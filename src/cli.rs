@@ -9,20 +9,47 @@ use structopt::StructOpt;
 
 const DEFAULT_APP_ID: &str = "snapmail-app";
 
+#[derive(StructOpt, Debug)]
+pub enum SnapSubcommand {
+   /// Set the agent's handle.
+   Setup {
+      #[structopt(long)]
+      handle: String,
+   },
+   Info,
+   Change {
+      #[structopt(long)]
+      handle: String,
+   },
+   Remove,
+}
+
+impl SnapSubcommand {
+   /// Run this command
+   pub async fn run(self) -> anyhow::Result<()> {
+      msg!("running!");
+      match self {
+         Self::Setup {handle } => msg!("Setup!"),
+         Self::Change {handle } => msg!("Change!"),
+         _ => msg!("WTF!"),
+      }
+      Ok(())
+   }
+}
+
+
 ///
 #[derive(Debug, StructOpt)]
-#[structopt(name = "snapmail-cli", about = "Command line interface for the Snapmail DNA")]
+#[structopt(name = "snapmail-cli", about = "Command line interface for Snapmail DNA")]
 pub struct SnapCli {
    #[structopt(subcommand)]
-   setup: SetupSubcommand,
+   cmd: SnapSubcommand,
 }
 
 impl SnapCli {
    /// Run this command
    pub async fn run(self) -> anyhow::Result<()> {
-      // match self {
-      //    Self::setup(cmd) => cmd.run().await?,
-      // }
-      Ok(())
+      self.cmd.run().await
    }
 }
+

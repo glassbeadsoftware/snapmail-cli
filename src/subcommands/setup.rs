@@ -11,19 +11,22 @@ use derive_more::FromStr;
 // pub enum HcSandboxSubcommand {
 //    Handle,
 
-#[derive(Debug, StructOpt, Clone, FromStr)]
-pub struct SetupSubcommand {
+#[derive(Debug, StructOpt, Clone)]
+pub enum SetupSubcommand {
    /// Set the agent's handle.
-   pub handle: String,
+   Handle {
+      #[structopt(long)]
+      username: String,
+   },
 }
 
-impl SetupSubcommand {
-   /// Run this command
-   pub async fn run(self) -> anyhow::Result<()> {
-      msg!("setup!");
-      // match self {
-      //    Self::handle(cmd) => cmd.run().await?,
-      // }
-      Ok(())
-   }
-}
+// impl SetupSubcommand {
+//    /// Run this command
+//    pub async fn run(self) -> anyhow::Result<()> {
+//       msg!("setup baby!");
+//       // match self {
+//       //    Self::handle(cmd) => cmd.run().await?,
+//       // }
+//       Ok(())
+//    }
+// }

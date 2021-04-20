@@ -1,30 +1,28 @@
-/// Snapmail CLI
+//! Definitions of StructOpt options for use in the CLI
 ///
 
+use crate::subcommands::setup::SetupSubcommand;
+//use holochain_types::prelude::InstalledAppId;
+//use std::path::Path;
+//use std::path::PathBuf;
 use structopt::StructOpt;
 
+const DEFAULT_APP_ID: &str = "snapmail-app";
 
 ///
-#[allow(clippy::large_enum_variant)]
 #[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::InferSubcommands)]
-pub enum Opt {
-   /// Work with hApp bundles
-   App(hc_bundle::HcAppBundle),
-   /// Work with DNA bundles
-   Dna(hc_bundle::HcDnaBundle),
-   /// Work with sandboxed environments for testing and development
-   Sandbox(hc_sandbox::HcSandbox),
+#[structopt(name = "snapmail-cli", about = "Command line interface for the Snapmail DNA")]
+pub struct SnapCli {
+   #[structopt(subcommand)]
+   setup: SetupSubcommand,
 }
 
-impl Opt {
+impl SnapCli {
    /// Run this command
    pub async fn run(self) -> anyhow::Result<()> {
-      match self {
-         Self::App(cmd) => cmd.run().await?,
-         Self::Dna(cmd) => cmd.run().await?,
-         Self::Sandbox(cmd) => cmd.run().await?,
-      }
+      // match self {
+      //    Self::setup(cmd) => cmd.run().await?,
+      // }
       Ok(())
    }
 }

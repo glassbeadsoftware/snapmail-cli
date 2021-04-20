@@ -29,9 +29,9 @@ impl SnapSubcommand {
    pub async fn run(self) -> anyhow::Result<()> {
       msg!("running!");
       match self {
-         Self::Setup {handle } => msg!("Setup!"),
+         Self::Setup {handle } => {msg!("Setup!"); setup(handle)},
          Self::Change {handle } => msg!("Change!"),
-         _ => msg!("WTF!"),
+         _ => msg!("unimplemented!"),
       }
       Ok(())
    }

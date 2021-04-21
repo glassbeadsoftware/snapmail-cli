@@ -27,12 +27,12 @@ use crate::subcommands::config::*;
 pub struct SetupCommand {
    #[structopt(long)]
    handle: String,
-   #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]
-   maybe_bootstrap: Option<Url2>,
-   #[structopt(name = "proxy", parse(from_str = Url2::parse))]
-   maybe_proxy: Option<Url2>,
-   #[structopt(name = "mdns")]
-   maybe_can_mdns: Option<bool>,
+   // #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]
+   // maybe_bootstrap: Option<Url2>,
+   // #[structopt(name = "proxy", parse(from_str = Url2::parse))]
+   // maybe_proxy: Option<Url2>,
+   // #[structopt(name = "mdns")]
+   // maybe_can_mdns: Option<bool>,
    #[structopt(subcommand, name = "network")]
    /// Add an optional network config
    pub maybe_network: Option<NetworkCmd>,
@@ -52,24 +52,14 @@ pub struct SetupCommand {
 
 impl SetupCommand {
 
-   // fn default() -> Self {
-   //    Self {
-   //       network: None,
-   //       root: None,
-   //       directory: PathBuf::default(),
-   //    }
-   // }
-
    ///
    pub fn run(self) {
-      let _ = fs::create_dir(CONFIG_PATH.as_path());
-      generateConductorConfig(
-         CONDUCTOR_CONFIG_FILEPATH.to_path_buf(),
-         self.maybe_bootstrap,
-         STORAGE_PATH.to_path_buf(),
-         self.maybe_proxy,
-         0,
-         false);
+      let root = self.maybe_root.unwrap_or(CONFIG_PATH.as_path().to_path_buf());
+      let _ = generate(
+         root,
+         self.maybe_directory,
+         self.maybe_network.map(|n| n.into_inner().into()),
+      ).expect("Generate config failed. Maybe Invalid params.");
    }
 }
 
@@ -127,81 +117,6 @@ pub struct Quic {
    /// Run through an external proxy at this url.
    pub proxy: Option<Url2>,
 }
-
-//
-// #[derive(Debug, StructOpt, Clone)]
-// pub struct Existing {
-//    #[structopt(short, long, value_delimiter = ",")]
-//    /// Paths to existing sandbox directories.
-//    /// For example `hc run -e=/tmp/kAOXQlilEtJKlTM_W403b,/tmp/kddsajkaasiIII_sJ`.
-//    pub existing_paths: Vec<PathBuf>,
-//    #[structopt(short, long, conflicts_with_all = &["last", "indices"])]
-//    /// Run all the existing conductor sandboxes.
-//    pub all: bool,
-//    #[structopt(short, long, conflicts_with_all = &["all", "indices"])]
-//    /// Run the last created conductor sandbox.
-//    pub last: bool,
-//    /// Run a selection of existing conductor sandboxes.
-//    /// Existing sandboxes are visible via `hc list`.
-//    /// Use the index to choose which sandboxes to use.
-//    /// For example `hc run 1 3 5` or `hc run 1`
-//    #[structopt(conflicts_with_all = &["all", "last"])]
-//    pub indices: Vec<usize>,
-// }
-//
-// impl Existing {
-//    pub fn load(mut self) -> anyhow::Result<Vec<PathBuf>> {
-//       let sandboxes = crate::save::load(std::env::current_dir()?)?;
-//       if self.all {
-//          // Get all the sandboxes
-//          self.existing_paths.extend(sandboxes.into_iter())
-//       } else if self.last && sandboxes.last().is_some() {
-//          // Get just the last sandbox
-//          self.existing_paths
-//              .push(sandboxes.last().cloned().expect("Safe due to check above"));
-//       } else if !self.indices.is_empty() {
-//          // Get the indices
-//          let e = self
-//             .indices
-//             .into_iter()
-//             .filter_map(|i| sandboxes.get(i).cloned());
-//          self.existing_paths.extend(e);
-//       } else if !self.existing_paths.is_empty() {
-//          // If there is existing paths then use those
-//       } else if sandboxes.len() == 1 {
-//          // If there is only one sandbox then use that
-//          self.existing_paths
-//              .push(sandboxes.last().cloned().expect("Safe due to check above"));
-//       } else if sandboxes.len() > 1 {
-//          // There is multiple sandboxes, the use must disambiguate
-//          msg!(
-//                 "
-// There are multiple sandboxes and hc doesn't know which to run.
-// You can run:
-//     - `--all` `-a` run all sandboxes.
-//     - `--last` `-l` run the last created sandbox.
-//     - `--existing-paths` `-e` run a list of existing paths to sandboxes.
-//     - `1` run a index from the list below.
-//     - `0 2` run multiple indices from the list below.
-// Run `hc list` to see the sandboxes or `hc r --help` for more information."
-//             );
-//          crate::save::list(std::env::current_dir()?, 0)?;
-//       } else {
-//          // There is no sandboxes
-//          msg!(
-//                 "
-// Before running or calling you need to generate a sandbox.
-// You can use `hc generate` or `hc g` to do this.
-// Run `hc g --help` for more options."
-//             );
-//       }
-//       Ok(self.existing_paths)
-//    }
-//
-//    pub fn is_empty(&self) -> bool {
-//       self.existing_paths.is_empty() && self.indices.is_empty() && !self.all && !self.last
-//    }
-// }
 
 impl From<Network> for KitsuneP2pConfig {
    fn from(n: Network) -> Self {

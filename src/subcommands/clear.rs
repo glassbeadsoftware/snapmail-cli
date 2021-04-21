@@ -1,9 +1,12 @@
 use crate::globals::*;
 use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
 
 ///
-pub fn clear() {
-   let result = fs::remove_dir_all(CONFIG_PATH.as_path());
+pub fn clear(uid: PathBuf) {
+   let dir = Path::new(&*CONFIG_PATH).join(uid);
+   let result = fs::remove_dir_all(dir.as_path());
    if let Err(e) = result {
       msg!("Clear failed: {}", e);
       return;

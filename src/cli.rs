@@ -22,7 +22,10 @@ pub enum SnapSubcommand {
       #[structopt(long)]
       handle: String,
    },
-   Clear,
+   Clear {
+      #[structopt(parse(from_os_str))]
+      uid: PathBuf,
+   }
 }
 
 impl SnapSubcommand {
@@ -34,10 +37,10 @@ impl SnapSubcommand {
          Self::Change => msg!("Change!"),
          Self::SetHandle {handle } => {
             msg!("** Set handle: {}", handle);
-            start_conductor(handle).await;
+            start_conductor(handle);
             // cmd.run();
          },
-         Self::Clear => {msg!("Clearing..."); clear()},
+         Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},
          _ => msg!("unimplemented!"),
       }
       Ok(())

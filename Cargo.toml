@@ -31,6 +31,8 @@ futures = "0.3"
 lazy_static = "1.4.0"
 derive_more = "0.99"
 holochain = { path = "../holochain/crates/holochain" }
+holochain_serialized_bytes = "=0.0.50"
+#holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }
 holochain_cli_bundle = { path = "../holochain/crates/hc_bundle" }
 holochain_conductor_api = { path = "../holochain/crates/holochain_conductor_api" }
 holochain_types = { path = "../holochain/crates/holochain_types" }

@@ -10,6 +10,8 @@ pub mod utils;
 pub mod subcommands;
 pub mod cli;
 pub mod globals;
+pub mod holochain;
+pub mod conductor;
 
 ///
 #[tokio::main]

@@ -64,7 +64,7 @@ impl SetupCommand {
    pub fn run(self) {
       let _ = fs::create_dir(CONFIG_PATH.as_path());
       generateConductorConfig(
-         CONFIG_PATH.join(Path::new(CONDUCTOR_CONFIG_FILENAME)),
+         CONDUCTOR_CONFIG_FILEPATH.to_path_buf(),
          self.maybe_bootstrap,
          STORAGE_PATH.to_path_buf(),
          self.maybe_proxy,

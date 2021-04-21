@@ -21,29 +21,14 @@ pub async fn start_conductor(_handle: String) -> ConductorHandle {
 pub async fn install_app(conductor: ConductorHandle, uid: String) -> ConductorResult<()> {
    // let agent_pub_key = conductor
    //    .keystore()
-   //    .clone()
+   //    //.clone()
    //    .generate_sign_keypair_from_pure_entropy()
    //    .await?;
 
-   let dna_file = DnaFile::new(
-      DnaDef {
-         name: SNAPMAIL_APP_ID.to_string(),
-         uid,
-         properties: SerializedBytes::try_from(()).unwrap(),
-         zomes: vec![/*TestWasm::Create.into()*/].into(),
-      },
-      vec![/*TestWasm::Create.into()*/],
-   )
-      .await
-      .unwrap();
-
-
-   // {
-   //    uid,
-   //    properties: undefined,
-   //    path: './dna/snapmail.dna',
-   // }
-
+   let mut dna_file = DnaFile::from_file_content(&std::fs::read(DNA_PATH)?)
+      .await.expect("Dna file load failed");
+   dna_file = dna_file.with_uid(uid).await.unwrap();
+   
    let hash = conductor.register_dna(dna_file).await?;
 
    // let cell_id = CellId::from((hash.clone(), agent_key.clone()));

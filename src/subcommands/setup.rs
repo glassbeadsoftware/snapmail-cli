@@ -43,13 +43,6 @@ pub struct SetupCommand {
    /// This directory must already exist.
    #[structopt(name = "root", parse(from_os_str))]
    pub maybe_root: Option<PathBuf>,
-   // #[structopt(short, long)]
-   // /// Specify the directory name for each user that is created.
-   // /// By default, new user directories get a random name
-   // /// like "kAOXQlilEtJKlTM_W403b".
-   // /// Use this option to override those names with something explicit.
-   // #[structopt(name = "directory", parse(from_os_str))]
-   // pub maybe_directory: Option<PathBuf>,
 }
 
 impl SetupCommand {
@@ -58,7 +51,7 @@ impl SetupCommand {
       let root = self.maybe_root.unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let _ = generate(
          root,
-         Some(self.uid), //self.maybe_directory,
+         Some(self.uid),
          self.maybe_network.map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
    }

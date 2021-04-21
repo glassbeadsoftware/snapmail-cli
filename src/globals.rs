@@ -8,6 +8,7 @@ pub const SNAPMAIL_APP_NAME: &str          = "snapmail-cli";
 pub const LAIR_MAGIC_READY_STRING: &str    = "#lair-keystore-ready#";
 pub const CONDUCTOR_CONFIG_FILENAME: &str  = "conductor-config.yaml";
 pub const APP_CONFIG_FILENAME: &str        = "app-config.txt";
+pub const DNA_PATH: &str                   = "../dna/snapmail.dna"; // FIXME
 
 lazy_static! {
    pub static ref CONFIG_PATH: PathBuf = ProjectDirs::from("", "", SNAPMAIL_APP_NAME).unwrap().config_dir().to_owned();

@@ -1,10 +1,15 @@
 use structopt::StructOpt;
 
 #[macro_use]
+extern crate lazy_static;
+
+#[macro_use]
+extern crate url2;
+#[macro_use]
 pub mod utils;
 pub mod subcommands;
 pub mod cli;
-
+pub mod globals;
 
 ///
 #[tokio::main]

@@ -23,6 +23,7 @@ rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
 lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
 
 [dependencies]
+directories = "3.0.1"
 anyhow = "1.0"
 ansi_term = "0.12"
 chrono = "0.4.6"

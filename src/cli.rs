@@ -1,27 +1,27 @@
 //! Definitions of StructOpt options for use in the CLI
 ///
 
-use crate::subcommands::setup::SetupSubcommand;
+use crate::subcommands::*;
 //use holochain_types::prelude::InstalledAppId;
 //use std::path::Path;
-//use std::path::PathBuf;
+use std::path::PathBuf;
 use structopt::StructOpt;
+use url2::Url2;
 
 const DEFAULT_APP_ID: &str = "snapmail-app";
 
+
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
-   /// Set the agent's handle.
-   Setup {
-      #[structopt(long)]
-      handle: String,
-   },
+   Setup(SetupCommand),
    Info,
-   Change {
+   Change,
+   #[structopt(name = "set-handle")]
+   SetHandle {
       #[structopt(long)]
       handle: String,
    },
-   Remove,
+   Clear,
 }
 
 impl SnapSubcommand {
@@ -29,8 +29,10 @@ impl SnapSubcommand {
    pub async fn run(self) -> anyhow::Result<()> {
       msg!("running!");
       match self {
-         Self::Setup {handle } => {msg!("Setup!"); setup(handle)},
-         Self::Change {handle } => msg!("Change!"),
+         Self::Setup(cmd)=> {msg!("Setup!"); cmd.run();},
+         Self::Change => msg!("Change!"),
+         Self::SetHandle {handle } => msg!("** Set handle: {}", handle),
+         Self::Clear => {msg!("Clearing..."); clear()},
          _ => msg!("unimplemented!"),
       }
       Ok(())

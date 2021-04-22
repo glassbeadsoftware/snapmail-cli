@@ -22,7 +22,7 @@ pub async fn call_zome(conductor: ConductorHandle, fn_name: &str, payload: Exter
    let cell_id = cell_ids[0].clone();
    let provenance = cell_ids[0].agent_pubkey().to_owned();
 
-   let result = conductor.call_zome(ZomeCall {
+   let result= conductor.call_zome(ZomeCall {
                           cap: None,
                           cell_id,
                           zome_name: ZOME_NAME.into(),
@@ -42,7 +42,7 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
    let config_path = Path::new(&*CONFIG_PATH).join(uid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
    // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
    let conductor = conductor_handle_from_config_path(Some(config_path)).await;
-   conductor.print_setup();
+   let _ = conductor.print_setup();
 
    // Startup
    conductor
@@ -52,7 +52,7 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
    let dnas = conductor.list_dnas().await.unwrap();
    println!("Installed DNAs: {:?}", dnas);
 
-   if (dnas.is_empty()) {
+   if dnas.is_empty() {
       install_app(conductor.clone(), uid.clone()).await.unwrap();
       let dnas = conductor.list_dnas().await.unwrap();
       println!("Installed DNAs: {:?}", dnas);

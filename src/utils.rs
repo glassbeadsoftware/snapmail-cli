@@ -9,6 +9,7 @@ macro_rules! msg {
     })
 }
 
+#[allow(unused_macros)]
 macro_rules! dbg {
     ($($arg:tt)*) => ({
         use ansi_term::Color::*;

@@ -30,10 +30,11 @@ chrono = "0.4.6"
 futures = "0.3"
 lazy_static = "1.4.0"
 derive_more = "0.99"
+thiserror = "1.0.24"
 tokio_helper = { version = "0.0.1", path = "../holochain/crates/tokio_helper" }
 holochain = { path = "../holochain/crates/holochain" }
-#holochain_serialized_bytes = "=0.0.50"
-#holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }
+holochain_serialized_bytes = "=0.0.50"
+holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }
 holochain_keystore = { version = "0.0.1", path = "../holochain/crates/holochain_keystore" }
 holochain_zome_types = { path = "../holochain/crates/holochain_zome_types" }
 holochain_cli_bundle = { path = "../holochain/crates/hc_bundle" }

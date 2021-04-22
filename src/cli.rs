@@ -46,13 +46,13 @@ impl SnapSubcommand {
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let payload = ExternIO::encode(handle).unwrap();
-            call_zome(conductor, "set_handle", payload).await;
+            let hash = Snapmail::set_handle(conductor, handle)?;
+            msg!(" - {:?}", hash);
          },
          Self::GetHandle {uid } => {
             msg!("** Get handle: ");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let handle = Snapmail::get_my_handle(conductor).unwrap();
+            let handle = Snapmail::get_my_handle(conductor)?;
             msg!(" - {}", handle);
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},

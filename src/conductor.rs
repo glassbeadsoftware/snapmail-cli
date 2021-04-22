@@ -69,7 +69,6 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
    // assert!(!cell_ids.is_empty());
    //g_cell_id = cell_ids[0];
 
-
    // Done
    return conductor;
 }
@@ -77,6 +76,7 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
 
 /// Install Snapmail DNA form dna file
 /// FIXME: hardcoded DNA file path
+#[allow(deprecated)]
 pub async fn install_app(conductor: ConductorHandle, uid: String) -> ConductorResult<()> {
    // Generate keys
    let agent_key = conductor

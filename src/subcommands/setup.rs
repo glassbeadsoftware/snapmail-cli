@@ -25,8 +25,8 @@ use crate::subcommands::config::*;
 /// - databases
 /// - keystore
 pub struct SetupCommand {
-   #[structopt(long)]
-   handle: String,
+   // #[structopt(long)]
+   // handle: String,
    #[structopt(parse(from_os_str))]
    pub uid: PathBuf,
    // #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]

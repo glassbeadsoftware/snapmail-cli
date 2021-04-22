@@ -12,9 +12,6 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 use holochain_zome_types::*;
 
-const DEFAULT_APP_ID: &str = "snapmail-app";
-
-
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
    Setup(SetupCommand),

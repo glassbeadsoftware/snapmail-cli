@@ -1,7 +1,7 @@
 use url2::Url2;
 use directories::ProjectDirs;
 use std::path::PathBuf;
-use std::path::Path;
+//use std::path::Path;
 
 pub const ZOME_NAME: &str                  = "snapmail";
 pub const SNAPMAIL_APP_ID: &str            = "snapmail-app";

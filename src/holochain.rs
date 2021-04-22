@@ -1,5 +1,5 @@
 //use crate::globals::*;
-use holochain::conductor::{Conductor, ConductorBuilder, ConductorHandle};
+use holochain::conductor::{Conductor, ConductorHandle};
 use std::path::PathBuf;
 use holochain::conductor::paths::ConfigFilePath;
 use holochain::conductor::config::ConductorConfig;

@@ -6,7 +6,7 @@ use crate::subcommands::*;
 //use std::path::Path;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use url2::Url2;
+//use url2::Url2;
 use crate::conductor::*;
 
 const DEFAULT_APP_ID: &str = "snapmail-app";
@@ -19,7 +19,8 @@ pub enum SnapSubcommand {
    Change,
    #[structopt(name = "set-handle")]
    SetHandle {
-      #[structopt(long)]
+      #[structopt(parse(from_os_str))]
+      uid: PathBuf,
       handle: String,
    },
    Clear {
@@ -35,9 +36,9 @@ impl SnapSubcommand {
       match self {
          Self::Setup(cmd)=> {msg!("Setup!"); cmd.run();},
          Self::Change => msg!("Change!"),
-         Self::SetHandle {handle } => {
+         Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
-            start_conductor(handle);
+            start_conductor(uid.to_string_lossy().to_string()).await;
             // cmd.run();
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},

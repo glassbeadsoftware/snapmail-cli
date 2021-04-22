@@ -1,14 +1,14 @@
 //! Helpers for creating, reading and writing [`ConductorConfig`]s.
 use std::path::PathBuf;
-use url2::Url2;
+//use url2::Url2;
 use holochain_conductor_api::config::conductor::ConductorConfig;
 use holochain_conductor_api::config::*;
 use crate::globals::*;
-use std::fs::File;
-use std::io::prelude::*;
-use std::fs;
+//use std::fs::File;
+//use std::io::prelude::*;
+//use std::fs;
 use holochain_p2p::kitsune_p2p::KitsuneP2pConfig;
-use holochain_p2p::kitsune_p2p::TransportConfig;
+//use holochain_p2p::kitsune_p2p::TransportConfig;
 
 /// Create a new default [`ConductorConfig`] with environment path
 /// and keystore all in the same directory.

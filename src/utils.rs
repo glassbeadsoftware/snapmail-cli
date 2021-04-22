@@ -8,3 +8,11 @@ macro_rules! msg {
         println!($($arg)*);
     })
 }
+
+macro_rules! dbg {
+    ($($arg:tt)*) => ({
+        use ansi_term::Color::*;
+        print!("{} ", Yellow.bold().paint("snap-dbg:"));
+        println!($($arg)*);
+    })
+}

@@ -12,12 +12,12 @@ use std::path::Path;
 //use holo_hash::*;
 //use holochain_serialized_bytes::prelude::*;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
+use holochain::core::workflow::ZomeCallResult;
 
 ///
-pub async fn call_zome(conductor: ConductorHandle, fn_name: &str, payload: ExternIO) /*-> ConductorResult<()>*/ {
+pub async fn call_zome(conductor: ConductorHandle, fn_name: &str, payload: ExternIO) -> ZomeCallResult {
    let cell_ids = conductor.list_cell_ids().await.unwrap();
    println!("Cell IDs : {:?}", cell_ids);
-
    assert!(!cell_ids.is_empty());
    let cell_id = cell_ids[0].clone();
    let provenance = cell_ids[0].agent_pubkey().to_owned();
@@ -31,6 +31,7 @@ pub async fn call_zome(conductor: ConductorHandle, fn_name: &str, payload: Exter
                           payload,
                        }).await.unwrap();
    println!("ZomeCall result: {:?}", result);
+   result
 }
 
 
@@ -63,9 +64,9 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
    let interfaces = conductor.list_app_interfaces().await.unwrap();
    println!("App Interfaces: {:?}", interfaces);
 
-   let cell_ids = conductor.list_cell_ids().await.unwrap();
-   println!("Cell IDs: {:?}", cell_ids);
-   assert!(!cell_ids.is_empty());
+   // let cell_ids = conductor.list_cell_ids().await.unwrap();
+   // println!("Cell IDs: {:?}", cell_ids);
+   // assert!(!cell_ids.is_empty());
    //g_cell_id = cell_ids[0];
 
 

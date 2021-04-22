@@ -1,13 +1,15 @@
 //! Definitions of StructOpt options for use in the CLI
 ///
 
-use crate::subcommands::*;
-//use holochain_types::prelude::InstalledAppId;
-//use std::path::Path;
+use crate::{
+   subcommands::*,
+   conductor::*,
+   snapmail_api as Snapmail,
+};
+
+
 use std::path::PathBuf;
 use structopt::StructOpt;
-//use url2::Url2;
-use crate::conductor::*;
 use holochain_zome_types::*;
 
 const DEFAULT_APP_ID: &str = "snapmail-app";
@@ -50,9 +52,8 @@ impl SnapSubcommand {
          Self::GetHandle {uid } => {
             msg!("** Get handle: ");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let payload = ExternIO::encode(()).unwrap();
-            call_zome(conductor, "get_handle", payload).await;
-            // cmd.run();
+            let handle = Snapmail::get_my_handle(conductor).unwrap();
+            msg!(" - {}", handle);
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},
          _ => msg!("unimplemented!"),

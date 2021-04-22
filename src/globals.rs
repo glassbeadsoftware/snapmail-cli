@@ -14,6 +14,7 @@ pub const WASM_PATH: &str                   = "/home/ddd/github/snapmail-cli/dna
 //pub const DNA_PATH: &str                   = "~/github/snapmail-cli/dna/snapmail.dna"; // FIXME
 
 lazy_static! {
+   pub static ref DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(9);
    pub static ref CONFIG_PATH: PathBuf = ProjectDirs::from("", "", SNAPMAIL_APP_NAME).unwrap().config_dir().to_owned();
    //pub static ref STORAGE_PATH: PathBuf = Path::new(&*CONFIG_PATH).join("storage");
    //pub static ref CONDUCTOR_CONFIG_FILEPATH: PathBuf = Path::new(&*CONFIG_PATH).join(CONDUCTOR_CONFIG_FILENAME);

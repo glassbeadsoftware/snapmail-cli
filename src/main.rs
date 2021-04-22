@@ -12,6 +12,7 @@ pub mod cli;
 pub mod globals;
 pub mod holochain;
 pub mod conductor;
+pub mod snapmail_api;
 
 ///
 #[tokio::main]

@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 //use url2::Url2;
 use crate::conductor::*;
+use holochain_zome_types::*;
 
 const DEFAULT_APP_ID: &str = "snapmail-app";
 
@@ -22,6 +23,10 @@ pub enum SnapSubcommand {
       #[structopt(parse(from_os_str))]
       uid: PathBuf,
       handle: String,
+   },
+   GetHandle {
+      #[structopt(parse(from_os_str))]
+      uid: PathBuf,
    },
    Clear {
       #[structopt(parse(from_os_str))]
@@ -38,7 +43,15 @@ impl SnapSubcommand {
          Self::Change => msg!("Change!"),
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
-            start_conductor(uid.to_string_lossy().to_string()).await;
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let payload = ExternIO::encode(handle).unwrap();
+            call_zome(conductor, "set_handle", payload).await;
+         },
+         Self::GetHandle {uid } => {
+            msg!("** Get handle: ");
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let payload = ExternIO::encode(()).unwrap();
+            call_zome(conductor, "get_handle", payload).await;
             // cmd.run();
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},

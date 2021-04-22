@@ -3,6 +3,7 @@ use directories::ProjectDirs;
 use std::path::PathBuf;
 use std::path::Path;
 
+pub const ZOME_NAME: &str                  = "snapmail";
 pub const SNAPMAIL_APP_ID: &str            = "snapmail-app";
 pub const SNAPMAIL_APP_NAME: &str          = "snapmail-cli";
 pub const LAIR_MAGIC_READY_STRING: &str    = "#lair-keystore-ready#";

@@ -31,6 +31,7 @@ futures = "0.3"
 lazy_static = "1.4.0"
 derive_more = "0.99"
 thiserror = "1.0.24"
+snapmail = { path = "../snapmail-rsm/zomes/snapmail" }
 tokio_helper = { version = "0.0.1", path = "../holochain/crates/tokio_helper" }
 holochain = { path = "../holochain/crates/holochain" }
 holochain_serialized_bytes = "=0.0.50"

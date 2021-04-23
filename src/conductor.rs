@@ -1,5 +1,6 @@
 use crate::globals::*;
 use crate::holochain::*;
+use crate::snapmail_api::ZOME_NAME;
 use holochain::conductor::*;
 use holochain_types::dna::*;
 use holochain_types::dna::zome::*;
@@ -14,30 +15,11 @@ use std::path::Path;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
 use holochain::core::workflow::ZomeCallResult;
 
-///
-pub async fn call_zome(conductor: ConductorHandle, fn_name: &str, payload: ExternIO) -> ZomeCallResult {
-   let cell_ids = conductor.list_cell_ids().await.unwrap();
-   println!("Cell IDs : {:?}", cell_ids);
-   assert!(!cell_ids.is_empty());
-   let cell_id = cell_ids[0].clone();
-   let provenance = cell_ids[0].agent_pubkey().to_owned();
-
-   let result= conductor.call_zome(ZomeCall {
-                          cap: None,
-                          cell_id,
-                          zome_name: ZOME_NAME.into(),
-                          fn_name: fn_name.into(),
-                          provenance,
-                          payload,
-                       }).await.unwrap();
-   println!("ZomeCall result: {:?}", result);
-   result
-}
-
 
 ///
 pub async fn start_conductor(uid: String) -> ConductorHandle {
    println!("** start_conductor: {:?}", uid);
+   println!("fn: {}", std::stringify!(start_conductor));
    // Load conductor from config file
    let config_path = Path::new(&*CONFIG_PATH).join(uid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
    // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();

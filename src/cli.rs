@@ -4,7 +4,7 @@
 use crate::{
    subcommands::*,
    conductor::*,
-   snapmail_api as Snapmail,
+   snapmail_api::*,
 };
 
 
@@ -43,13 +43,13 @@ impl SnapSubcommand {
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let hash = Snapmail::set_handle(conductor, handle)?;
+            let hash = snapmail_set_handle(conductor, handle)?;
             msg!(" - {:?}", hash);
          },
          Self::GetHandle {uid } => {
             msg!("** Get handle: ");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let handle = Snapmail::get_my_handle(conductor)?;
+            let handle = snapmail_get_my_handle(conductor)?;
             msg!(" - {}", handle);
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},

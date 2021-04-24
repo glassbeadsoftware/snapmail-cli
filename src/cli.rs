@@ -4,13 +4,14 @@
 use crate::{
    subcommands::*,
    conductor::*,
-   snapmail_api::*,
 };
 
-
+use snapmail_api::*;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use holochain_zome_types::*;
+use holochain::conductor::ConductorHandle;
+
 
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
@@ -42,7 +43,7 @@ impl SnapSubcommand {
          Self::Change => msg!("Change!"),
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
-            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let conductor: ConductorHandle = start_conductor(uid.to_string_lossy().to_string()).await;
             let hash = snapmail_set_handle(conductor, handle)?;
             msg!(" - {:?}", hash);
          },

@@ -18,7 +18,6 @@ incremental = false
 codegen-units = 16
 
 [patch.crates-io]
-
 rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
 lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
 
@@ -32,7 +31,8 @@ lazy_static = "1.4.0"
 derive_more = "0.99"
 thiserror = "1.0.24"
 snapmail = { path = "../snapmail-rsm/zomes/snapmail" }
-tokio_helper = { version = "0.0.1", path = "../holochain/crates/tokio_helper" }
+snapmail_api = { path = "../snapmail-rsm/api" }
+#tokio_helper = { version = "0.0.1", path = "../holochain/crates/tokio_helper" }
 holochain = { path = "../holochain/crates/holochain" }
 holochain_serialized_bytes = "=0.0.50"
 holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }

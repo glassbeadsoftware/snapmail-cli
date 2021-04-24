@@ -6,6 +6,7 @@ use crate::{
    conductor::*,
 };
 
+use snapmail::handle::*;
 use snapmail_api::*;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -50,7 +51,7 @@ impl SnapSubcommand {
          Self::GetHandle {uid } => {
             msg!("** Get handle: ");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let handle = snapmail_get_my_handle(conductor)?;
+            let handle: String = snapmail_get_my_handle(conductor, ())?;
             msg!(" - {}", handle);
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},

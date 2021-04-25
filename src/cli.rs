@@ -45,7 +45,7 @@ impl SnapSubcommand {
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let hash = snapmail_set_handle(conductor, handle)?.unwrap();
+            let hash = snapmail_set_handle(conductor, handle)?;
             msg!(" - {:?}", hash);
          },
          Self::GetHandle {uid } => {

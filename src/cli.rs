@@ -44,15 +44,15 @@ impl SnapSubcommand {
          Self::Change => msg!("Change!"),
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);
-            let conductor: ConductorHandle = start_conductor(uid.to_string_lossy().to_string()).await;
-            let hash = snapmail_set_handle(conductor, handle)?;
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let hash = snapmail_set_handle(conductor, handle)?.unwrap();
             msg!(" - {:?}", hash);
          },
          Self::GetHandle {uid } => {
             msg!("** Get handle: ");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let handle: String = snapmail_get_my_handle(conductor, ())?;
-            msg!(" - {}", handle);
+            let handle = snapmail_get_my_handle(conductor, ())?;
+            msg!(" - {:?}", handle);
          },
          Self::Clear {uid } => {msg!("Clearing..."); clear(uid)},
          _ => msg!("unimplemented!"),

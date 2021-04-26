@@ -1,3 +1,4 @@
+use holochain_types::dna::*;
 
 /// Print a msg with `snapmail: ` pre-pended
 /// and ansi colors.
@@ -16,4 +17,12 @@ macro_rules! dbg {
         print!("{} ", Yellow.bold().paint("snap-dbg:"));
         println!($($arg)*);
     })
+}
+
+///
+pub fn stoh(input: String) -> AgentPubKey {
+   let bytes = base64::decode_config(input[1..].to_string(), base64::URL_SAFE_NO_PAD).unwrap();
+   //println!(" - bytes = {:?} ({})", bytes, bytes.len());
+   let key: AgentPubKey = AgentPubKey::from_raw_39(bytes).unwrap();
+   key
 }

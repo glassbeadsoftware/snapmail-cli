@@ -27,8 +27,6 @@ use crate::subcommands::config::*;
 pub struct SetupCommand {
    // #[structopt(long)]
    // handle: String,
-   #[structopt(parse(from_os_str))]
-   pub uid: PathBuf,
    // #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]
    // maybe_bootstrap: Option<Url2>,
    // #[structopt(name = "proxy", parse(from_str = Url2::parse))]
@@ -47,11 +45,11 @@ pub struct SetupCommand {
 
 impl SetupCommand {
    ///
-   pub fn run(&self) {
+   pub fn run(&self, uid: PathBuf) {
       let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let _ = generate(
          root,
-         Some(self.uid.clone()),
+         Some(uid.clone()),
          self.maybe_network.clone().map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
    }

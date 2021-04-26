@@ -7,7 +7,6 @@ use crate::{
 };
 
 use snapmail::handle::*;
-use snapmail_api::*;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use holochain_zome_types::*;

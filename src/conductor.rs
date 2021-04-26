@@ -1,6 +1,6 @@
 use crate::globals::*;
 use crate::holochain::*;
-use snapmail_api::ZOME_NAME;
+use snapmail::ZOME_NAME;
 use holochain::conductor::*;
 use holochain::conductor::ConductorHandle;
 use holochain_types::dna::*;

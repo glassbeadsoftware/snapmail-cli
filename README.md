@@ -21,7 +21,7 @@ FLAGS:
 SUBCOMMANDS:
     help       Prints this message or the help of the given subcommand(s)
     setup      Create agent and config
-    remove     Erase agent and config
+    clear      Erase agent and config
     info       Display setup (conductor config...)
     change     Change handle / config
     directory  Display all users part of the current network

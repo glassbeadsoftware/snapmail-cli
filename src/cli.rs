@@ -33,6 +33,10 @@ pub enum SnapSubcommand {
    Pull,
    Directory,
    Send(SendCommand),
+   List,
+   Open {
+      hash: String,
+   },
 }
 
 impl SnapSubcommand {
@@ -67,9 +71,6 @@ impl SnapSubcommand {
          Self::Ping { agent_id } => {
             msg!("Ping...");
             let key = stoh(agent_id);
-            // let bytes = base64::decode_config(agent_id[1..].to_string(), base64::URL_SAFE_NO_PAD).unwrap();
-            // println!(" - bytes = {:?} ({})", bytes, bytes.len());
-            // let key: AgentPubKey = AgentPubKey::from_raw_39(bytes).unwrap();
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
             let res = snapmail_ping_agent(conductor, key);
             match res {
@@ -81,12 +82,51 @@ impl SnapSubcommand {
                }
             }
          },
+         Self::Open { hash } => {
+            msg!("Open...");
+            let hh = stohh(hash);
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let maybe_mail = snapmail_get_mail(conductor.clone(), hh.clone())?;
+            if let Some(mail) = maybe_mail.0 {
+               let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
+               msg!(" - mail: {:?}", mail);
+               match mail {
+                  Ok(inmail) => {
+                     msg!("Subject: {}", inmail.mail.subject);
+                     msg!("   From: {}", get_name(&handle_list, &inmail.from));
+                     msg!("   Date: {}", inmail.mail.date_sent);
+                     msg!("    Att: {}", inmail.mail.attachments.len());
+                     msg!("\n\n{}\n", inmail.mail.payload);
+                     let maybe_hash = snapmail_acknowledge_mail(conductor, hh);
+                     if let Ok(hash) = maybe_hash {
+                        msg!("Acknowledged: {}", hash);
+                     }
+                  },
+                  Err(outmail) => {
+                     msg!(" - outmail to : {:?}", outmail.mail.to);
+                  },
+               }
+            } else {
+               msg!(" !! No mail found at this hash");
+            }
+         },
          Self::Directory => {
             msg!("Directory...");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
             let handle_list = snapmail_get_all_handles(conductor, ())?.0;
             for pair in handle_list.iter() {
                msg!(" - {} - {}", pair.0, pair.1);
+            }
+         },
+         Self::List => {
+            msg!("List inbox...");
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?.0;
+            let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
+            msg!(" {} mail(s) found:", all_mail_list.len());
+            for item in all_mail_list.iter() {
+               let username = get_name(&handle_list, &item.author);
+               msg!("- {:?} | {} | {} | {}", item.state, username, item.mail.subject, item.address);
             }
          },
          Self::Pull => {

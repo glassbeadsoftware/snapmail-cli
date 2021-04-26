@@ -1,20 +1,15 @@
 use crate::globals::*;
 use crate::holochain::*;
 use snapmail::ZOME_NAME;
-use holochain::conductor::*;
 use holochain::conductor::ConductorHandle;
 use holochain_types::dna::*;
 use holochain_types::dna::zome::*;
 use holochain_types::dna::wasm::DnaWasm;
 use holochain_types::app::*;
 use holochain_zome_types::*;
-use holochain_conductor_api::*;
 use holochain::conductor::error::*;
 use std::path::Path;
-//use holo_hash::*;
-//use holochain_serialized_bytes::prelude::*;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
-use holochain::core::workflow::ZomeCallResult;
 
 
 ///
@@ -47,10 +42,8 @@ pub async fn start_conductor(uid: String) -> ConductorHandle {
    let interfaces = conductor.list_app_interfaces().await.unwrap();
    println!("App Interfaces: {:?}", interfaces);
 
-   // let cell_ids = conductor.list_cell_ids().await.unwrap();
-   // println!("Cell IDs: {:?}", cell_ids);
-   // assert!(!cell_ids.is_empty());
-   //g_cell_id = cell_ids[0];
+   //let cell_ids = conductor.list_cell_ids().await.unwrap();
+   //println!("Cell IDs: {:?}", cell_ids);
 
    // Done
    return conductor;

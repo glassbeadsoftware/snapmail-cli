@@ -9,8 +9,8 @@ use crate::{
 use snapmail::handle::*;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use holochain_zome_types::*;
-use holochain::conductor::ConductorHandle;
+//use holochain_zome_types::*;
+//use holochain::conductor::ConductorHandle;
 
 
 #[derive(StructOpt, Debug)]
@@ -39,7 +39,11 @@ impl SnapSubcommand {
    pub async fn run(self) -> anyhow::Result<()> {
       msg!("running!");
       match self {
-         Self::Setup(cmd)=> {msg!("Setup!"); cmd.run();},
+         Self::Setup(cmd)=> {
+            msg!("Setup!");
+            cmd.run();
+            let _ = start_conductor(cmd.uid.to_string_lossy().to_string()).await;
+         },
          Self::Change => msg!("Change!"),
          Self::SetHandle {uid, handle } => {
             msg!("** Set handle: {}", handle);

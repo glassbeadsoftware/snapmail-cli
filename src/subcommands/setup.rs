@@ -47,12 +47,12 @@ pub struct SetupCommand {
 
 impl SetupCommand {
    ///
-   pub fn run(self) {
-      let root = self.maybe_root.unwrap_or(CONFIG_PATH.as_path().to_path_buf());
+   pub fn run(&self) {
+      let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let _ = generate(
          root,
-         Some(self.uid),
-         self.maybe_network.map(|n| n.into_inner().into()),
+         Some(self.uid.clone()),
+         self.maybe_network.clone().map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
    }
 }

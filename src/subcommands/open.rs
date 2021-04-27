@@ -34,7 +34,7 @@ fn print_mail(handle_list: &GetAllHandlesOutput, mail: Mail, from: String, bcc: 
    msg!("        Date: {}", date);
    msg!(" Attachments: {}", mail.attachments.len());
    for attachment in mail.attachments.iter() {
-      msg!(" - ({} KiB) {} | {}", attachment.orig_filesize, attachment.filename, attachment.manifest_eh);
+      msg!("            - ({} KiB) {} | {}", attachment.orig_filesize, attachment.filename, attachment.manifest_eh);
    }
    msg!("\n\n{}\n", mail.payload);
 }

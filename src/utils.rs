@@ -21,18 +21,9 @@ macro_rules! dbg {
 }
 
 ///
-pub fn stohh(input: String) -> HeaderHash {
+pub fn stoh<T: holochain_types::dna::PrimitiveHashType>(input: String) -> HoloHash<T> {
    let bytes = base64::decode_config(input[1..].to_string(), base64::URL_SAFE_NO_PAD).unwrap();
-   //println!(" - bytes = {:?} ({})", bytes, bytes.len());
-   let key: HeaderHash = HeaderHash::from_raw_39(bytes).unwrap();
-   key
-}
-
-///
-pub fn stoh(input: String) -> AgentPubKey {
-   let bytes = base64::decode_config(input[1..].to_string(), base64::URL_SAFE_NO_PAD).unwrap();
-   //println!(" - bytes = {:?} ({})", bytes, bytes.len());
-   let key: AgentPubKey = AgentPubKey::from_raw_39(bytes).unwrap();
+   let key: HoloHash<T> = HoloHash::<T>::from_raw_39(bytes).unwrap();
    key
 }
 

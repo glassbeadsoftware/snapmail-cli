@@ -12,10 +12,7 @@ use snapmail::handle::*;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use snapmail::mail::*;
-
-//use holochain_zome_types::*;
-//use holochain::conductor::ConductorHandle;
-
+use holochain_types::dna::*;
 
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
@@ -36,6 +33,9 @@ pub enum SnapSubcommand {
    Send(SendCommand),
    List,
    Open {
+      hash: String,
+   },
+   GetAttachment {
       hash: String,
    },
 }
@@ -85,12 +85,16 @@ impl SnapSubcommand {
          },
          Self::Open { hash } => {
             msg!("Open...");
-            let hh = stohh(hash);
+            let hh: HeaderHash = stoh(hash);
             let uid_str = uid.to_string_lossy().to_string();
-            //let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            //let handle_list = snapmail_get_all_handles(conductor, ())?;
             open(uid_str, hh).await?;
-
+         },
+         Self::GetAttachment { hash } => {
+            msg!("GetAttachment...");
+            let eh: EntryHash = stoh(hash);
+            //let uid_str = uid.to_string_lossy().to_string();
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            get_attachment(conductor, eh)?;
          },
          Self::Directory => {
             msg!("Directory...");

@@ -14,12 +14,12 @@ fn print_mail(handle_list: &GetAllHandlesOutput, mail: Mail, from: String, bcc: 
    // Get all CCs
    let mut cc_all = String::new();
    for cc in mail.cc.iter() {
-      cc_all = format!("{}, {}", cc_all, get_name(&handle_list, &cc));
+      cc_all = format!("{}, {}", cc_all, get_name(&handle_list, &cc).unwrap());
    }
    // Get all BCCs
    let mut bcc_all = String::new();
    for bcc in bcc.iter() {
-      bcc_all = format!("{}, {}",bcc_all, get_name(&handle_list, &bcc));
+      bcc_all = format!("{}, {}",bcc_all, get_name(&handle_list, &bcc).unwrap());
    }
 
    //let date = NaiveDateTime::from_timestamp(mail.date_sent as i64, 0);
@@ -48,7 +48,7 @@ pub async fn open(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
       msg!(" - mail: {:?}", mail);
       match mail {
          Ok(inmail) => {
-            let from = get_name(&handle_list, &inmail.from);
+            let from = get_name(&handle_list, &inmail.from).unwrap();
             print_mail(&handle_list, inmail.mail, from, vec![]);
             let maybe_hash = snapmail_acknowledge_mail(conductor, hh);
             if let Ok(hash) = maybe_hash {

@@ -38,6 +38,7 @@ pub enum SnapSubcommand {
    GetAttachment {
       hash: String,
    },
+   Listen,
 }
 
 impl SnapSubcommand {
@@ -51,10 +52,15 @@ impl SnapSubcommand {
             let _ = start_conductor(uid.to_string_lossy().to_string()).await;
          },
          Self::Change => msg!("Change! (TODO)"),
+         Self::Listen => {
+            msg!("Listening forever:");
+            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            listen(conductor)?;
+         },
          Self::Send(cmd) => {
             msg!("Send!");
             let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            cmd.run(conductor);
+            cmd.run(conductor)?;
          },
          Self::SetHandle {handle } => {
             msg!("** Set handle: {}", handle);
@@ -111,7 +117,7 @@ impl SnapSubcommand {
             let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
             msg!(" {} mail(s) found:", all_mail_list.len());
             for item in all_mail_list.iter() {
-               let username = get_name(&handle_list, &item.author);
+               let username = get_name(&handle_list, &item.author).unwrap();
                msg!("- {:?} | {} | {} | {}", item.state, username, item.mail.subject, item.address);
             }
          },

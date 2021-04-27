@@ -8,6 +8,7 @@ use snapmail::{
    CHUNK_MAX_SIZE, FILE_MAX_SIZE,
    mail::*,
    file::*,
+   handle::*,
 };
 use std::path::PathBuf;
 use holochain_types::dna::*;
@@ -30,38 +31,38 @@ pub struct SendCommand {
 
 impl SendCommand {
    ///
-   pub fn run(self, conductor: ConductorHandle) {
+   pub fn run(self, conductor: ConductorHandle) -> anyhow::Result<()> {
       // Form "to" list
+      let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
       let mut to_list: Vec<AgentPubKey> = Vec::new();
-      for id_str in self.to.iter() {
-         to_list.push(stoh(id_str.to_owned()));
+      for name in self.to.iter() {
+         let agent_id = get_agent_id(&handle_list, name)
+            .ok_or(anyhow::Error::msg("username not found"))?;
+         to_list.push(agent_id);
       }
-
       // Form attachment list
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
       if let Some(attachment) = self.maybe_attachment {
          let hh = write_attachment(conductor.clone(), attachment).unwrap();
          manifest_address_list.push(hh);
       }
-
       // Form MailInput
       let mail = SendMailInput {
          subject: self.subject,
          payload: self.message,
          to: to_list,
          cc: vec![],
-          bcc: vec![],
+         bcc: vec![],
          manifest_address_list,
       };
       let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
-
       // Send
       let output = snapmail_send_mail(conductor, mail).unwrap();
-
       // Show results
       let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
       msg!("Send done: {:?}", output.outmail);
       msg!("   - pendings: {} / {}", pending_count, send_count);
+      Ok(())
    }
 }
 

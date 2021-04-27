@@ -25,6 +25,9 @@ async fn main() -> anyhow::Result<()> {
    let opts = cli::SnapCli::from_args();
 
    println!("{:?}", opts);
-   opts.run().await?;
+   let res = opts.run().await;
+   if let Err(e) = res {
+      err_msg!("{}", e);
+   }
    Ok(())
 }

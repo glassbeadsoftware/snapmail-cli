@@ -20,6 +20,15 @@ macro_rules! dbg {
     })
 }
 
+#[allow(unused_macros)]
+macro_rules! err_msg {
+    ($($arg:tt)*) => ({
+        use ansi_term::Color::*;
+        print!("{} ", Red.bold().paint("snapmail error:"));
+        println!($($arg)*);
+    })
+}
+
 ///
 pub fn stoh<T: holochain_types::dna::PrimitiveHashType>(input: String) -> HoloHash<T> {
    let bytes = base64::decode_config(input[1..].to_string(), base64::URL_SAFE_NO_PAD).unwrap();
@@ -29,11 +38,21 @@ pub fn stoh<T: holochain_types::dna::PrimitiveHashType>(input: String) -> HoloHa
 
 
 /// Get username from AgentPubKey
-pub fn get_name(handle_list: &GetAllHandlesOutput, candidate: &AgentPubKey) -> String {
+pub fn get_name(handle_list: &GetAllHandlesOutput, candidate: &AgentPubKey) -> Option<String> {
    for pair in handle_list.0.iter() {
       if &pair.1 == candidate {
-         return pair.0.clone();
+         return Some(pair.0.clone());
       }
    }
-   "<unknown>".to_string()
+   None
+}
+
+/// Get username from AgentPubKey
+pub fn get_agent_id(handle_list: &GetAllHandlesOutput, candidate: &str) -> Option<AgentPubKey> {
+   for pair in handle_list.0.iter() {
+      if &pair.0 == candidate {
+         return Some(pair.1.clone());
+      }
+   }
+   None
 }

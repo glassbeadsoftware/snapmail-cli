@@ -1,3 +1,5 @@
+#![allow(unused_doc_comments)]
+
 use structopt::StructOpt;
 
 #[macro_use]

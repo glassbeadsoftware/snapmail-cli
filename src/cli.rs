@@ -5,6 +5,7 @@ use crate::{
    utils::*,
    subcommands::*,
    conductor::*,
+   subcommands::open,
 };
 
 use snapmail::handle::*;
@@ -85,30 +86,11 @@ impl SnapSubcommand {
          Self::Open { hash } => {
             msg!("Open...");
             let hh = stohh(hash);
-            let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
-            let maybe_mail = snapmail_get_mail(conductor.clone(), hh.clone())?;
-            if let Some(mail) = maybe_mail.0 {
-               let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
-               msg!(" - mail: {:?}", mail);
-               match mail {
-                  Ok(inmail) => {
-                     msg!("Subject: {}", inmail.mail.subject);
-                     msg!("   From: {}", get_name(&handle_list, &inmail.from));
-                     msg!("   Date: {}", inmail.mail.date_sent);
-                     msg!("    Att: {}", inmail.mail.attachments.len());
-                     msg!("\n\n{}\n", inmail.mail.payload);
-                     let maybe_hash = snapmail_acknowledge_mail(conductor, hh);
-                     if let Ok(hash) = maybe_hash {
-                        msg!("Acknowledged: {}", hash);
-                     }
-                  },
-                  Err(outmail) => {
-                     msg!(" - outmail to : {:?}", outmail.mail.to);
-                  },
-               }
-            } else {
-               msg!(" !! No mail found at this hash");
-            }
+            let uid_str = uid.to_string_lossy().to_string();
+            //let conductor = start_conductor(uid.to_string_lossy().to_string()).await;
+            //let handle_list = snapmail_get_all_handles(conductor, ())?;
+            open(uid_str, hh).await?;
+
          },
          Self::Directory => {
             msg!("Directory...");

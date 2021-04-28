@@ -13,54 +13,43 @@ use holochain_keystore::keystore_actor::KeystoreSenderExt;
 
 
 ///
-pub async fn start_conductor(uid: String) -> ConductorHandle {
-   println!("** start_conductor: {:?}", uid);
-   println!("fn: {}", std::stringify!(start_conductor));
-   // Load conductor from config file
-   let config_path = Path::new(&*CONFIG_PATH).join(uid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
+pub async fn start_conductor(sid: String) -> ConductorHandle {
+   msg!("** start_conductor: {:?}", sid);
+   /// Load conductor from config file
+   let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
    // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
    let conductor = conductor_handle_from_config_path(Some(config_path)).await;
    let _ = conductor.print_setup();
-
-   // Startup
-   conductor
-      .clone()
-      .startup_app_interfaces().await.unwrap();
-
-   let dnas = conductor.list_dnas().await.unwrap();
-   println!("Installed DNAs: {:?}", dnas);
-
-   if dnas.is_empty() {
-      install_app(conductor.clone(), uid.clone()).await.unwrap();
-      let dnas = conductor.list_dnas().await.unwrap();
-      println!("Installed DNAs: {:?}", dnas);
-   }
-
-   let apps = conductor.list_active_apps().await.unwrap();
-   println!("Activate Apps: {:?}", apps);
-
-   let interfaces = conductor.list_app_interfaces().await.unwrap();
-   println!("App Interfaces: {:?}", interfaces);
-
+   /// Startup
+   conductor.clone().startup_app_interfaces().await.unwrap();
+   /// Check state
+   //let dnas = conductor.list_dnas().await.unwrap();
+   //msg!("Installed DNAs: {:?}", dnas);
+   //let apps = conductor.list_active_apps().await.unwrap();
+   //msg!("Activate Apps: {:?}", apps);
+   //let interfaces = conductor.list_app_interfaces().await.unwrap();
+   //msg!("App Interfaces: {:?}", interfaces);
    //let cell_ids = conductor.list_cell_ids().await.unwrap();
    //println!("Cell IDs: {:?}", cell_ids);
-
-   // Done
+   /// Done
    return conductor;
 }
 
 
-/// Install Snapmail DNA form dna file
+/// Install Snapmail DNA from dna file
 /// FIXME: hardcoded DNA file path
 #[allow(deprecated)]
-pub async fn install_app(conductor: ConductorHandle, uid: String) -> ConductorResult<()> {
-   // Generate keys
+pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
+   /// Load conductor from config file
+   let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
+   // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
+   let conductor = conductor_handle_from_config_path(Some(config_path)).await;
+   /// Generate keys
    let agent_key = conductor
       .keystore()
       .generate_sign_keypair_from_pure_entropy()
       .await?;
-
-   // Load DnaFile
+   /// Load DnaFile
    println!("Loading DNA wasm file: {}", WASM_PATH);
    let wasm = &std::fs::read(WASM_PATH)?;
    let dna_wasm = DnaWasm::from(wasm.to_owned());
@@ -69,7 +58,6 @@ pub async fn install_app(conductor: ConductorHandle, uid: String) -> ConductorRe
       .into_inner();
    let zome_def: ZomeDef = WasmZome { wasm_hash }.into();
    let zome = (ZOME_NAME.into(), zome_def).into();
-
    let dna_file = DnaFile::new(DnaDef {
       name: SNAPMAIL_APP_ID.to_string(),
       uid: uid.to_string(),
@@ -78,23 +66,20 @@ pub async fn install_app(conductor: ConductorHandle, uid: String) -> ConductorRe
    },
       vec![dna_wasm].into_iter(),
    ).await.expect("Dna file load failed");
-
-   // Register DNA
+   /// Register DNA
    conductor.register_dna(dna_file.clone()).await?;
-
-   // Install DNA
+   /// Install DNA
    let cell_id = CellId::from((dna_file.dna_hash().clone(), agent_key.clone()));
    let cell_id_with_proof =  (InstalledCell::new(cell_id, "slot-1".to_string()), None);
-
-   // Call genesis
+   /// Call genesis
    conductor
        .clone()
        .install_app(SNAPMAIL_APP_ID.to_string(), vec![cell_id_with_proof])
        .await?;
-
-   // Activate app
+   /// Activate app
    conductor.activate_app(SNAPMAIL_APP_ID.to_string()).await?;
-
-   // Done
+   /// Done
+   let dnas = conductor.list_dnas().await.unwrap();
+   msg!("Installed DNAs: {:?}", dnas);
    Ok(())
 }

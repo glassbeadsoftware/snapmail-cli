@@ -13,18 +13,22 @@ use url2::Url2;
 //use std::io::prelude::*;
 //use std::fs;
 //use directories::ProjectDirs;
-use crate::globals::*;
+use crate::{
+   globals::*,
+   conductor::*,
+};
 //use holochain_conductor_api::config::conductor::ConductorConfig;
 use crate::subcommands::config::*;
 
-
-#[derive(Debug, StructOpt, Clone)]
 /// This creates a new holochain sandbox
 /// which is a
 /// - conductor config
 /// - databases
 /// - keystore
+#[derive(Debug, StructOpt, Clone)]
 pub struct SetupCommand {
+   #[structopt(about = "Network ID that this session will use")]
+   uid: String,
    // #[structopt(long)]
    // handle: String,
    // #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]
@@ -45,13 +49,14 @@ pub struct SetupCommand {
 
 impl SetupCommand {
    ///
-   pub fn run(&self, uid: PathBuf) {
+   pub async fn run(&self, sid: PathBuf) {
       let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let _ = generate(
          root,
-         Some(uid.clone()),
+         Some(sid.clone()),
          self.maybe_network.clone().map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
+      let _ = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await;
    }
 }
 

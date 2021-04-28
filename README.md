@@ -12,7 +12,7 @@ Snapmail CLI
 Interface for Snapmail DNA 
 
 USAGE:
-    snapmail-cli <SUBCOMMAND>
+    snapmail-cli <sid> <SUBCOMMAND>
 
 FLAGS:
     -h, --help       Prints help information
@@ -43,7 +43,7 @@ Snapmail CLI
 Create agent and config
 
 USAGE:
-    snapmail-cli setup [OPTIONS] <SUBCOMMAND>
+    snapmail-cli <sid> setup [OPTIONS] <SUBCOMMAND>
 
 FLAGS:
     -h, --help       Prints help information

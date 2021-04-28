@@ -40,17 +40,18 @@ pub struct SetupCommand {
    #[structopt(subcommand, name = "network")]
    /// Add an optional network config
    pub maybe_network: Option<NetworkCmd>,
-   /// Set a root directory for the app's storage data to be placed into.
-   /// Defaults to the system's temp directory.
-   /// This directory must already exist.
-   #[structopt(name = "root", parse(from_os_str))]
-   pub maybe_root: Option<PathBuf>,
+   // Set a root directory for the app's storage data to be placed into.
+   // Defaults to the system's temp directory.
+   // This directory must already exist.
+   // #[structopt(name = "root", parse(from_os_str))]
+   // pub maybe_root: Option<PathBuf>,
 }
 
 impl SetupCommand {
    ///
    pub async fn run(&self, sid: PathBuf) {
-      let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
+      //let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
+      let root = CONFIG_PATH.as_path().to_path_buf();
       let _ = generate(
          root,
          Some(sid.clone()),

@@ -3,6 +3,7 @@
 
 use crate::{
    utils::*,
+   globals::*,
    subcommands::*,
    conductor::*,
    subcommands::open,
@@ -40,6 +41,7 @@ pub enum SnapSubcommand {
    Directory,
    Send(SendCommand),
    List,
+   ListSessions,
    Open {
       hash: String,
    },
@@ -61,6 +63,15 @@ impl SnapSubcommand {
          },
          Self::Info => msg!("Info! (TODO)"),
          Self::Change => msg!("Change! (TODO)"),
+         /// Dont know what this is
+         Self::ListSessions => {
+            msg!("ListSessions: ");
+            let root = CONFIG_PATH.as_path().to_path_buf();
+            let paths = std::fs::read_dir(root).unwrap();
+            for path in paths {
+               msg!(" - {}", path.unwrap().path().display())
+            }
+         },
          Self::Clear => { msg!("Clearing..."); clear(sid); },
          Self::Listen => {
             msg!("Listening forever:");

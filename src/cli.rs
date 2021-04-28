@@ -149,6 +149,7 @@ impl SnapSubcommand {
                let username = get_name(&handle_list, &item.author).unwrap();
                msg!("- {:?} | {} | {} | {}", item.state, username, item.mail.subject, item.address);
             }
+            dump_state(conductor);
          },
          Self::Pull => {
             msg!("Pull...");

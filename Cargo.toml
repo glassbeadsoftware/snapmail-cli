@@ -34,6 +34,7 @@ thiserror = "1.0.24"
 snapmail = { path = "../snapmail-rsm/zomes/snapmail" }
 
 holochain_serialized_bytes = "=0.0.50"
+tokio_helper = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "tokio_helper" }
 holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }
 #holochain_keystore = { version = "0.0.1", path = "../holochain/crates/holochain_keystore" }
 holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_keystore" }

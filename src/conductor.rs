@@ -7,7 +7,10 @@ use holochain_types::dna::zome::*;
 use holochain_types::dna::wasm::DnaWasm;
 use holochain_types::app::*;
 use holochain_zome_types::*;
-use holochain::conductor::error::*;
+use holochain::conductor::{
+   error::*,
+   p2p_store,
+};
 use std::path::Path;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
 
@@ -19,10 +22,8 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
    // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
    let conductor = conductor_handle_from_config_path(Some(config_path)).await;
-   let _ = conductor.print_setup();
-   /// Startup
-   conductor.clone().startup_app_interfaces().await.unwrap();
    /// Check state
+   //let _ = conductor.print_setup();
    //let dnas = conductor.list_dnas().await.unwrap();
    //msg!("Installed DNAs: {:?}", dnas);
    //let apps = conductor.list_active_apps().await.unwrap();
@@ -82,4 +83,32 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
    let dnas = conductor.list_dnas().await.unwrap();
    msg!("Installed DNAs: {:?}", dnas);
    Ok(())
+}
+
+pub fn dump_state(conductor: ConductorHandle) -> usize {
+   let result = tokio_helper::block_on(async {
+      //let p2p = conductor.holochain_p2p();
+      //let broadcaster = conductor.signal_broadcaster();
+
+      let cell_id = &conductor.list_cell_ids().await.unwrap()[0];
+
+      // let cell = conductor.cell_by_id(cell_id).unwrap();
+      // let arc = cell.env();
+      // let source_chain = SourceChainBuf::new(arc.clone().into()).unwrap();
+      // let source_chain_dump = source_chain.dump_state().await.unwrap();
+      //let integration_dump = integrate_dht_ops_workflow::dump_state(arc.clone().into())?;
+
+      let peer_dump = p2p_store::dump_state(
+         conductor.get_p2p_env().await.clone().into(),
+         Some(cell_id.clone())).unwrap();
+
+      //let state = conductor.dump_cell_state(&cell_ids[0]).await.unwrap();
+      //msg!(" {}", state);
+
+      // msg!("Conductor state dump:");
+      // msg!(" - peer dump: {}", peer_dump);
+      // msg!(" - Peers: {}", peer_dump.peers.len());
+      peer_dump.peers.len()
+   }, std::time::Duration::from_secs(9));
+   result.unwrap()
 }

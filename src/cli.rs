@@ -40,7 +40,9 @@ pub enum SnapSubcommand {
    Pull,
    Directory,
    Send(SendCommand),
+   /// List all mails received by this agent
    List,
+   /// List sessions that have been setup on this computer
    ListSessions,
    Open {
       hash: String,
@@ -63,7 +65,6 @@ impl SnapSubcommand {
          },
          Self::Info => msg!("Info! (TODO)"),
          Self::Change => msg!("Change! (TODO)"),
-         /// Dont know what this is
          Self::ListSessions => {
             msg!("ListSessions: ");
             let root = CONFIG_PATH.as_path().to_path_buf();

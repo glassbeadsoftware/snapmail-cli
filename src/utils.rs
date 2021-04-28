@@ -6,7 +6,9 @@ use snapmail::handle::GetAllHandlesOutput;
 macro_rules! msg {
     ($($arg:tt)*) => ({
         use ansi_term::Color::*;
-        print!("{} ", Blue.bold().paint("snapmail:"));
+        let now = chrono::Utc::now().format("%H:%M:%S");
+        let prepend = format!("[{}] snapmail: ", now);
+        print!("{}", Blue.bold().paint(prepend));
         println!($($arg)*);
     })
 }

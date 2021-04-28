@@ -28,7 +28,10 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    //msg!("Installed DNAs: {:?}", dnas);
    //let apps = conductor.list_active_apps().await.unwrap();
    //msg!("Activate Apps: {:?}", apps);
-   //let interfaces = conductor.list_app_interfaces().await.unwrap();
+
+   // Add app interface so we can get signals
+   let _port = conductor.clone().add_app_interface(0).await.unwrap();
+   let _interfaces = conductor.list_app_interfaces().await.unwrap();
    //msg!("App Interfaces: {:?}", interfaces);
    //let cell_ids = conductor.list_cell_ids().await.unwrap();
    //println!("Cell IDs: {:?}", cell_ids);
@@ -100,7 +103,8 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
 
       let peer_dump = p2p_store::dump_state(
          conductor.get_p2p_env().await.clone().into(),
-         Some(cell_id.clone())).unwrap();
+         Some(cell_id.clone()),
+      ).unwrap();
 
       //let state = conductor.dump_cell_state(&cell_ids[0]).await.unwrap();
       //msg!(" {}", state);

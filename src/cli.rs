@@ -77,7 +77,7 @@ impl SnapSubcommand {
          Self::Listen => {
             msg!("Listening forever:");
             let conductor = start_conductor(sid_str).await;
-            listen(conductor)?;
+            listen(conductor).await?;
          },
          Self::Send(cmd) => {
             msg!("Send!");

@@ -19,6 +19,7 @@ use crate::{
 };
 //use holochain_conductor_api::config::conductor::ConductorConfig;
 use crate::subcommands::config::*;
+use snapmail::handle::*;
 
 /// This creates a new holochain sandbox
 /// which is a
@@ -50,6 +51,7 @@ pub struct SetupCommand {
 impl SetupCommand {
    ///
    pub async fn run(&self, sid: PathBuf) {
+      let sid_str = sid.to_string_lossy().to_string();
       //let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let root = CONFIG_PATH.as_path().to_path_buf();
       let _ = generate(
@@ -57,7 +59,10 @@ impl SetupCommand {
          Some(sid.clone()),
          self.maybe_network.clone().map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
-      let _ = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await;
+      let _ = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
+      let conductor = start_conductor(sid_str.clone()).await;
+      let hash = snapmail_set_handle(conductor, sid_str.clone()).unwrap();
+      msg!(" handle set: {} - {:?}", sid_str, hash);
    }
 }
 

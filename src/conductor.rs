@@ -28,10 +28,7 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    //msg!("Installed DNAs: {:?}", dnas);
    //let apps = conductor.list_active_apps().await.unwrap();
    //msg!("Activate Apps: {:?}", apps);
-
-   // Add app interface so we can get signals
-   let _port = conductor.clone().add_app_interface(0).await.unwrap();
-   let _interfaces = conductor.list_app_interfaces().await.unwrap();
+   //let _interfaces = conductor.list_app_interfaces().await.unwrap();
    //msg!("App Interfaces: {:?}", interfaces);
    //let cell_ids = conductor.list_cell_ids().await.unwrap();
    //println!("Cell IDs: {:?}", cell_ids);

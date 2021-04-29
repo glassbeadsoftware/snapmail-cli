@@ -47,10 +47,11 @@ pub async fn open(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
          Ok(inmail) => {
             let from = get_name(&handle_list, &inmail.from).unwrap();
             print_mail(&handle_list, inmail.mail, from, vec![]);
+            msg!("Acknowledging...");
             let maybe_hash = snapmail_acknowledge_mail(conductor, hh);
             if let Ok(hash) = maybe_hash {
                msg!("Acknowledged: {}", hash);
-            }
+            } else { msg!("Done");}
          },
          Err(outmail) => {
             print_mail(&handle_list, outmail.mail, "<myself>".to_string(), outmail.bcc);

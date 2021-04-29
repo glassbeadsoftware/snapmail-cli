@@ -11,10 +11,13 @@ use std::path::Path;
 #[derive(Debug, StructOpt, Clone)]
 pub struct ChangeCommand {
    #[structopt(name = "proxy", long, parse(from_os_str))]
+   /// Url of proxy server to use
    maybe_proxy: Option<PathBuf>,
    #[structopt(name = "bootstrap", long, parse(from_os_str))]
+   /// Url of bootstrap server to use
    maybe_bootstrap: Option<PathBuf>,
    #[structopt(name = "uid", long)]
+   /// Network ID that this session will use (String)
    maybe_uid: Option<String>,
 }
 

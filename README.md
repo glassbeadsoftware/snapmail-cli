@@ -9,7 +9,7 @@ CI and NIX configs are not set up for the moment.
 `````
 Snapmail CLI
 
-Interface for Snapmail DNA 
+Command line interface for Snapmail DNA
 
 USAGE:
     snapmail-cli <sid> <SUBCOMMAND>
@@ -18,45 +18,42 @@ FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
-SUBCOMMANDS:
-    help           Prints this message or the help of the given subcommand(s)
-    setup          Create agent and config
-    clear          Erase agent and config
-    info           Display setup (conductor config...)
-    change         Change handle / config
-    directory      Display all users part of the current network
-    ping           Check if a user is online
-    pull           Query the DHT for all relevant data (handles, mailbox, ackbox)
-    send           Send a mail
-    list           Display all mails (with filtering)
-    open           Read mailbox
-    get-attachment Extract an attachment from a mail
-    listen         Listen to network events
-`````
-
-## Sub-commands
-### Setup
-
-`````
-Snapmail CLI
-
-Create agent and config
-
-USAGE:
-    snapmail-cli <sid> setup [OPTIONS] <SUBCOMMAND>
-
-FLAGS:
-    -h, --help       Prints help information
-
-OPTIONS:
-    -mdns           Use MDNS instead of bootstrap server
+ARGS:
+    <sid>    Session ID. Corresponds to an unique config, network id and agent
 
 SUBCOMMANDS:
-    network
+    change            Modify the setup
+    clear             Erase a session from disk
+    directory         Display all users part of the current network
+    get-attachment    Extract an attachment from a mail
+    get-handle        Get agent's current handle
+    help              Prints this message or the help of the given subcommand(s)
+    info              Display setup (conductor config, uid)
+    list              List all mails received by this agent
+    list-sessions     List sessions that have been setup on this computer
+    listen            Launch an "always on" conductor that displays events & signals
+    open              Read mail from mailbox (Will send an acknowledgement to mail author)
+    ping              Check if a user is currently online
+    pull              Query the DHT for all relevant data (handles, mailbox, ackbox)
+    send              Send a mail to another agent
+    set-handle        Change agent's handle
+    setup             Create agent and config
 `````
 
+## Example
+
+##### Setup
 `````
-snapmail-cli setup --name toto --mdns
+snapmail-cli alex setup my-network-id network -b https://bootstrap-staging.holo.host/ quic
+`````
+##### Send mail
+`````
+snapmail-cli alex send --to billy -m "hello world!" -s "First post" -a ../clover.jpg
+`````
+##### Open mail
+`````
+snapmail-cli billy list
+snapmail-cli billy open uhCkk69Fu0YwACllB__HLWwN49vCVf8JIOfKDuBXjMjG5BWcH2Tq4
 `````
 
 ## Building
@@ -65,5 +62,4 @@ FIXME
 
 ## Testing
 FIXME
-## Running with UI
-FIXME
+

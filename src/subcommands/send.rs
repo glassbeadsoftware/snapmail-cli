@@ -16,14 +16,18 @@ use std::io::prelude::*;
 #[derive(Debug, StructOpt, Clone)]
 pub struct SendCommand {
    #[structopt(long)]
+   /// Recepients
    to: Vec<String>,
    // #[structopt(long)]
    // cc: Option<Vec<String>>,
    #[structopt(short, long)]
+   /// Subject of the mail
    subject: String,
    #[structopt(short, long)]
+   /// Content to send
    message: String,
    #[structopt(name = "attachment", short, long, parse(from_os_str))]
+   /// Add a file atachment
    pub maybe_attachment: Option<PathBuf>,
 }
 

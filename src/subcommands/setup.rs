@@ -28,12 +28,11 @@ use snapmail::handle::*;
 /// - keystore
 #[derive(Debug, StructOpt, Clone)]
 pub struct SetupCommand {
-   #[structopt(about = "Network ID that this session will use")]
+   /// Network ID that this session will use
    uid: String,
    // #[structopt(name = "mdns")]
    // maybe_can_mdns: Option<bool>,
    #[structopt(subcommand, name = "network")]
-   /// Add an optional network config
    pub maybe_network: Option<NetworkCmd>,
    // Set a root directory for the app's storage data to be placed into.
    // Defaults to the system's temp directory.
@@ -64,6 +63,7 @@ impl SetupCommand {
 
 #[derive(Debug, StructOpt, Clone)]
 pub enum NetworkCmd {
+   /// Add an optional network config
    Network(Network),
 }
 

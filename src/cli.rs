@@ -17,40 +17,51 @@ use holochain_types::dna::*;
 
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
-   #[structopt(about = "Create agent and config")]
+   /// Create agent and config
    Setup(SetupCommand),
-   #[structopt(about = "Display setup (conductor config...)")]
+   /// Display setup (conductor config, uid)
    Info,
-   #[structopt(about = "Modify the conductor config")]
+   /// Modify the setup
    Change(ChangeCommand),
-   #[structopt(name = "set-handle")]
+   /// Change agent's handle
    SetHandle {
-      #[structopt(about = "New handle name to use for this agent")]
+      /// New handle name to use for this agent
       handle: String,
    },
+   /// Get agent's current handle
    GetHandle,
+   /// Erase a session from disk
    Clear,
+   /// Check if a user is currently online
    Ping {
-      #[structopt(name = "name", short, long, about = "handle of the agent to Ping")]
-      /// Handle of agent to ping
+      #[structopt(name = "name", short, long)]
+      /// Handle of the agent to Ping
       maybe_name: Option<String>,
-      #[structopt(name = "id", long, about = "agent_id of the agent to Ping", required_unless = "maybe_name")]
+      #[structopt(name = "id", long, required_unless = "name")]
       /// Agent ID of agent to ping
       maybe_agent_id: Option<String>,
    },
+   /// Query the DHT for all relevant data (handles, mailbox, ackbox)
    Pull,
+   /// Display all users part of the current network
    Directory,
+   /// Send a mail to another agent
    Send(SendCommand),
    /// List all mails received by this agent
    List,
    /// List sessions that have been setup on this computer
    ListSessions,
+   /// Read mail from mailbox (Will send an acknowledgement to mail author)
    Open {
+      /// Hash of the mail to open
       hash: String,
    },
+   /// Extract an attachment from a mail
    GetAttachment {
+      /// Hash of the attachment to extract
       hash: String,
    },
+   /// Launch an "always on" conductor that displays events & signals
    Listen,
 }
 
@@ -195,7 +206,7 @@ impl SnapSubcommand {
 #[structopt(name = "snapmail-cli", about = "Command line interface for Snapmail DNA")]
 pub struct SnapCli {
    #[structopt(parse(from_os_str))]
-   /// Session ID. Corresponds to an unique config, network id and agent
+   /// Session ID (user defined). Corresponds to an unique config, network id and agent
    sid: PathBuf,
    #[structopt(subcommand)]
    cmd: SnapSubcommand,

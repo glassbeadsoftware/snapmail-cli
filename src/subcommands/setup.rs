@@ -30,12 +30,6 @@ use snapmail::handle::*;
 pub struct SetupCommand {
    #[structopt(about = "Network ID that this session will use")]
    uid: String,
-   // #[structopt(long)]
-   // handle: String,
-   // #[structopt(name = "bootstrap", parse(from_str = Url2::parse))]
-   // maybe_bootstrap: Option<Url2>,
-   // #[structopt(name = "proxy", parse(from_str = Url2::parse))]
-   // maybe_proxy: Option<Url2>,
    // #[structopt(name = "mdns")]
    // maybe_can_mdns: Option<bool>,
    #[structopt(subcommand, name = "network")]
@@ -59,6 +53,8 @@ impl SetupCommand {
          Some(sid.clone()),
          self.maybe_network.clone().map(|n| n.into_inner().into()),
       ).expect("Generate config failed. Maybe Invalid params.");
+
+
       let _ = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
       let conductor = start_conductor(sid_str.clone()).await;
       let hash = snapmail_set_handle(conductor, sid_str.clone()).unwrap();

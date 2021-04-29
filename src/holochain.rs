@@ -1,4 +1,3 @@
-//use crate::globals::*;
 use holochain::conductor::{Conductor, ConductorHandle};
 use std::path::PathBuf;
 use holochain::conductor::paths::ConfigFilePath;

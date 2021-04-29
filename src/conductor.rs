@@ -20,7 +20,6 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    msg!("** start_conductor: {:?}", sid);
    /// Load conductor from config file
    let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
-   // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
    let conductor = conductor_handle_from_config_path(Some(config_path)).await;
    /// Check state
    //let _ = conductor.print_setup();
@@ -42,9 +41,11 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
 #[allow(deprecated)]
 pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
    /// Load conductor from config file
-   let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
-   // let config_path = CONDUCTOR_CONFIG_FILEPATH.to_path_buf();
-   let conductor = conductor_handle_from_config_path(Some(config_path)).await;
+   let config_path = Path::new(&*CONFIG_PATH).join(sid.clone());
+   let conductor_path = config_path.join(CONDUCTOR_CONFIG_FILENAME);
+   let app_filepath = config_path.join(APP_CONFIG_FILENAME);
+   std::fs::write(app_filepath, uid.as_bytes())?;
+   let conductor = conductor_handle_from_config_path(Some(conductor_path)).await;
    /// Generate keys
    let agent_key = conductor
       .keystore()
@@ -85,6 +86,7 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
    Ok(())
 }
 
+///
 pub fn dump_state(conductor: ConductorHandle) -> usize {
    let result = tokio_helper::block_on(async {
       //let p2p = conductor.holochain_p2p();

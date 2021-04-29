@@ -28,15 +28,12 @@ ansi_term = "0.12"
 chrono = "0.4.6"
 futures = "0.3"
 lazy_static = "1.4.0"
-derive_more = "0.99"
 thiserror = "1.0.24"
-nanoid = "0.3"
 observability = "0.1.3"
 serde_yaml = "0.8"
 structopt = "0.3"
-tracing = "0.1"
 url2 = "0.0.6"
-walkdir = "2"
+regex = "1"
 base64 = "0.13"
 tokio = { version = "1.5", features = [ "full" ] }
 tokio-stream = { version = "0.1.5" }
@@ -45,7 +42,6 @@ snapmail = { path = "../snapmail-rsm/zomes/snapmail" }
 holochain_serialized_bytes = "=0.0.50"
 tokio_helper = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "tokio_helper" }
 holo_hash = { version = "^0.0.2-alpha.1", path = "../holochain/crates/holo_hash", features = ["string-encoding"] }
-#holochain_keystore = { version = "0.0.1", path = "../holochain/crates/holochain_keystore" }
 holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_keystore" }
 holochain = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain", features = ["test_utils"] }
 holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_zome_types" }

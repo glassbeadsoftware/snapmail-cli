@@ -11,22 +11,19 @@ use snapmail::handle::*;
 use chrono::{DateTime, TimeZone, Local};
 
 fn print_mail(handle_list: &GetAllHandlesOutput, mail: Mail, from: String, bcc: Vec<AgentPubKey>) {
-   // Get all CCs
+   /// Get all CCs
    let mut cc_all = String::new();
    for cc in mail.cc.iter() {
       cc_all = format!("{}, {}", cc_all, get_name(&handle_list, &cc).unwrap());
    }
-   // Get all BCCs
+   /// Get all BCCs
    let mut bcc_all = String::new();
    for bcc in bcc.iter() {
       bcc_all = format!("{}, {}",bcc_all, get_name(&handle_list, &bcc).unwrap());
    }
-
-   //let date = NaiveDateTime::from_timestamp(mail.date_sent as i64, 0);
-    //let utc_date = DateTime::<Utc>::from_utc(date, Utc);
+   ///
    let date: DateTime<Local> = Local.timestamp(mail.date_sent as i64, 0);
-
-   // Print
+   /// Print
    msg!("     Subject: {}", mail.subject);
    msg!("        From: {}", from);
    msg!("          CC: {}", cc_all);

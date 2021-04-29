@@ -21,7 +21,8 @@ pub enum SnapSubcommand {
    Setup(SetupCommand),
    #[structopt(about = "Display setup (conductor config...)")]
    Info,
-   Change,
+   #[structopt(about = "Modify the conductor config")]
+   Change(ChangeCommand),
    #[structopt(name = "set-handle")]
    SetHandle {
       #[structopt(about = "New handle name to use for this agent")]
@@ -63,8 +64,25 @@ impl SnapSubcommand {
             msg!("Setup!");
             cmd.run(sid).await;
          },
-         Self::Info => msg!("Info! (TODO)"),
-         Self::Change => msg!("Change! (TODO)"),
+         Self::Info => {
+            msg!("{} Info:", sid_str);
+            let path = CONFIG_PATH.as_path().join(sid);
+            let config_filepath = path.join(CONDUCTOR_CONFIG_FILENAME);
+            let app_filepath = path.join(APP_CONFIG_FILENAME);
+            let uid = std::fs::read_to_string(app_filepath)
+               .expect("Something went wrong reading APP CONFIG file");
+            msg!("uid: {}", uid);
+            // let f = std::fs::File::open(config_filepath)
+            //    .expect("Something went wrong reading CONDUCTOR CONFIG file");
+            let s = std::fs::read_to_string(config_filepath)
+               .expect("Something went wrong reading CONDUCTOR CONFIG file");
+            msg!("config:\n {}", s);
+
+         },
+         Self::Change(cmd) => {
+            msg!("Change!");
+            cmd.run(sid);
+         },
          Self::ListSessions => {
             msg!("ListSessions: ");
             let root = CONFIG_PATH.as_path().to_path_buf();

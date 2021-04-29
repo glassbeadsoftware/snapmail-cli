@@ -13,7 +13,7 @@ use futures_util::{self, pin_mut};
 use tokio::time::{Duration};
 
 
-/// Always on conductor that displays events & signals
+/// Launch an "always on" conductor that displays events & signals
 pub async fn listen(conductor: ConductorHandle) -> anyhow::Result<()> {
 
    // Add app interface so we can get signals
@@ -53,6 +53,7 @@ pub async fn listen(conductor: ConductorHandle) -> anyhow::Result<()> {
    //Ok(())
 }
 
+///
 fn print_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, signal: Signal) {
    match signal {
       Signal::App(_cell_id, app_signal) => {
@@ -65,8 +66,7 @@ fn print_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, s
    }
 }
 
-
-
+///
 fn print_snapmail_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, signal: SignalProtocol) {
    match signal {
       SignalProtocol::ReceivedMail(item) => {

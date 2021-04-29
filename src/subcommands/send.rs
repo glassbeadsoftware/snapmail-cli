@@ -1,5 +1,4 @@
 use crate::{
-   //globals::*,
    utils::*,
 };
 use structopt::StructOpt;
@@ -66,19 +65,7 @@ impl SendCommand {
    }
 }
 
-
-// export function splitFile(full_data_string) {
-//    const hash = sha256(full_data_string);
-//    console.log('file hash: ' + hash)
-//    const chunks = chunkSubstr(full_data_string, CHUNK_MAX_SIZE);
-//    return {
-//    dataHash: hash,
-//    numChunks: chunks.length,
-//    chunks: chunks,
-//    }
-// }
-
-
+///
 fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> std::io::Result<HeaderHash> {
    /// Load file
    msg!("Reading attachment file: {:?}", filepath);
@@ -102,7 +89,7 @@ fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> std::io::R
    file.read_to_end(&mut file_content)?;
 
    let data_hash = holo_hash::encode::blake2b_256(file_content.as_slice());
-   msg!(" data hash: {}", String::from_utf8_lossy(&data_hash));
+   //msg!(" data hash: {}", String::from_utf8_lossy(&data_hash));
    /// Split into chunks
    let chunk_count = (file_meta.len() as f64 / CHUNK_MAX_SIZE as f64).ceil() as usize;
    msg!("chunk_count: {}", chunk_count);
@@ -121,7 +108,7 @@ fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> std::io::R
    for chunk in chunk_list {
       let chunk_hash = holo_hash::encode::blake2b_256(chunk);
       let chunk_b64 = base64::encode_config(chunk.clone(), base64::URL_SAFE_NO_PAD);
-      msg!(" chunk_hash: {}", String::from_utf8_lossy(&chunk_hash));
+      //msg!(" chunk_hash: {}", String::from_utf8_lossy(&chunk_hash));
       msg!(" chunk size: {} KiB ({} KiB)", chunk.len() / 1024, chunk_b64.len() / 1024);
       let chunk_input = FileChunk {
          data_hash: String::from_utf8_lossy(&chunk_hash).to_string(),

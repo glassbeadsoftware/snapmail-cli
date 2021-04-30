@@ -58,7 +58,9 @@ snapmail-cli billy open uhCkk69Fu0YwACllB__HLWwN49vCVf8JIOfKDuBXjMjG5BWcH2Tq4
 
 ## Building
 
-FIXME
+`````
+cargo build --release
+`````
 
 ## Testing
 FIXME

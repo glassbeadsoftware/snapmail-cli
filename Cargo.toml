@@ -9,6 +9,14 @@ edition = "2018"
 name = "snapmail-cli"
 path = "src/main.rs"
 
+[[bin]]
+name = "rustify-wasm"
+path = "src/rustify-wasm.rs"
+
+[profile.release]
+opt-level = 'z'  # Optimize for size.
+lto = true # link time optimization
+
 [profile.dev.package."*"]
 opt-level = 3
 debug = false

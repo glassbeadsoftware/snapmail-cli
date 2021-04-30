@@ -16,6 +16,8 @@ pub mod holochain;
 pub mod conductor;
 pub mod error;
 
+pub mod wasm;
+
 ///
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

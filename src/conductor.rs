@@ -51,10 +51,18 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
       .keystore()
       .generate_sign_keypair_from_pure_entropy()
       .await?;
+
    /// Load DnaFile
-   println!("Loading DNA wasm file: {}", WASM_PATH);
-   let wasm = &std::fs::read(WASM_PATH)?;
-   let dna_wasm = DnaWasm::from(wasm.to_owned());
+   // println!("Loading DNA wasm file: {}", WASM_PATH);
+   // let wasm = &std::fs::read(WASM_PATH)?;
+   // let wasm_str = format!("pub const DNA_WASM: [u8 ; {}] = {:?};\n", wasm.len(), wasm);
+   // std::fs::write("./wasm.rs", wasm_str.as_bytes());
+   // //let wasm2 = &std::fs::read("./dump.rs")?;
+   // let dna_wasm = DnaWasm::from(wasm.to_owned());
+
+   println!("Loading DNA wasm vec!");
+   let dna_wasm = DnaWasm::from(crate::wasm::DNA_WASM.to_vec());
+
    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
       .await
       .into_inner();

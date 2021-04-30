@@ -8,9 +8,6 @@ pub const SNAPMAIL_APP_NAME: &str          = "snapmail-cli";
 pub const LAIR_MAGIC_READY_STRING: &str    = "#lair-keystore-ready#";
 pub const CONDUCTOR_CONFIG_FILENAME: &str  = "conductor-config.yaml";
 pub const APP_CONFIG_FILENAME: &str        = "app-config.txt";
-//pub const DNA_PATH: &str                   = "/home/ddd/github/snapmail-cli/dna/snapmail.dna"; // FIXME
-pub const WASM_PATH: &str                   = "/home/ddd/github/snapmail-rsm/target/wasm32-unknown-unknown/release/snapmail.wasm"; // FIXME
-//pub const DNA_PATH: &str                   = "~/github/snapmail-cli/dna/snapmail.dna"; // FIXME
 
 lazy_static! {
    pub static ref DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(9);

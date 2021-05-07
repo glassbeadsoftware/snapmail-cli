@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use std::string::ToString;
+use std::sync::RwLock;
 
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
@@ -39,4 +40,9 @@ impl Default for App {
          messages: vec!["Welcome to Snapmail".to_string()],
       }
    }
+}
+
+lazy_static! {
+   /// Create default app state
+   pub static ref g_app: RwLock<App> = RwLock::new(App::default());
 }

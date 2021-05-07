@@ -40,7 +40,7 @@ SUBCOMMANDS:
     setup             Create agent and config
 `````
 
-## Example
+## Examples
 
 ##### Setup
 `````
@@ -62,6 +62,21 @@ snapmail-cli billy open uhCkk69Fu0YwACllB__HLWwN49vCVf8JIOfKDuBXjMjG5BWcH2Tq4
 cargo build --release
 `````
 
-## Testing
-FIXME
+# Snapmail-tui
+
+`````
+Snapmail TUI
+
+Terminal user interface for Snapmail DNA
+
+USAGE:
+    snapmail-tui <sid>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+ARGS:
+    <sid>    Session ID. Corresponds to an unique config, network id and agent
+`````
 

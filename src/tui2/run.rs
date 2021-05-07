@@ -30,6 +30,7 @@ use crate::{
    tui2::*,
    tui2::menu::*,
    app::*,
+   app::InputVariable,
    globals::*,
    holochain::*,
    conductor::*,
@@ -53,7 +54,7 @@ pub async fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
 
    let conductor = start_conductor(sid.clone()).await;
-   let handle = snapmail_get_my_handle(conductor, ())?;
+   let handle = snapmail_get_my_handle(conductor.clone(), ())?;
 
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);
@@ -139,7 +140,8 @@ pub async fn run(
                ])
             })
             .collect();
-         let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}", sid, uid, handle, frame_count);
+         let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}",
+                             sid, uid, handle.clone(), frame_count);
          let tabs = Tabs::new(top_menu)
             .select(active_menu_item.into())
             .block(Block::default().title(title).borders(Borders::ALL))
@@ -148,14 +150,15 @@ pub async fn run(
             .divider(Span::raw("|"));
          main_rect.render_widget(tabs, chunks[0]);
 
-         let input_mode = g_app.read().unwrap().input_mode.clone();
-         let feedback = Paragraph::new(input_mode.to_string())
+         let app = g_app.read().unwrap();
+         //let input_mode = app.input_mode.clone();
+         let feedback = Paragraph::new(app.messages[0].clone())
             .alignment(Alignment::Center)
             .block(
                Block::default()
                   .borders(Borders::ALL)
                   .style(Style::default().fg(Color::White))
-                  .title("feedback")
+                  .title("Feedback")
                   .border_type(BorderType::Plain),
             );
          main_rect.render_widget(feedback, chunks[2]);
@@ -180,13 +183,34 @@ pub async fn run(
          InputMode::Normal => {
             match key_code  {
                KeyCode::Esc => return Ok(()),
+               /// Top Menu
                KeyCode::Char('q') => return Ok(()),
                KeyCode::Char('v') => active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => active_menu_item = TopMenuItem::Write,
                KeyCode::Char('s') => active_menu_item = TopMenuItem::Settings,
+               /// Settings Menu
                KeyCode::Char('b') => {
                   if active_menu_item == TopMenuItem::Settings {
-                     g_app.write().unwrap().input_mode = InputMode::Editing;
+                     let mut app = g_app.write().unwrap();
+                     app.input_variable = InputVariable::BoostrapUrl;
+                     app.input_mode = InputMode::Editing;
+                     app.input = String::new();
+                  }
+               },
+               KeyCode::Char('h') => {
+                  if active_menu_item == TopMenuItem::Settings {
+                     let mut app = g_app.write().unwrap();
+                     app.input_variable = InputVariable::Handle;
+                     app.input_mode = InputMode::Editing;
+                     app.input = handle.clone();
+                  }
+               },
+               KeyCode::Char('u') => {
+                  if active_menu_item == TopMenuItem::Settings {
+                     let mut app = g_app.write().unwrap();
+                     app.input_variable = InputVariable::Uid;
+                     app.input_mode = InputMode::Editing;
+                     app.input = "FIXME".to_string();
                   }
                },
 
@@ -214,15 +238,36 @@ pub async fn run(
             }
          },
          InputMode::Editing => {
+
             match key_code  {
                KeyCode::Esc => {
                   g_app.write().unwrap().input_mode = InputMode::Normal;
                   //events.enable_exit_key();
                },
                KeyCode::Enter => {
-                  g_app.write().unwrap().input_mode = InputMode::Normal;
+                  let mut app = g_app.write().unwrap();
+                  app.input_mode = InputMode::Normal;
+                  match app.input_variable {
+                     InputVariable::Handle => {
+                        let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
+                        app.messages.insert(0, format!("Handle entry hash: {}", hash.to_string()));
+                     },
+                     InputVariable::Uid => {
+
+                     },
+                     _ => {},
+                  }
                },
-               _ => {}
+               KeyCode::Char('\n') => {
+                  g_app.write().unwrap().input_mode = InputMode::Normal;
+               }
+               KeyCode::Char(c) => {
+                  g_app.write().unwrap().input.push(c);
+               }
+               KeyCode::Backspace => {
+                  g_app.write().unwrap().input.pop();
+               }
+               _ => {},
             }
          },
       }
@@ -332,6 +377,8 @@ fn render_write(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect)
 ///
 fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
 
+   let app = g_app.read().unwrap();
+
    let settings_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
@@ -371,8 +418,8 @@ fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Re
             .border_type(BorderType::Plain),
       );
 
-   let bottom = Paragraph::new("Input")
-      .alignment(Alignment::Center)
+   let bottom = Paragraph::new(g_app.read().unwrap().input.clone())
+      //.alignment(Alignment::Center)
       .block(
          Block::default()
             .borders(Borders::ALL)
@@ -380,9 +427,25 @@ fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Re
                InputMode::Normal => Style::default(),
                InputMode::Editing => Style::default().fg(Color::Yellow),
             })
-            .title("Input")
+            .title(app.input_variable.to_string())
             .border_type(BorderType::Plain),
       );
+
+
+   match app.input_mode {
+      InputMode::Normal =>
+      // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
+         {}
+      InputMode::Editing => {
+         // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
+         main_rect.set_cursor(
+            // Put cursor past the end of the input text
+            settings_chunks[1].x + app.input.len() as u16 + 1,
+            // Move one line down, from the border to the input line
+            settings_chunks[1].y + 1,
+         )
+      }
+   }
 
    main_rect.render_widget(top, settings_chunks[0]);
    main_rect.render_widget(bottom, settings_chunks[1]);

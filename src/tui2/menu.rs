@@ -1,15 +1,3 @@
-use std::str::FromStr;
-
-use tui::{
-   backend::CrosstermBackend,
-   layout::{Alignment, Constraint, Direction, Layout},
-   style::{Color, Modifier, Style},
-   text::{Span, Spans},
-   widgets::{
-      Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
-   },
-   Terminal,
-};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum TopMenuItem {

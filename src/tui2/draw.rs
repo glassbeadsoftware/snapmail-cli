@@ -1,16 +1,4 @@
-use chrono::prelude::*;
-use crossterm::{
-   event::{self, Event as CEvent, KeyCode},
-   terminal::{disable_raw_mode, enable_raw_mode},
-};
-
-use std::sync::mpsc;
 use std::io;
-use std::thread;
-use std::time::{Duration, Instant};
-use snapmail::mail::*;
-use snapmail::handle::*;
-use std::sync::RwLock;
 
 use tui::{
    Frame,
@@ -22,17 +10,11 @@ use tui::{
       Widget,
       Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
    },
-   Terminal,
 };
 
 use crate::{
-   error::SnapmailError,
    tui2::*,
    tui2::menu::*,
-   app::*,
-   globals::*,
-   holochain::*,
-   conductor::*,
 };
 
 pub fn draw(

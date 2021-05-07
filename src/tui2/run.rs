@@ -1,7 +1,5 @@
-use chrono::prelude::*;
 use crossterm::{
    event::{self, Event as CEvent, KeyCode},
-   terminal::{disable_raw_mode, enable_raw_mode},
 };
 
 use std::sync::mpsc;
@@ -13,13 +11,6 @@ use snapmail::handle::*;
 
 use tui::{
    backend::CrosstermBackend,
-   // layout::{Alignment, Constraint, Direction, Layout, Rect},
-   // style::{Color, Modifier, Style},
-   // text::{Span, Spans},
-   // widgets::{
-   //    Widget,
-   //    Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
-   // },
    Terminal,
 };
 
@@ -28,8 +19,6 @@ use crate::{
    tui2::*,
    tui2::menu::*,
    app::*,
-   app::InputVariable,
-   //app::g_app,
    globals::*,
    holochain::*,
    conductor::*,

@@ -11,7 +11,7 @@ use tui::{
    Terminal,
 };
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum TopMenuItem {
    View,
    Write,

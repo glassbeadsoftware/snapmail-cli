@@ -1,8 +1,18 @@
+use std::str::FromStr;
+use std::string::ToString;
 
+#[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
    Normal,
    Editing,
 }
+
+// impl FromStr for InputMode {
+//    type Err = ();
+//    fn from_str(input: &str) -> Result<EntryKind, Self::Err> {
+//       match input {}
+//    }
+// }
 
 /// App holds the state of the application
 pub struct App {

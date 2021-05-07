@@ -8,6 +8,9 @@ use std::sync::mpsc;
 use std::io;
 use std::thread;
 use std::time::{Duration, Instant};
+use snapmail::mail::*;
+use snapmail::handle::*;
+use std::sync::RwLock;
 
 use tui::{
    Frame,
@@ -16,6 +19,7 @@ use tui::{
    style::{Color, Modifier, Style},
    text::{Span, Spans},
    widgets::{
+      Widget,
       Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
    },
    Terminal,
@@ -31,18 +35,30 @@ use crate::{
    conductor::*,
 };
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum Event<I> {
    Input(I),
    Tick,
 }
 
-///
-pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: String) -> Result<(), Box<dyn std::error::Error>> {
-
-   let _conductor = start_conductor(sid).await;
-
+lazy_static! {
    /// Create default app state
-   let mut app = App::default();
+   static ref g_app: RwLock<App> = RwLock::new(App::default());
+}
+
+///
+pub async fn run(
+   terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+   sid: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+
+   let conductor = start_conductor(sid.clone()).await;
+   let handle = snapmail_get_my_handle(conductor, ())?;
+
+   let path = CONFIG_PATH.as_path().join(sid.clone());
+   let app_filepath = path.join(APP_CONFIG_FILENAME);
+   let uid = std::fs::read_to_string(app_filepath)
+      .expect("Something went wrong reading APP CONFIG file");
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();
@@ -71,13 +87,16 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
    let mut active_menu_item = TopMenuItem::View;
    let mut pet_list_state = ListState::default();
    pet_list_state.select(Some(0));
+   let mut frame_count = 0;
+
    /// Render loop
    loop {
 
       /// Render
-      terminal.draw(|rect| {
+      terminal.draw(|main_rect| {
+         frame_count += 1;
          /// Set vertical layout
-         let size = rect.size();
+         let size = main_rect.size();
          let chunks = Layout::default()
             .direction(Direction::Vertical)
             .margin(1)
@@ -85,6 +104,7 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
                [
                   Constraint::Length(3),
                   Constraint::Min(10),
+                  Constraint::Length(3),
                ]
                   .as_ref(),
             )
@@ -119,19 +139,32 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
                ])
             })
             .collect();
+         let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}", sid, uid, handle, frame_count);
          let tabs = Tabs::new(top_menu)
             .select(active_menu_item.into())
-            .block(Block::default().title("Snapmail v0.0.4 - <network> - <handle>").borders(Borders::ALL))
+            .block(Block::default().title(title).borders(Borders::ALL))
             .style(Style::default().fg(Color::White))
             .highlight_style(Style::default().fg(Color::Yellow))
             .divider(Span::raw("|"));
-         rect.render_widget(tabs, chunks[0]);
+         main_rect.render_widget(tabs, chunks[0]);
+
+         let input_mode = g_app.read().unwrap().input_mode.clone();
+         let feedback = Paragraph::new(input_mode.to_string())
+            .alignment(Alignment::Center)
+            .block(
+               Block::default()
+                  .borders(Borders::ALL)
+                  .style(Style::default().fg(Color::White))
+                  .title("feedback")
+                  .border_type(BorderType::Plain),
+            );
+         main_rect.render_widget(feedback, chunks[2]);
 
          /// Render main block according to active menu item
          match active_menu_item {
-            TopMenuItem::View => rect.render_widget(render_view(), chunks[1]),
-            TopMenuItem::Write => render_write(rect, chunks[1]),
-            TopMenuItem::Settings => rect.render_widget(render_settings(), chunks[1]),
+            TopMenuItem::View => render_view(main_rect, chunks[1]),
+            TopMenuItem::Write => render_write(main_rect, chunks[1]),
+            TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
          }
       })?;
 
@@ -142,13 +175,21 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
             key_event.code
          } else { KeyCode::Null };
 
-      match app.input_mode {
+      let input_mode = g_app.read().unwrap().input_mode.clone();
+      match input_mode {
          InputMode::Normal => {
             match key_code  {
+               KeyCode::Esc => return Ok(()),
                KeyCode::Char('q') => return Ok(()),
                KeyCode::Char('v') => active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => active_menu_item = TopMenuItem::Write,
                KeyCode::Char('s') => active_menu_item = TopMenuItem::Settings,
+               KeyCode::Char('b') => {
+                  if active_menu_item == TopMenuItem::Settings {
+                     g_app.write().unwrap().input_mode = InputMode::Editing;
+                  }
+               },
+
                // KeyCode::Down => {
                //    if let Some(selected) = pet_list_state.selected() {
                //       let amount_pets = read_db().expect("can fetch pet list").len();
@@ -175,9 +216,12 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
          InputMode::Editing => {
             match key_code  {
                KeyCode::Esc => {
-                  app.input_mode = InputMode::Normal;
+                  g_app.write().unwrap().input_mode = InputMode::Normal;
                   //events.enable_exit_key();
-               }
+               },
+               KeyCode::Enter => {
+                  g_app.write().unwrap().input_mode = InputMode::Normal;
+               },
                _ => {}
             }
          },
@@ -185,7 +229,74 @@ pub async fn run(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, sid: Str
    }
 }
 
-fn render_write(rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+
+///
+fn render_view(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+   let top = Paragraph::new("Folder")
+      .alignment(Alignment::Center)
+      .block(
+         Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White))
+            .title("Folder")
+            .border_type(BorderType::Plain),
+      );
+
+   let bottom = Paragraph::new("Mail")
+      .alignment(Alignment::Center)
+      .block(
+         Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White))
+            .title("Mail")
+            .border_type(BorderType::Plain),
+      );
+
+   // let left = Paragraph::new("MailItem")
+   //    .alignment(Alignment::Center)
+   //    .block(
+   //       Block::default()
+   //          .borders(Borders::NONE)
+   //          .style(Style::default().fg(Color::White))
+   //          .title("MailItem")
+   //          .border_type(BorderType::Plain),
+   //    );
+
+   let right = Paragraph::new("Attachments")
+      .alignment(Alignment::Center)
+      .block(
+         Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White))
+            .title("Attachments")
+            .border_type(BorderType::Plain),
+      );
+
+   let vert_chunks = Layout::default()
+      .direction(Direction::Vertical)
+      .constraints(
+         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
+      )
+      .split(area);
+
+   let hori_chunks = Layout::default()
+      .direction(Direction::Horizontal)
+      .constraints(
+         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
+      )
+      .split(vert_chunks[1]);
+
+   main_rect.render_widget(top, vert_chunks[0]);
+   //main_rect.render_widget(bottom, vert_chunks[1]);
+   main_rect.render_widget(bottom, hori_chunks[0]);
+   main_rect.render_widget(right, hori_chunks[1]);
+
+}
+
+
+
+///
+fn render_write(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
    let left = Paragraph::new("Write")
       .alignment(Alignment::Center)
       .block(
@@ -213,14 +324,44 @@ fn render_write(rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
       )
       .split(area);
 
-   rect.render_widget(left, write_chunks[0]);
-   rect.render_widget(right, write_chunks[1]);
+   main_rect.render_widget(left, write_chunks[0]);
+   main_rect.render_widget(right, write_chunks[1]);
    //rect.render_stateful_widget(right, write_chunks[1], &mut pet_list_state);
-
 }
 
-fn render_settings<'a>() -> Paragraph<'a> {
-   Paragraph::new("Settings")
+///
+fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+
+   let settings_chunks = Layout::default()
+      .direction(Direction::Vertical)
+      .constraints(
+         [Constraint::Min(6), Constraint::Length(3)].as_ref(),
+      )
+      .split(area);
+
+   let items = vec!["Handle", "UID", "Proxy URL", "Bootstrap URL"];
+
+   let items: Vec<Spans> = items
+      .iter()
+      .map(|&item| {
+         let (first, rest) = item.split_at(1);
+         let span =
+         Spans::from(vec![
+             Span::styled(
+                first,
+                Style::default()
+                   .fg(Color::Yellow)
+                   .add_modifier(Modifier::UNDERLINED),
+             ),
+             Span::styled(rest, Style::default().fg(Color::White)),
+          ]);
+         //ListItem::new(span)
+         span
+      })
+      .collect();
+
+   //List::new(items)
+   let top = Paragraph::new(items)
       .alignment(Alignment::Center)
       .block(
          Block::default()
@@ -228,32 +369,22 @@ fn render_settings<'a>() -> Paragraph<'a> {
             .style(Style::default().fg(Color::White))
             .title("Settings")
             .border_type(BorderType::Plain),
-      )
-}
+      );
 
-
-///
-fn render_view<'a>() -> Paragraph<'a> {
-   let home = Paragraph::new(vec![
-      Spans::from(vec![Span::raw("")]),
-      Spans::from(vec![Span::raw("Welcome")]),
-      Spans::from(vec![Span::raw("")]),
-      Spans::from(vec![Span::raw("to")]),
-      Spans::from(vec![Span::raw("")]),
-      Spans::from(vec![Span::styled(
-         "snapmail-TUI",
-         Style::default().fg(Color::LightBlue),
-      )]),
-      Spans::from(vec![Span::raw("")]),
-      Spans::from(vec![Span::raw("Press 'v' to access Mails, 'w' to add write a new mail and 's' to change settings.")]),
-   ])
+   let bottom = Paragraph::new("Input")
       .alignment(Alignment::Center)
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
-            .title("View")
+            .style(match g_app.read().unwrap().input_mode {
+               InputMode::Normal => Style::default(),
+               InputMode::Editing => Style::default().fg(Color::Yellow),
+            })
+            .title("Input")
             .border_type(BorderType::Plain),
       );
-   home
+
+   main_rect.render_widget(top, settings_chunks[0]);
+   main_rect.render_widget(bottom, settings_chunks[1]);
+
 }

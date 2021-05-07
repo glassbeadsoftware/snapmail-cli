@@ -1,4 +1,5 @@
 #![allow(unused_doc_comments)]
+#![allow(non_upper_case_globals)]
 
 pub mod error;
 pub mod globals;
@@ -9,6 +10,8 @@ pub mod conductor;
 pub mod tui2;
 pub mod wasm;
 
+#[macro_use]
+extern crate strum_macros;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -64,6 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       for path in paths {
          println!(" - {}", path.unwrap().path().display());
       }
+      return Ok(());
    }
    //let sid = args[1].to_string();
 
@@ -78,6 +82,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
    /// Run TUI app
    let _res = tui2::run(&mut terminal, args[1].clone()).await;
+
+   terminal.clear()?;
 
    /// Shutdown terminal
    disable_raw_mode()?;

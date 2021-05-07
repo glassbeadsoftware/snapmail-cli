@@ -30,6 +30,9 @@ enum Event<I> {
    Tick,
 }
 
+
+
+
 ///
 pub async fn run(
    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
@@ -37,7 +40,7 @@ pub async fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
 
    let conductor = start_conductor(sid.clone()).await;
-   let handle = snapmail_get_my_handle(conductor.clone(), ())?;
+   let chain = pull_source_chain(conductor.clone()).await;
 
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);
@@ -67,7 +70,6 @@ pub async fn run(
    });
 
    /// Set Menu
-
    let mut active_menu_item = TopMenuItem::View;
    let mut frame_count = 0;
 
@@ -76,7 +78,7 @@ pub async fn run(
       frame_count += 1;
       /// Render
       terminal.draw(|main_rect| {
-         draw(main_rect, &sid, uid.clone(), handle.clone(), &mut active_menu_item, frame_count)
+         draw(main_rect, &sid, uid.clone(), chain.my_handle.clone(), &mut active_menu_item, frame_count)
       })?;
 
       /// Check if input received
@@ -110,7 +112,7 @@ pub async fn run(
                      let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::Handle;
                      app.input_mode = InputMode::Editing;
-                     app.input = handle.clone();
+                     app.input = chain.my_handle.clone();
                   }
                },
                KeyCode::Char('u') => {

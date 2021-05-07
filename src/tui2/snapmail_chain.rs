@@ -1,5 +1,3 @@
-//use holo_hash::EntryHash;
-//use holo_hash::AgentPubKey;
 use holochain::conductor::ConductorHandle;
 use holochain_types::dna::*;
 

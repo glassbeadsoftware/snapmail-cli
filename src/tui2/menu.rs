@@ -16,6 +16,25 @@ impl From<TopMenuItem> for usize {
    }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum FolderItem {
+   Inbox,
+   Sent,
+   Trash,
+   All,
+}
+
+impl From<FolderItem> for usize {
+   fn from(input: FolderItem) -> usize {
+      match input {
+         FolderItem::Inbox => 0,
+         FolderItem::Sent => 1,
+         FolderItem::Trash => 2,
+         FolderItem::All => 3,
+      }
+   }
+}
+
 
 #[derive(Copy, Clone, Debug)]
 pub enum WriteMenuItem {

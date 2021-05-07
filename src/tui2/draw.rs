@@ -19,13 +19,16 @@ use crate::{
 
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
+   chain: &SnapmailChain,
+   table: &mut MailTable,
    sid: &str,
    uid: String,
    handle: String,
    active_menu_item: &mut TopMenuItem,
+   folder_item: &mut FolderItem,
    frame_count: u32,
 ) {
-   let menu_titles = vec!["View", "Write", "Settings", "Quit"];
+   let menu_titles = vec!["View", "Write", "Edit Settings", "Quit"];
 
    /// Set vertical layout
    let size = main_rect.size();
@@ -71,6 +74,7 @@ pub fn draw(
          ])
       })
       .collect();
+
    let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}",
                        sid, uid, handle.clone(), frame_count);
    let tabs = Tabs::new(top_menu)
@@ -96,7 +100,7 @@ pub fn draw(
 
    /// Render main block according to active menu item
    match active_menu_item {
-      TopMenuItem::View => render_view(main_rect, chunks[1]),
+      TopMenuItem::View => render_view(main_rect, chunks[1], table, folder_item),
       TopMenuItem::Write => render_write(main_rect, chunks[1]),
       TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
    }
@@ -104,16 +108,83 @@ pub fn draw(
 
 
 ///
-fn render_view(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+fn render_view(
+   main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
+   area: Rect,
+   table: &mut MailTable,
+   folder_item: &mut FolderItem,
+) {
+   /// -- Set top menu
+   let menu_titles = vec!["Inbox", "Sent", "Trash", "All"];
+   let top_menu = menu_titles
+      .iter()
+      .map(|t| {
+         let (first, rest) = t.split_at(1);
+         Spans::from(vec![
+            Span::styled(
+               first,
+               Style::default()
+                  .fg(Color::Yellow)
+                  .add_modifier(Modifier::UNDERLINED),
+            ),
+            Span::styled(rest, Style::default().fg(Color::White)),
+         ])
+      })
+      .collect();
+   let tabs = Tabs::new(top_menu)
+      .select(folder_item.to_owned().into())
+      .block(Block::default().title("Folder").borders(Borders::ALL))
+      .style(Style::default().fg(Color::White))
+      .highlight_style(Style::default().fg(Color::Yellow))
+      .divider(Span::raw("|"));
+
+   /// -- Set Mail Table
+
+   let selected_style = Style::default().add_modifier(Modifier::REVERSED);
+   let normal_style = Style::default().bg(Color::Blue);
+
+   let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
+      .iter()
+      .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
+   let header = Row::new(header_cells)
+      .style(normal_style)
+      .height(1)
+      .bottom_margin(1);
+
+   let rows = table.items.iter().map(|item| {
+      let height = item
+         .iter()
+         .map(|content| content.chars().filter(|c| *c == '\n').count())
+         .max()
+         .unwrap_or(0)
+         + 1;
+      let cells = item.iter().map(|c| Cell::from(*c));
+      Row::new(cells).height(height as u16).bottom_margin(1)
+   });
+   let t = Table::new(rows)
+      .header(header)
+      .block(Block::default().borders(Borders::ALL).title("Table"))
+      .highlight_style(selected_style)
+      .highlight_symbol(">> ")
+      .widths(&[
+         Constraint::Percentage(50),
+         Constraint::Length(30),
+         Constraint::Max(10),
+      ]);
+   //f.render_stateful_widget(t, rects[0], &mut table.state);
+
    let top = Paragraph::new("Folder")
       .alignment(Alignment::Center)
       .block(
          Block::default()
             .borders(Borders::ALL)
             .style(Style::default().fg(Color::White))
-            .title("Folder")
+            .title("")
             .border_type(BorderType::Plain),
       );
+
+
+   /// -- Draw selected mail
 
    let bottom = Paragraph::new("Mail")
       .alignment(Alignment::Center)
@@ -148,7 +219,11 @@ fn render_view(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) 
    let vert_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
-         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
+         [
+            Constraint::Length(3),
+            Constraint::Percentage(66),
+            Constraint::Percentage(34),
+         ].as_ref(),
       )
       .split(area);
 
@@ -157,9 +232,10 @@ fn render_view(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) 
       .constraints(
          [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
       )
-      .split(vert_chunks[1]);
+      .split(vert_chunks[2]);
 
-   main_rect.render_widget(top, vert_chunks[0]);
+   main_rect.render_widget(tabs, vert_chunks[0]);
+   main_rect.render_widget(top, vert_chunks[1]);
    //main_rect.render_widget(bottom, vert_chunks[1]);
    main_rect.render_widget(bottom, hori_chunks[0]);
    main_rect.render_widget(right, hori_chunks[1]);

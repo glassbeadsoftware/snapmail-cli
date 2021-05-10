@@ -33,23 +33,44 @@ enum Event<I> {
 }
 
 
+pub struct UiState {
+   pub frame_count: u32,
+   pub sid: String,
+   pub uid: String,
+   pub active_menu_item: TopMenuItem,
+   pub folder_item: FolderItem,
+   pub mail_table: MailTable,
+   pub contacts_table: ContactsTable,
+}
+
 
 ///
 pub async fn run(
    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
    sid: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
+   /// - Startup holochain
    let conductor = start_conductor(sid.clone()).await;
    let chain = pull_source_chain(conductor.clone()).await;
-   let mail_list = filter_chain(&chain, FolderItem::Inbox);
-   let mut mail_table = MailTable::new(mail_list, &chain.handle_map);
-   let mut contacts_table = ContactsTable::new(&chain.handle_map);
    terminal.clear()?;
-
+   /// - Get UID
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);
-   let mut uid = std::fs::read_to_string(app_filepath)
+   let uid = std::fs::read_to_string(app_filepath)
       .expect("Something went wrong reading APP CONFIG file");
+   /// - Setup UI
+   let mail_list = filter_chain(&chain, FolderItem::Inbox);
+   let mail_table = MailTable::new(mail_list, &chain.handle_map);
+   let contacts_table = ContactsTable::new(&chain.handle_map);
+   let mut ui = UiState {
+      frame_count: 0,
+      sid,
+      uid,
+      active_menu_item: TopMenuItem::View,
+      folder_item: FolderItem::Inbox,
+      mail_table,
+      contacts_table,
+   };
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();
@@ -73,28 +94,13 @@ pub async fn run(
       }
    });
 
-   /// Set Menu
-   let mut active_menu_item = TopMenuItem::View;
-   let mut folder_item = FolderItem::Inbox;
-   let mut frame_count = 0;
 
    /// Render loop
    loop {
-      frame_count += 1;
+      ui.frame_count += 1;
       /// Render
       terminal.draw(|main_rect| {
-         draw(
-            main_rect,
-            &chain,
-            &mut mail_table,
-            &mut contacts_table,
-            &sid,
-            uid.clone(),
-            chain.my_handle.clone(),
-            &mut active_menu_item,
-            &mut folder_item,
-            frame_count,
-         )
+         draw(main_rect, &chain, &mut ui);
       })?;
 
       /// Check if input received
@@ -112,42 +118,42 @@ pub async fn run(
                KeyCode::Esc => return Ok(()),
                /// Top Menu
                KeyCode::Char('q') => return Ok(()),
-               KeyCode::Char('v') => active_menu_item = TopMenuItem::View,
-               KeyCode::Char('w') => active_menu_item = TopMenuItem::Write,
-               KeyCode::Char('e') => active_menu_item = TopMenuItem::Settings,
+               KeyCode::Char('v') => ui.active_menu_item = TopMenuItem::View,
+               KeyCode::Char('w') => ui.active_menu_item = TopMenuItem::Write,
+               KeyCode::Char('e') => ui.active_menu_item = TopMenuItem::Settings,
 
                KeyCode::Char('i') => {
-                  if active_menu_item == TopMenuItem::View {
-                     folder_item = FolderItem::Inbox;
-                     let mail_list = filter_chain(&chain, folder_item);
-                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  if ui.active_menu_item == TopMenuItem::View {
+                     ui.folder_item = FolderItem::Inbox;
+                     let mail_list = filter_chain(&chain, ui.folder_item);
+                     ui.mail_table = MailTable::new(mail_list, &chain.handle_map);
                   }
                },
                KeyCode::Char('s') => {
-                  if active_menu_item == TopMenuItem::View {
-                     folder_item = FolderItem::Sent;
-                     let mail_list = filter_chain(&chain, folder_item);
-                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  if ui.active_menu_item == TopMenuItem::View {
+                     ui.folder_item = FolderItem::Sent;
+                     let mail_list = filter_chain(&chain, ui.folder_item);
+                     ui.mail_table = MailTable::new(mail_list, &chain.handle_map);
                   }
                },
                KeyCode::Char('t') => {
-                  if active_menu_item == TopMenuItem::View {
-                     folder_item = FolderItem::Trash;
-                     let mail_list = filter_chain(&chain, folder_item);
-                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  if ui.active_menu_item == TopMenuItem::View {
+                     ui.folder_item = FolderItem::Trash;
+                     let mail_list = filter_chain(&chain, ui.folder_item);
+                     ui.mail_table = MailTable::new(mail_list, &chain.handle_map);
                   }
                },
                KeyCode::Char('a') => {
-                  if active_menu_item == TopMenuItem::View {
-                     folder_item = FolderItem::All;
-                     let mail_list = filter_chain(&chain, folder_item);
-                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  if ui.active_menu_item == TopMenuItem::View {
+                     ui.folder_item = FolderItem::All;
+                     let mail_list = filter_chain(&chain, ui.folder_item);
+                     ui.mail_table = MailTable::new(mail_list, &chain.handle_map);
                   }
                },
 
                /// Settings Menu
                KeyCode::Char('b') => {
-                  if active_menu_item == TopMenuItem::Settings {
+                  if ui.active_menu_item == TopMenuItem::Settings {
                      let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::BoostrapUrl;
                      app.input_mode = InputMode::Editing;
@@ -155,7 +161,7 @@ pub async fn run(
                   }
                },
                KeyCode::Char('h') => {
-                  if active_menu_item == TopMenuItem::Settings {
+                  if ui.active_menu_item == TopMenuItem::Settings {
                      let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::Handle;
                      app.input_mode = InputMode::Editing;
@@ -163,36 +169,36 @@ pub async fn run(
                   }
                },
                KeyCode::Char('u') => {
-                  if active_menu_item == TopMenuItem::Settings {
+                  if ui.active_menu_item == TopMenuItem::Settings {
                      let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::Uid;
                      app.input_mode = InputMode::Editing;
-                     app.input = uid.clone();
+                     app.input = ui.uid.clone();
                   }
                },
                KeyCode::Down => {
-                  if active_menu_item == TopMenuItem::View {
+                  if ui.active_menu_item == TopMenuItem::View {
                      g_app.write().unwrap().messages.insert(0, "MailTable NEXT".to_string());
-                     mail_table.next();
+                     ui.mail_table.next();
                   }
-                  if active_menu_item == TopMenuItem::Write {
+                  if ui.active_menu_item == TopMenuItem::Write {
                      g_app.write().unwrap().messages.insert(0, "ContactsTable NEXT".to_string());
-                     contacts_table.next();
+                     ui.contacts_table.next();
                   }
                }
                KeyCode::Up => {
-                  if active_menu_item == TopMenuItem::View {
+                  if ui.active_menu_item == TopMenuItem::View {
                      g_app.write().unwrap().messages.insert(0, "MailTable PREVIOUS".to_string());
-                     mail_table.previous();
+                     ui.mail_table.previous();
                   }
-                  if active_menu_item == TopMenuItem::Write {
+                  if ui.active_menu_item == TopMenuItem::Write {
                      g_app.write().unwrap().messages.insert(0, "ContactsTable PREVIOUS".to_string());
-                     contacts_table.previous();
+                     ui.contacts_table.previous();
                   }
                }
                KeyCode::Enter => {
-                  if active_menu_item == TopMenuItem::Write {
-                     contacts_table.toggle_selected();
+                  if ui.active_menu_item == TopMenuItem::Write {
+                     ui.contacts_table.toggle_selected();
                   }
                }
                _ => {}
@@ -214,10 +220,10 @@ pub async fn run(
                         app.messages.insert(0, format!("Handle entry hash: {}", hash.to_string()));
                      },
                      InputVariable::Uid => {
-                        uid = app.input.clone();
-                        let config_path = Path::new(&*CONFIG_PATH).join(sid.clone());
+                        ui.uid = app.input.clone();
+                        let config_path = Path::new(&*CONFIG_PATH).join(ui.sid.clone());
                         let app_filepath = config_path.join(APP_CONFIG_FILENAME);
-                        std::fs::write(app_filepath, uid.as_bytes()).unwrap();
+                        std::fs::write(app_filepath, ui.uid.as_bytes()).unwrap();
                         // Must restart conductor
                         return Ok(());
                      },

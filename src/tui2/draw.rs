@@ -20,14 +20,7 @@ use crate::{
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    chain: &SnapmailChain,
-   mail_table: &mut MailTable,
-   contacts_table: &mut ContactsTable,
-   sid: &str,
-   uid: String,
-   handle: String,
-   active_menu_item: &mut TopMenuItem,
-   folder_item: &mut FolderItem,
-   frame_count: u32,
+   ui: &mut UiState,
 ) {
    let menu_titles = vec!["View", "Write", "Edit Settings", "Quit"];
 
@@ -63,9 +56,9 @@ pub fn draw(
       .collect();
 
    let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}",
-                       sid, uid, handle.clone(), frame_count);
+                       ui.sid, ui.uid, chain.my_handle.clone(), ui.frame_count);
    let tabs = Tabs::new(top_menu)
-      .select(active_menu_item.to_owned().into())
+      .select(ui.active_menu_item.to_owned().into())
       .block(Block::default().title(title).borders(Borders::ALL))
       .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
@@ -86,9 +79,9 @@ pub fn draw(
    main_rect.render_widget(feedback, chunks[2]);
 
    /// Render main block according to active menu item
-   match active_menu_item {
-      TopMenuItem::View => render_view(chain, main_rect, chunks[1], mail_table, folder_item),
-      TopMenuItem::Write => render_write(chain, main_rect, chunks[1], contacts_table),
+   match ui.active_menu_item {
+      TopMenuItem::View => render_view(chain, main_rect, chunks[1], &mut ui.mail_table, &mut ui.folder_item),
+      TopMenuItem::Write => render_write(chain, main_rect, chunks[1], &mut ui.contacts_table),
       TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
    }
 }

@@ -99,10 +99,11 @@ pub async fn run(
       let event = rx.recv()?;
       let key_code =
          if let Event::Input(key_event) = event {
+            g_app.write().unwrap().messages.insert(0, format!("Key pressed: {:?}", key_event.code));
             key_event.code
          } else { KeyCode::Null };
-
       let input_mode = g_app.read().unwrap().input_mode.clone();
+
       match input_mode {
          InputMode::Normal => {
             match key_code  {
@@ -113,10 +114,34 @@ pub async fn run(
                KeyCode::Char('w') => active_menu_item = TopMenuItem::Write,
                KeyCode::Char('e') => active_menu_item = TopMenuItem::Settings,
 
-               KeyCode::Char('i') => folder_item = FolderItem::Inbox,
-               KeyCode::Char('s') => folder_item = FolderItem::Sent,
-               KeyCode::Char('t') => folder_item = FolderItem::Trash,
-               KeyCode::Char('a') => folder_item = FolderItem::All,
+               KeyCode::Char('i') => {
+                  if active_menu_item == TopMenuItem::View {
+                     folder_item = FolderItem::Inbox;
+                     let mail_list = filter_chain(&chain, folder_item);
+                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  }
+               },
+               KeyCode::Char('s') => {
+                  if active_menu_item == TopMenuItem::View {
+                     folder_item = FolderItem::Sent;
+                     let mail_list = filter_chain(&chain, folder_item);
+                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  }
+               },
+               KeyCode::Char('t') => {
+                  if active_menu_item == TopMenuItem::View {
+                     folder_item = FolderItem::Trash;
+                     let mail_list = filter_chain(&chain, folder_item);
+                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  }
+               },
+               KeyCode::Char('a') => {
+                  if active_menu_item == TopMenuItem::View {
+                     folder_item = FolderItem::All;
+                     let mail_list = filter_chain(&chain, folder_item);
+                     mail_table = MailTable::new(mail_list, &chain.handle_map);
+                  }
+               },
 
                /// Settings Menu
                KeyCode::Char('b') => {
@@ -143,7 +168,18 @@ pub async fn run(
                      app.input = uid.clone();
                   }
                },
-
+               KeyCode::Down => {
+                  if active_menu_item == TopMenuItem::View {
+                     g_app.write().unwrap().messages.insert(0, "MailTable NEXT".to_string());
+                     mail_table.next();
+                  }
+               }
+               KeyCode::Up => {
+                  if active_menu_item == TopMenuItem::View {
+                     g_app.write().unwrap().messages.insert(0, "MailTable PREVIOUS".to_string());
+                     mail_table.previous();
+                  }
+               }
                // KeyCode::Down => {
                //    if let Some(selected) = pet_list_state.selected() {
                //       let amount_pets = read_db().expect("can fetch pet list").len();

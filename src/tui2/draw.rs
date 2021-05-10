@@ -40,23 +40,9 @@ pub fn draw(
             Constraint::Length(3),
             Constraint::Min(10),
             Constraint::Length(3),
-         ]
-            .as_ref(),
+         ].as_ref(),
       )
       .split(size);
-
-   // let mail = Paragraph::new("")
-   //    .style(Style::default().fg(Color::LightCyan))
-   //    .alignment(Alignment::Center)
-   //    .block(
-   //       Block::default()
-   //          .borders(Borders::ALL)
-   //          .style(Style::default().fg(Color::White))
-   //          .title("")
-   //          //.borders(Borders::NONE),
-   //          .border_type(BorderType::Double),
-   //    );
-   // rect.render_widget(mail, chunks[2]);
 
    /// Set top menu
    let top_menu = menu_titles
@@ -139,18 +125,17 @@ fn render_view(
       .divider(Span::raw("|"));
 
    /// -- Set Mail Table
-
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
-   let normal_style = Style::default().bg(Color::Blue);
+   let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);
 
    //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
-   let header_cells = ["Status", "Sender", "Subject", "Date"]
+   let header_cells = ["", "Sender", "Subject", "Message", "Date"]
       .iter()
       .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
    let header = Row::new(header_cells)
       .style(normal_style)
       .height(1)
-      .bottom_margin(1);
+      .bottom_margin(0);
 
    let rows = mail_table.items.iter().map(|item| {
       let height = item
@@ -160,30 +145,21 @@ fn render_view(
          .unwrap_or(0)
          + 1;
       let cells = item.iter().map(|c| Cell::from(c.as_str()));
-      Row::new(cells).height(height as u16).bottom_margin(1)
+      Row::new(cells).height(height as u16).bottom_margin(0)
    });
    let table = Table::new(rows)
       .header(header)
       .block(Block::default().borders(Borders::NONE).title(""))
       .highlight_style(selected_style)
-      .highlight_symbol(">> ")
+      //.highlight_symbol(">> ")
       .widths(&[
          //Constraint::Min(10),
-         Constraint::Length(6),
-         Constraint::Min(16),
+         Constraint::Length(4),
+         Constraint::Length(20),
+         Constraint::Length(28),
+         Constraint::Length(12),
          Constraint::Length(16),
-         Constraint::Min(6),
       ]);
-
-   // let top = Paragraph::new("Folder")
-   //    .alignment(Alignment::Center)
-   //    .block(
-   //       Block::default()
-   //          .borders(Borders::ALL)
-   //          .style(Style::default().fg(Color::White))
-   //          .title("")
-   //          .border_type(BorderType::Plain),
-   //    );
 
 
    /// -- Draw selected mail
@@ -197,16 +173,6 @@ fn render_view(
             .title("Mail")
             .border_type(BorderType::Plain),
       );
-
-   // let left = Paragraph::new("MailItem")
-   //    .alignment(Alignment::Center)
-   //    .block(
-   //       Block::default()
-   //          .borders(Borders::NONE)
-   //          .style(Style::default().fg(Color::White))
-   //          .title("MailItem")
-   //          .border_type(BorderType::Plain),
-   //    );
 
    let right = Paragraph::new("Attachments")
       .alignment(Alignment::Center)
@@ -237,7 +203,7 @@ fn render_view(
       .split(vert_chunks[2]);
 
    main_rect.render_widget(tabs, vert_chunks[0]);
-   main_rect.render_widget(table, vert_chunks[1]);
+   main_rect.render_stateful_widget(table, vert_chunks[1], &mut mail_table.state);
    //main_rect.render_widget(top, vert_chunks[1]);
    main_rect.render_widget(bottom, hori_chunks[0]);
    main_rect.render_widget(right, hori_chunks[1]);

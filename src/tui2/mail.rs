@@ -14,15 +14,25 @@ impl MailTable {
    pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable {
       let items: Vec<Vec<String>> = mails.iter().map(|mail| {
          let mut row: Vec<String> = Vec::new();
-         //row.push(format!("{}", mail.address));
-         row.push(get_status_string(mail));
+         let status = get_status_string(mail);
          let username = get_username(mail, handle_map.clone());
-         row.push(username);
-         row.push(mail.mail.subject.clone());
+         let subject: String = if mail.mail.payload.len() > 28 {
+            let base = mail.mail.subject[0..25].to_string();
+            base + "..."
+         } else { mail.mail.subject.clone() };
+         let message: String = if mail.mail.payload.len() > 12 {
+            let base = mail.mail.payload[0..9].to_string();
+            base + "..."
+         } else { mail.mail.payload.clone() };
          let date: DateTime<Local> = Local.timestamp(mail.mail.date_sent as i64, 0);
          let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
+
+         //row.push(format!("{}", mail.address));
+         row.push(status);
+         row.push(username);
+         row.push(subject);
+         row.push(message);
          row.push(date_str);
-         //let status = format!("");
          row
 
       }).collect();

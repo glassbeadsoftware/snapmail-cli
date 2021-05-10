@@ -43,6 +43,7 @@ pub async fn run(
    let chain = pull_source_chain(conductor.clone()).await;
    let mail_list = filter_chain(&chain, FolderItem::Inbox);
    let mut mail_table = MailTable::new(mail_list, &chain.handle_map);
+   let mut contacts_table = ContactsTable::new(&chain.handle_map);
    terminal.clear()?;
 
    let path = CONFIG_PATH.as_path().join(sid.clone());
@@ -86,6 +87,7 @@ pub async fn run(
             main_rect,
             &chain,
             &mut mail_table,
+            &mut contacts_table,
             &sid,
             uid.clone(),
             chain.my_handle.clone(),
@@ -173,33 +175,26 @@ pub async fn run(
                      g_app.write().unwrap().messages.insert(0, "MailTable NEXT".to_string());
                      mail_table.next();
                   }
+                  if active_menu_item == TopMenuItem::Write {
+                     g_app.write().unwrap().messages.insert(0, "ContactsTable NEXT".to_string());
+                     contacts_table.next();
+                  }
                }
                KeyCode::Up => {
                   if active_menu_item == TopMenuItem::View {
                      g_app.write().unwrap().messages.insert(0, "MailTable PREVIOUS".to_string());
                      mail_table.previous();
                   }
+                  if active_menu_item == TopMenuItem::Write {
+                     g_app.write().unwrap().messages.insert(0, "ContactsTable PREVIOUS".to_string());
+                     contacts_table.previous();
+                  }
                }
-               // KeyCode::Down => {
-               //    if let Some(selected) = pet_list_state.selected() {
-               //       let amount_pets = read_db().expect("can fetch pet list").len();
-               //       if selected >= amount_pets - 1 {
-               //          pet_list_state.select(Some(0));
-               //       } else {
-               //          pet_list_state.select(Some(selected + 1));
-               //       }
-               //    }
-               // }
-               // KeyCode::Up => {
-               //    if let Some(selected) = pet_list_state.selected() {
-               //       let amount_pets = read_db().expect("can fetch pet list").len();
-               //       if selected > 0 {
-               //          pet_list_state.select(Some(selected - 1));
-               //       } else {
-               //          pet_list_state.select(Some(amount_pets - 1));
-               //       }
-               //    }
-               // }
+               KeyCode::Enter => {
+                  if active_menu_item == TopMenuItem::Write {
+                     contacts_table.toggle_selected();
+                  }
+               }
                _ => {}
             }
          },

@@ -20,7 +20,8 @@ use crate::{
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    chain: &SnapmailChain,
-   table: &mut MailTable,
+   mail_table: &mut MailTable,
+   contacts_table: &mut ContactsTable,
    sid: &str,
    uid: String,
    handle: String,
@@ -34,7 +35,7 @@ pub fn draw(
    let size = main_rect.size();
    let chunks = Layout::default()
       .direction(Direction::Vertical)
-      .margin(1)
+      .margin(0)// FIXME
       .constraints(
          [
             Constraint::Length(3),
@@ -86,8 +87,8 @@ pub fn draw(
 
    /// Render main block according to active menu item
    match active_menu_item {
-      TopMenuItem::View => render_view(chain, main_rect, chunks[1], table, folder_item),
-      TopMenuItem::Write => render_write(main_rect, chunks[1]),
+      TopMenuItem::View => render_view(chain, main_rect, chunks[1], mail_table, folder_item),
+      TopMenuItem::Write => render_write(chain, main_rect, chunks[1], contacts_table),
       TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
    }
 }
@@ -163,7 +164,7 @@ fn render_view(
       ]);
 
 
-   /// -- Draw selected mail.
+   /// -- Draw selected mail
    let mail_txt = if let Some(index) = mail_table.state.selected() {
       mail_table.get_mail_text(index, &chain)
    } else {
@@ -190,7 +191,6 @@ fn render_view(
       );
 
    /// - Layout and render
-
    let vert_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
@@ -220,7 +220,12 @@ fn render_view(
 
 
 ///
-fn render_write(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+fn render_write(
+   chain: &SnapmailChain,
+   main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
+   area: Rect,
+   contacts_table: &mut ContactsTable,
+) {
    let left = Paragraph::new("Write")
       .alignment(Alignment::Center)
       .block(
@@ -231,26 +236,62 @@ fn render_write(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect)
             .border_type(BorderType::Plain),
       );
 
-   let right = Paragraph::new("Users")
-      .alignment(Alignment::Center)
-      .block(
-         Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
-            .title("Users")
-            .border_type(BorderType::Plain),
-      );
+   /// -- Set Mail Table
 
+   // let right = Paragraph::new("Contacts")
+   //    .alignment(Alignment::Center)
+   //    .block(
+   //       Block::default()
+   //          .borders(Borders::ALL)
+   //          .style(Style::default().fg(Color::White))
+   //          .title("Users")
+   //          .border_type(BorderType::Plain),
+   //    );
+
+   let selected_style = Style::default().add_modifier(Modifier::REVERSED);
+   //let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);
+
+   //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
+   // let header_cells = ["", "From", "Subject", "Message", "Date"]
+   //    .iter()
+   //    .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
+   // let header = Row::new(header_cells)
+   //    .style(normal_style)
+   //    .height(1)
+   //    .bottom_margin(0);
+
+   let rows = contacts_table.items.iter().map(|item| {
+      let height = item
+         .iter()
+         .map(|content| content.chars().filter(|c| *c == '\n').count())
+         .max()
+         .unwrap_or(0)
+         + 1;
+      let cells = item.iter().map(|c| Cell::from(c.as_str()));
+      Row::new(cells).height(height as u16).bottom_margin(0)//.horizontal_margin(2)
+   });
+   let table = Table::new(rows)
+      //.header(header)
+      .block(Block::default().borders(Borders::ALL).title("Contacts"))
+      .highlight_style(selected_style)
+      //.highlight_symbol(">> ")
+      .widths(&[
+         //Constraint::Min(10),
+         Constraint::Length(5),
+         Constraint::Length(20),
+      ]);
+
+   /// - Layout Render
    let write_chunks = Layout::default()
       .direction(Direction::Horizontal)
       .constraints(
-         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
+         [Constraint::Percentage(75), Constraint::Percentage(25)].as_ref(),
       )
       .split(area);
 
    main_rect.render_widget(left, write_chunks[0]);
-   main_rect.render_widget(right, write_chunks[1]);
-   //rect.render_stateful_widget(right, write_chunks[1], &mut pet_list_state);
+   //main_rect.render_widget(right, write_chunks[1]);
+   main_rect.render_stateful_widget(table, write_chunks[1], &mut contacts_table.state);
 }
 
 ///

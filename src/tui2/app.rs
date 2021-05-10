@@ -1,5 +1,14 @@
 use std::string::ToString;
 use std::sync::RwLock;
+use crate::{
+   globals::*,
+   tui2::{
+      menu::*, MailTable, ContactsTable, SnapmailChain,
+   }
+};
+use snapmail::mail::*;
+use snapmail::mail::entries::*;
+
 
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
@@ -27,21 +36,89 @@ pub struct App {
    pub input_variable: InputVariable,
    /// History of recorded messages
    pub messages: Vec<String>,
+
+   pub sid: String,
+   pub uid: String,
+   pub active_menu_item: TopMenuItem,
+   pub active_folder_item: FolderItem,
+   pub mail_table: MailTable,
+   pub contacts_table: ContactsTable,
+
+   /// Debug
+   pub frame_count: u32,
 }
 
-impl Default for App {
-   fn default() -> App {
+impl App {
+   pub fn new(sid: String, chain: &SnapmailChain) -> App {
+
+      let mail_list = filter_chain(&chain, FolderItem::Inbox);
+      let mail_table = MailTable::new(mail_list, &chain.handle_map);
+      let contacts_table = ContactsTable::new(&chain.handle_map);
+
+      /// - Get UID
+      let path = CONFIG_PATH.as_path().join(sid.clone());
+      let app_filepath = path.join(APP_CONFIG_FILENAME);
+      let uid = std::fs::read_to_string(app_filepath)
+         .expect("Something went wrong reading APP CONFIG file");
 
       App {
          input: String::new(),
          input_mode: InputMode::Normal,
          input_variable: InputVariable::Mail,
          messages: vec!["Welcome to Snapmail".to_string()],
+
+         frame_count: 0,
+         active_menu_item: TopMenuItem::View,
+         active_folder_item: FolderItem::Inbox,
+         sid,
+         uid,
+         mail_table,
+         contacts_table,
+
       }
    }
 }
 
-// lazy_static! {
-//    /// Create default app state
-//    pub static ref g_app: RwLock<App> = RwLock::new(App::default());
-// }
+
+///
+pub fn filter_chain(chain: &SnapmailChain, folder: FolderItem) -> Vec<MailItem> {
+   let mut res = Vec::new();
+   match folder {
+      FolderItem::Inbox => {
+         for item in chain.mail_map.values() {
+            if let MailState::In(_) = item.state {
+               res.push(item.clone());
+            }
+         }
+      }
+      FolderItem::Sent => {
+         for item in chain.mail_map.values() {
+            if let MailState::Out(_) = item.state {
+               res.push(item.clone());
+            }
+         }
+      }
+      FolderItem::All => {
+         for item in chain.mail_map.values() {
+            res.push(item.clone());
+         }
+      }
+      FolderItem::Trash => {
+         for item in chain.mail_map.values() {
+            match &item.state {
+               MailState::Out(state) => {
+                  if let OutMailState::Deleted = state {
+                     res.push(item.clone());
+                  }
+               }
+               MailState::In(state) => {
+                  if let InMailState::Deleted = state {
+                     res.push(item.clone());
+                  }
+               }
+            }
+         }
+      }
+   }
+   res
+}

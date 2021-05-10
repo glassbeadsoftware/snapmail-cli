@@ -20,8 +20,7 @@ use crate::{
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    chain: &SnapmailChain,
-   ui: &mut UiState,
-   app: &App,
+   app: &mut App,
 ) {
    let menu_titles = vec!["View", "Write", "Edit Settings", "Quit"];
 
@@ -57,9 +56,9 @@ pub fn draw(
       .collect();
 
    let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}",
-                       ui.sid, ui.uid, chain.my_handle.clone(), ui.frame_count);
+                       app.sid, app.uid, chain.my_handle.clone(), app.frame_count);
    let tabs = Tabs::new(top_menu)
-      .select(ui.active_menu_item.to_owned().into())
+      .select(app.active_menu_item.to_owned().into())
       .block(Block::default().title(title).borders(Borders::ALL))
       .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
@@ -80,9 +79,9 @@ pub fn draw(
    main_rect.render_widget(feedback, chunks[2]);
 
    /// Render main block according to active menu item
-   match ui.active_menu_item {
-      TopMenuItem::View => render_view(chain, main_rect, chunks[1], &mut ui.mail_table, &mut ui.folder_item),
-      TopMenuItem::Write => render_write(chain, main_rect, chunks[1], &mut ui.contacts_table),
+   match app.active_menu_item {
+      TopMenuItem::View => render_view(chain, main_rect, chunks[1], &mut app.mail_table, &mut app.active_folder_item),
+      TopMenuItem::Write => render_write(chain, main_rect, chunks[1], &mut app.contacts_table),
       TopMenuItem::Settings => render_settings(app, main_rect, chunks[1]),
    }
 }
@@ -94,7 +93,7 @@ fn render_view(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    area: Rect,
    mail_table: &mut MailTable,
-   folder_item: &mut FolderItem,
+   active_folder_item: &mut FolderItem,
 ) {
    /// -- Set top menu
    let menu_titles = vec!["Inbox", "Sent", "Trash", "All"];
@@ -114,7 +113,7 @@ fn render_view(
       })
       .collect();
    let tabs = Tabs::new(top_menu)
-      .select(folder_item.to_owned().into())
+      .select(active_folder_item.to_owned().into())
       .block(Block::default().title("Filebox").borders(Borders::ALL))
       .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))

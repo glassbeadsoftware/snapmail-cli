@@ -41,7 +41,7 @@ impl Default for App {
    }
 }
 
-lazy_static! {
-   /// Create default app state
-   pub static ref g_app: RwLock<App> = RwLock::new(App::default());
-}
+// lazy_static! {
+//    /// Create default app state
+//    pub static ref g_app: RwLock<App> = RwLock::new(App::default());
+// }

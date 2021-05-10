@@ -21,6 +21,7 @@ pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    chain: &SnapmailChain,
    ui: &mut UiState,
+   app: &App,
 ) {
    let menu_titles = vec!["View", "Write", "Edit Settings", "Quit"];
 
@@ -65,7 +66,7 @@ pub fn draw(
       .divider(Span::raw("|"));
    main_rect.render_widget(tabs, chunks[0]);
 
-   let app = g_app.read().unwrap();
+   //let app = g_app.read().unwrap();
    //let input_mode = app.input_mode.clone();
    let feedback = Paragraph::new(app.messages[0].clone())
       .alignment(Alignment::Center)
@@ -82,7 +83,7 @@ pub fn draw(
    match ui.active_menu_item {
       TopMenuItem::View => render_view(chain, main_rect, chunks[1], &mut ui.mail_table, &mut ui.folder_item),
       TopMenuItem::Write => render_write(chain, main_rect, chunks[1], &mut ui.contacts_table),
-      TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
+      TopMenuItem::Settings => render_settings(app, main_rect, chunks[1]),
    }
 }
 
@@ -288,9 +289,9 @@ fn render_write(
 }
 
 ///
-fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+fn render_settings(app: &App, main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
 
-   let app = g_app.read().unwrap();
+   //let app = g_app.read().unwrap();
 
    let settings_chunks = Layout::default()
       .direction(Direction::Vertical)
@@ -331,12 +332,11 @@ fn render_settings(main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Re
             .border_type(BorderType::Plain),
       );
 
-   let bottom = Paragraph::new(g_app.read().unwrap().input.clone())
-      //.alignment(Alignment::Center)
+   let bottom = Paragraph::new(app.input.clone())
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(match g_app.read().unwrap().input_mode {
+            .style(match app.input_mode {
                InputMode::Normal => Style::default(),
                InputMode::Editing => Style::default().fg(Color::Yellow),
             })

@@ -71,6 +71,7 @@ pub async fn run(
       mail_table,
       contacts_table,
    };
+   let mut app = App::default();
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();
@@ -100,17 +101,17 @@ pub async fn run(
       ui.frame_count += 1;
       /// Render
       terminal.draw(|main_rect| {
-         draw(main_rect, &chain, &mut ui);
+         draw(main_rect, &chain, &mut ui, &app);
       })?;
 
       /// Check if input received
       let event = rx.recv()?;
       let key_code =
          if let Event::Input(key_event) = event {
-            g_app.write().unwrap().messages.insert(0, format!("Key pressed: {:?}", key_event.code));
+            app.messages.insert(0, format!("Key pressed: {:?}", key_event.code));
             key_event.code
          } else { KeyCode::Null };
-      let input_mode = g_app.read().unwrap().input_mode.clone();
+      let input_mode = app.input_mode.clone();
 
       match input_mode {
          InputMode::Normal => {
@@ -154,7 +155,6 @@ pub async fn run(
                /// Settings Menu
                KeyCode::Char('b') => {
                   if ui.active_menu_item == TopMenuItem::Settings {
-                     let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::BoostrapUrl;
                      app.input_mode = InputMode::Editing;
                      app.input = String::new();
@@ -162,7 +162,6 @@ pub async fn run(
                },
                KeyCode::Char('h') => {
                   if ui.active_menu_item == TopMenuItem::Settings {
-                     let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::Handle;
                      app.input_mode = InputMode::Editing;
                      app.input = chain.my_handle.clone();
@@ -170,7 +169,6 @@ pub async fn run(
                },
                KeyCode::Char('u') => {
                   if ui.active_menu_item == TopMenuItem::Settings {
-                     let mut app = g_app.write().unwrap();
                      app.input_variable = InputVariable::Uid;
                      app.input_mode = InputMode::Editing;
                      app.input = ui.uid.clone();
@@ -178,21 +176,21 @@ pub async fn run(
                },
                KeyCode::Down => {
                   if ui.active_menu_item == TopMenuItem::View {
-                     g_app.write().unwrap().messages.insert(0, "MailTable NEXT".to_string());
+                     app.messages.insert(0, "MailTable NEXT".to_string());
                      ui.mail_table.next();
                   }
                   if ui.active_menu_item == TopMenuItem::Write {
-                     g_app.write().unwrap().messages.insert(0, "ContactsTable NEXT".to_string());
+                     app.messages.insert(0, "ContactsTable NEXT".to_string());
                      ui.contacts_table.next();
                   }
                }
                KeyCode::Up => {
                   if ui.active_menu_item == TopMenuItem::View {
-                     g_app.write().unwrap().messages.insert(0, "MailTable PREVIOUS".to_string());
+                     app.messages.insert(0, "MailTable PREVIOUS".to_string());
                      ui.mail_table.previous();
                   }
                   if ui.active_menu_item == TopMenuItem::Write {
-                     g_app.write().unwrap().messages.insert(0, "ContactsTable PREVIOUS".to_string());
+                     app.messages.insert(0, "ContactsTable PREVIOUS".to_string());
                      ui.contacts_table.previous();
                   }
                }
@@ -208,11 +206,9 @@ pub async fn run(
 
             match key_code  {
                KeyCode::Esc => {
-                  g_app.write().unwrap().input_mode = InputMode::Normal;
-                  //events.enable_exit_key();
+                  app.input_mode = InputMode::Normal;
                },
                KeyCode::Enter => {
-                  let mut app = g_app.write().unwrap();
                   app.input_mode = InputMode::Normal;
                   match app.input_variable {
                      InputVariable::Handle => {
@@ -231,13 +227,13 @@ pub async fn run(
                   }
                },
                KeyCode::Char('\n') => {
-                  g_app.write().unwrap().input_mode = InputMode::Normal;
+                  app.input_mode = InputMode::Normal;
                }
                KeyCode::Char(c) => {
-                  g_app.write().unwrap().input.push(c);
+                  app.input.push(c);
                }
                KeyCode::Backspace => {
-                  g_app.write().unwrap().input.pop();
+                  app.input.pop();
                }
                _ => {},
             }

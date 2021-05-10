@@ -19,7 +19,7 @@ use crate::{
 
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
-   chain: &SnapmailChain,
+   _chain: &SnapmailChain,
    table: &mut MailTable,
    sid: &str,
    uid: String,
@@ -111,7 +111,7 @@ pub fn draw(
 fn render_view(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    area: Rect,
-   table: &mut MailTable,
+   mail_table: &mut MailTable,
    folder_item: &mut FolderItem,
 ) {
    /// -- Set top menu
@@ -133,7 +133,7 @@ fn render_view(
       .collect();
    let tabs = Tabs::new(top_menu)
       .select(folder_item.to_owned().into())
-      .block(Block::default().title("Folder").borders(Borders::ALL))
+      .block(Block::default().title("Filebox").borders(Borders::ALL))
       .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
       .divider(Span::raw("|"));
@@ -143,7 +143,8 @@ fn render_view(
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
    let normal_style = Style::default().bg(Color::Blue);
 
-   let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
+   //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
+   let header_cells = ["Status", "Sender", "Subject", "Date"]
       .iter()
       .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
    let header = Row::new(header_cells)
@@ -151,37 +152,38 @@ fn render_view(
       .height(1)
       .bottom_margin(1);
 
-   let rows = table.items.iter().map(|item| {
+   let rows = mail_table.items.iter().map(|item| {
       let height = item
          .iter()
          .map(|content| content.chars().filter(|c| *c == '\n').count())
          .max()
          .unwrap_or(0)
          + 1;
-      let cells = item.iter().map(|c| Cell::from(*c));
+      let cells = item.iter().map(|c| Cell::from(c.as_str()));
       Row::new(cells).height(height as u16).bottom_margin(1)
    });
-   let t = Table::new(rows)
+   let table = Table::new(rows)
       .header(header)
-      .block(Block::default().borders(Borders::ALL).title("Table"))
+      .block(Block::default().borders(Borders::NONE).title(""))
       .highlight_style(selected_style)
       .highlight_symbol(">> ")
       .widths(&[
-         Constraint::Percentage(50),
-         Constraint::Length(30),
-         Constraint::Max(10),
+         //Constraint::Min(10),
+         Constraint::Length(6),
+         Constraint::Min(16),
+         Constraint::Length(16),
+         Constraint::Min(6),
       ]);
-   //f.render_stateful_widget(t, rects[0], &mut table.state);
 
-   let top = Paragraph::new("Folder")
-      .alignment(Alignment::Center)
-      .block(
-         Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
-            .title("")
-            .border_type(BorderType::Plain),
-      );
+   // let top = Paragraph::new("Folder")
+   //    .alignment(Alignment::Center)
+   //    .block(
+   //       Block::default()
+   //          .borders(Borders::ALL)
+   //          .style(Style::default().fg(Color::White))
+   //          .title("")
+   //          .border_type(BorderType::Plain),
+   //    );
 
 
    /// -- Draw selected mail
@@ -235,8 +237,8 @@ fn render_view(
       .split(vert_chunks[2]);
 
    main_rect.render_widget(tabs, vert_chunks[0]);
-   main_rect.render_widget(top, vert_chunks[1]);
-   //main_rect.render_widget(bottom, vert_chunks[1]);
+   main_rect.render_widget(table, vert_chunks[1]);
+   //main_rect.render_widget(top, vert_chunks[1]);
    main_rect.render_widget(bottom, hori_chunks[0]);
    main_rect.render_widget(right, hori_chunks[1]);
 

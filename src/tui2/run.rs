@@ -42,7 +42,8 @@ pub async fn run(
    let conductor = start_conductor(sid.clone()).await;
    let chain = pull_source_chain(conductor.clone()).await;
    let mail_list = filter_chain(&chain, FolderItem::Inbox);
-   let mut mail_table = MailTable::new(mail_list, chain.handle_map.clone());
+   let mut mail_table = MailTable::new(mail_list, &chain.handle_map);
+   terminal.clear()?;
 
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);

@@ -6,23 +6,23 @@ use snapmail::mail::entries::*;
 use std::collections::HashMap;
 use holochain_types::dna::*;
 
-pub struct MailTable<'a> {
+pub struct MailTable {
    pub state: TableState,
-   pub items: Vec<Vec<&'a str>>,
+   pub items: Vec<Vec<String>>,
 }
-impl<'a> MailTable<'a> {
-   pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable<'a> {
-      let items: Vec<Vec<&str>> = mails.iter().map(|mail| {
-         let mut row: Vec<&str> = Vec::new();
-         row.push(&format!("{}", mail.address));
-         let username = get_username(mail, handle_map).as_str();
+impl MailTable {
+   pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable {
+      let items: Vec<Vec<String>> = mails.iter().map(|mail| {
+         let mut row: Vec<String> = Vec::new();
+         //row.push(format!("{}", mail.address));
+         row.push(get_status_string(mail));
+         let username = get_username(mail, handle_map.clone());
          row.push(username);
-         row.push(mail.mail.subject.as_str());
+         row.push(mail.mail.subject.clone());
          let date: DateTime<Local> = Local.timestamp(mail.mail.date_sent as i64, 0);
-         let date_str = format!("{}", date);
-         row.push(date_str.as_str());
+         let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
+         row.push(date_str);
          //let status = format!("");
-         row.push(get_status_string(mail).as_str());
          row
 
       }).collect();
@@ -92,7 +92,7 @@ fn get_status_string(mail: &MailItem) -> String {
 ///
 fn get_username(mail: &MailItem, handle_map: HashMap<AgentPubKey, String>) -> String {
    let username: String = handle_map.get(&mail.author).unwrap_or(&"<unknown>".to_string()).to_owned();
-   match mail.state {
+   match &mail.state {
       MailState::In(_in_state) => {
          username
       },

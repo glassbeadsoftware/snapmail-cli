@@ -5,14 +5,21 @@ use chrono::{DateTime, TimeZone, Local};
 use snapmail::mail::entries::*;
 use std::collections::HashMap;
 use holochain_types::dna::*;
+use crate::tui2::snapmail_chain::*;
 
 pub struct MailTable {
    pub state: TableState,
    pub items: Vec<Vec<String>>,
+   pub mail_index_map: HashMap<usize, HeaderHash>,
 }
+
 impl MailTable {
    pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable {
+      let mut mail_index_map = HashMap::new();
+      let mut i = 0;
       let items: Vec<Vec<String>> = mails.iter().map(|mail| {
+         mail_index_map.insert(i, mail.address.clone());
+         i+= 1;
          let mut row: Vec<String> = Vec::new();
          let status = get_status_string(mail);
          let username = get_username(mail, handle_map.clone());
@@ -39,6 +46,7 @@ impl MailTable {
       MailTable {
          state: TableState::default(),
          items,
+         mail_index_map,
       }
    }
 
@@ -69,6 +77,45 @@ impl MailTable {
       };
       self.state.select(Some(i));
    }
+
+   pub fn get_mail_text(&self, index: usize, chain: &SnapmailChain) -> String {
+      let hh = self.mail_index_map.get(&index).unwrap();
+      let item = chain.mail_map.get(hh).unwrap();
+      let author = chain.handle_map.get(&item.author).unwrap();
+      let date: DateTime<Local> = Local.timestamp(item.mail.date_sent as i64, 0);
+      let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
+
+
+      let mut to_line = "     To:".to_string();
+      for to in &item.mail.to {
+         to_line +=  &format!(" {}", chain.handle_map.get(&to).unwrap());
+      }
+
+      let mut cc_line = "     Cc:".to_string();
+      for to in &item.mail.cc {
+         cc_line +=  &format!(" {}", chain.handle_map.get(&to).unwrap());
+      }
+
+      let mut bcc_line = "    Bcc:".to_string();
+      for to in &item.bcc {
+         bcc_line +=  &format!(" {}", chain.handle_map.get(&to).unwrap());
+      }
+
+      let mut text = format!("Subject: {}\n   From: {}\nSent at: {}\n", item.mail.subject, author, date_str);
+      if to_line.len() > 9 {
+         text += &format!("{}\n", to_line);
+      }
+      if cc_line.len() > 9 {
+         text += &format!("{}\n", cc_line);
+      }
+      if bcc_line.len() > 9 {
+         text += &format!("{}\n", bcc_line);
+      }
+
+      text += &format!("\n{}", &item.mail.payload);
+      text
+   }
+
 }
 
 ///

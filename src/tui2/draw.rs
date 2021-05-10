@@ -19,7 +19,7 @@ use crate::{
 
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
-   _chain: &SnapmailChain,
+   chain: &SnapmailChain,
    table: &mut MailTable,
    sid: &str,
    uid: String,
@@ -86,7 +86,7 @@ pub fn draw(
 
    /// Render main block according to active menu item
    match active_menu_item {
-      TopMenuItem::View => render_view(main_rect, chunks[1], table, folder_item),
+      TopMenuItem::View => render_view(chain, main_rect, chunks[1], table, folder_item),
       TopMenuItem::Write => render_write(main_rect, chunks[1]),
       TopMenuItem::Settings => render_settings(main_rect, chunks[1]),
    }
@@ -95,6 +95,7 @@ pub fn draw(
 
 ///
 fn render_view(
+   chain: &SnapmailChain,
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    area: Rect,
    mail_table: &mut MailTable,
@@ -129,7 +130,7 @@ fn render_view(
    let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);
 
    //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
-   let header_cells = ["", "Sender", "Subject", "Message", "Date"]
+   let header_cells = ["", "From", "Subject", "Message", "Date"]
       .iter()
       .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
    let header = Row::new(header_cells)
@@ -162,10 +163,14 @@ fn render_view(
       ]);
 
 
-   /// -- Draw selected mail
-
-   let bottom = Paragraph::new("Mail")
-      .alignment(Alignment::Center)
+   /// -- Draw selected mail.
+   let mail_txt = if let Some(index) = mail_table.state.selected() {
+      mail_table.get_mail_text(index, &chain)
+   } else {
+      "No Mail Selected".to_string()
+   };
+   let bottom = Paragraph::new(mail_txt)
+      .alignment(Alignment::Left)
       .block(
          Block::default()
             .borders(Borders::ALL)
@@ -184,13 +189,15 @@ fn render_view(
             .border_type(BorderType::Plain),
       );
 
+   /// - Layout and render
+
    let vert_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
          [
             Constraint::Length(3),
-            Constraint::Percentage(66),
-            Constraint::Percentage(34),
+            Constraint::Percentage(55),
+            Constraint::Percentage(45),
          ].as_ref(),
       )
       .split(area);

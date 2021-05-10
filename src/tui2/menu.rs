@@ -36,6 +36,13 @@ impl From<FolderItem> for usize {
 }
 
 
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum WriteBlock {
+   Content,
+   Contacts,
+   Attachments,
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum WriteMenuItem {
    Clear,

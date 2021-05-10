@@ -35,10 +35,16 @@ pub struct App {
 
    pub sid: String,
    pub uid: String,
+
    pub active_menu_item: TopMenuItem,
    pub active_folder_item: FolderItem,
+
    pub mail_table: MailTable,
+
    pub contacts_table: ContactsTable,
+   pub write_content: String,
+   pub write_attachments: Vec<String>,
+   pub active_write_block: WriteBlock,
 
    /// - Debug
    pub frame_count: u32,
@@ -57,7 +63,7 @@ impl App {
       let path = CONFIG_PATH.as_path().join(sid.clone());
       let app_filepath = path.join(APP_CONFIG_FILENAME);
       let uid = std::fs::read_to_string(app_filepath)
-         .expect("Something went wrong reading APP CONFIG file");
+         .unwrap_or("test-network".to_string());
 
       App {
          input: String::new(),
@@ -72,7 +78,9 @@ impl App {
          uid,
          mail_table,
          contacts_table,
-
+         active_write_block: WriteBlock::Contacts,
+         write_content: String::new(),
+         write_attachments: Vec::new(),
       }
    }
 
@@ -82,6 +90,15 @@ impl App {
          self.active_folder_item = folder_item;
          let mail_list = filter_chain(&chain, self.active_folder_item);
          self.mail_table = MailTable::new(mail_list, &chain.handle_map);
+      }
+   }
+
+   ///
+   pub fn toggle_write_block(&mut self) {
+      self.active_write_block = match self.active_write_block {
+         WriteBlock::Contacts => WriteBlock::Attachments,
+         WriteBlock::Attachments => WriteBlock::Content,
+         WriteBlock::Content => WriteBlock::Contacts,
       }
    }
 }

@@ -134,7 +134,8 @@ pub async fn run(
                      app.messages.insert(0, "MailTable NEXT".to_string());
                      app.mail_table.next();
                   }
-                  if app.active_menu_item == TopMenuItem::Write {
+                  if app.active_menu_item == TopMenuItem::Write &&
+                     app.active_write_block == WriteBlock::Contacts {
                      app.messages.insert(0, "ContactsTable NEXT".to_string());
                      app.contacts_table.next();
                   }
@@ -144,13 +145,20 @@ pub async fn run(
                      app.messages.insert(0, "MailTable PREVIOUS".to_string());
                      app.mail_table.previous();
                   }
-                  if app.active_menu_item == TopMenuItem::Write {
+                  if app.active_menu_item == TopMenuItem::Write  &&
+                     app.active_write_block == WriteBlock::Contacts {
                      app.messages.insert(0, "ContactsTable PREVIOUS".to_string());
                      app.contacts_table.previous();
                   }
-               }
-               KeyCode::Enter => {
+               },
+               KeyCode::Tab => {
                   if app.active_menu_item == TopMenuItem::Write {
+                     app.toggle_write_block();
+                  }
+               },
+               KeyCode::Enter => {
+                  if app.active_menu_item == TopMenuItem::Write &&
+                     app.active_write_block == WriteBlock::Contacts {
                      app.contacts_table.toggle_selected();
                   }
                }

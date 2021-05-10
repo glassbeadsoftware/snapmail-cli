@@ -1,12 +1,10 @@
 use std::string::ToString;
-use std::sync::RwLock;
 use crate::{
    globals::*,
    tui2::{
       menu::*, MailTable, ContactsTable, SnapmailChain,
    }
 };
-use snapmail::mail::*;
 use snapmail::mail::entries::*;
 
 
@@ -34,8 +32,6 @@ pub struct App {
    pub input_mode: InputMode,
    /// Current settings to change
    pub input_variable: InputVariable,
-   /// History of recorded messages
-   pub messages: Vec<String>,
 
    pub sid: String,
    pub uid: String,
@@ -44,13 +40,15 @@ pub struct App {
    pub mail_table: MailTable,
    pub contacts_table: ContactsTable,
 
-   /// Debug
+   /// - Debug
    pub frame_count: u32,
+   /// History of recorded messages
+   pub messages: Vec<String>,
 }
 
 impl App {
+   ///
    pub fn new(sid: String, chain: &SnapmailChain) -> App {
-
       let mail_list = filter_chain(&chain, FolderItem::Inbox);
       let mail_table = MailTable::new(mail_list, &chain.handle_map);
       let contacts_table = ContactsTable::new(&chain.handle_map);
@@ -75,6 +73,15 @@ impl App {
          mail_table,
          contacts_table,
 
+      }
+   }
+
+   ///
+   pub fn update_active_folder(&mut self, chain: &SnapmailChain, folder_item: FolderItem) {
+      if self.active_menu_item == TopMenuItem::View {
+         self.active_folder_item = folder_item;
+         let mail_list = filter_chain(&chain, self.active_folder_item);
+         self.mail_table = MailTable::new(mail_list, &chain.handle_map);
       }
    }
 }

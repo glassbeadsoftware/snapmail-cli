@@ -214,7 +214,7 @@ fn render_view(
 
 ///
 fn render_write(
-   chain: &SnapmailChain,
+   _chain: &SnapmailChain,
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    area: Rect,
    contacts_table: &mut ContactsTable,
@@ -230,16 +230,6 @@ fn render_write(
       );
 
    /// -- Set Mail Table
-
-   // let right = Paragraph::new("Contacts")
-   //    .alignment(Alignment::Center)
-   //    .block(
-   //       Block::default()
-   //          .borders(Borders::ALL)
-   //          .style(Style::default().fg(Color::White))
-   //          .title("Users")
-   //          .border_type(BorderType::Plain),
-   //    );
 
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
    //let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);

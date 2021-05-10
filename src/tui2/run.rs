@@ -6,13 +6,10 @@ use std::sync::mpsc;
 use std::io;
 use std::thread;
 use std::time::{Duration, Instant};
-use snapmail::mail::*;
-use snapmail::mail::entries::*;
 use snapmail::handle::*;
 
 use tui::{
    backend::CrosstermBackend,
-   widgets::TableState,
    Terminal,
 };
 
@@ -98,32 +95,16 @@ pub async fn run(
                KeyCode::Char('e') => app.active_menu_item = TopMenuItem::Settings,
 
                KeyCode::Char('i') => {
-                  if app.active_menu_item == TopMenuItem::View {
-                     app.active_folder_item = FolderItem::Inbox;
-                     let mail_list = filter_chain(&chain, app.active_folder_item);
-                     app.mail_table = MailTable::new(mail_list, &chain.handle_map);
-                  }
+                  app.update_active_folder(&chain, FolderItem::Inbox)
                },
                KeyCode::Char('s') => {
-                  if app.active_menu_item == TopMenuItem::View {
-                     app.active_folder_item = FolderItem::Sent;
-                     let mail_list = filter_chain(&chain, app.active_folder_item);
-                     app.mail_table = MailTable::new(mail_list, &chain.handle_map);
-                  }
+                  app.update_active_folder(&chain, FolderItem::Sent)
                },
                KeyCode::Char('t') => {
-                  if app.active_menu_item == TopMenuItem::View {
-                     app.active_folder_item = FolderItem::Trash;
-                     let mail_list = filter_chain(&chain, app.active_folder_item);
-                     app.mail_table = MailTable::new(mail_list, &chain.handle_map);
-                  }
+                  app.update_active_folder(&chain, FolderItem::Trash)
                },
                KeyCode::Char('a') => {
-                  if app.active_menu_item == TopMenuItem::View {
-                     app.active_folder_item = FolderItem::All;
-                     let mail_list = filter_chain(&chain, app.active_folder_item);
-                     app.mail_table = MailTable::new(mail_list, &chain.handle_map);
-                  }
+                  app.update_active_folder(&chain, FolderItem::All)
                },
 
                /// Settings Menu

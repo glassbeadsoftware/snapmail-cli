@@ -1,11 +1,9 @@
 use tui::{
    widgets::TableState,
 };
-use chrono::{DateTime, TimeZone, Local};
-use snapmail::mail::entries::*;
+//use chrono::{DateTime, TimeZone, Local};
 use std::collections::HashMap;
 use holochain_types::dna::*;
-use crate::tui2::snapmail_chain::*;
 
 pub struct ContactsTable {
    pub state: TableState,

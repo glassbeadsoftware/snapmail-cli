@@ -28,7 +28,7 @@ pub enum InputVariable {
    ProxyUrl,
    Handle,
    Uid,
-   Mail,
+   Content,
    Attachment,
    Subject,
 }
@@ -53,7 +53,8 @@ pub struct App {
    pub contacts_table: ContactsTable,
    pub write_subject: String,
    pub write_content: String,
-   pub write_attachments: Vec<PathBuf>,
+   // pub write_attachments: Vec<PathBuf>,
+   pub write_attachment: String,
    pub active_write_block: WriteBlock,
 
    /// - Debug
@@ -78,7 +79,7 @@ impl App {
       App {
          input: String::new(),
          input_mode: InputMode::Normal,
-         input_variable: InputVariable::Mail,
+         input_variable: InputVariable::Content,
          messages: vec!["Welcome to Snapmail".to_string()],
 
          frame_count: 0,
@@ -91,7 +92,8 @@ impl App {
          active_write_block: WriteBlock::Contacts,
          write_subject: String::new(),
          write_content: String::new(),
-         write_attachments: Vec::new(),
+         write_attachment: String::new(),
+         //write_attachments: Vec::new(),
       }
    }
 
@@ -105,30 +107,41 @@ impl App {
    }
 
    ///
+   pub fn set_write_block(&mut self, block: WriteBlock) {
+      while self.active_write_block != block {
+         self.toggle_write_block();
+      }
+   }
+
+   ///
    pub fn toggle_write_block(&mut self) {
       self.active_write_block = match self.active_write_block {
          WriteBlock::Subject => {
-            self.input_variable = InputVariable::Subject;
-            self.input = self.write_subject.clone();
+            self.write_subject = self.input.clone();
+            self.input = self.write_content.clone();
+            self.input_variable = InputVariable::Content;
             WriteBlock::Content
          }
          WriteBlock::Content => {
-            self.input_mode = InputMode::Normal;
             self.write_content = self.input.clone();
-            WriteBlock::Contacts
-         },
-         WriteBlock::Contacts => {
-            self.input_mode = InputMode::Editing;
+            self.input = self.write_attachment.clone();
             self.input_variable = InputVariable::Attachment;
             WriteBlock::Attachments
          },
          WriteBlock::Attachments => {
+            self.write_attachment = self.input.clone();
+            self.input = String::new();
+            self.input_mode = InputMode::Normal;
+            self.contacts_table.state.select(Some(1));
+            WriteBlock::Contacts
+         },
+         WriteBlock::Contacts => {
+            self.contacts_table.state.select(None);
+            self.input = self.write_subject.clone();
             self.input_mode = InputMode::Editing;
             self.input_variable = InputVariable::Subject;
-            self.input = self.write_content.clone();
             WriteBlock::Subject
          },
-
       }
    }
 
@@ -156,12 +169,20 @@ impl App {
       }
       /// Form attachment list
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
-      for attachment in &self.write_attachments {
-         let maybe_hh = write_attachment(conductor.clone(), attachment.clone());
+      // for attachment in &self.write_attachments {
+      //    let maybe_hh = write_attachment(conductor.clone(), attachment.clone());
+      //    if let Ok(hh) = maybe_hh {
+      //       manifest_address_list.push(hh);
+      //    }
+      // }
+
+      //if let Ok(path) = PathBuf::from(self.write_attachment.clone()) {
+      let path = PathBuf::from(self.write_attachment.clone());
+         let maybe_hh = write_attachment(conductor.clone(), path);
          if let Ok(hh) = maybe_hh {
             manifest_address_list.push(hh);
          }
-      }
+      //}
       /// Form MailInput
       let mail = SendMailInput {
          subject: self.write_subject.clone(),
@@ -182,7 +203,8 @@ impl App {
       // Erase State
       self.input = String::new();
       self.write_content = String::new();
-      self.write_attachments = Vec::new();
+      self.write_attachment = String::new();
+      //self.write_attachments = Vec::new();
       self.write_subject = String::new();
       self.contacts_table = ContactsTable::new(&chain.handle_map);
    }

@@ -1,7 +1,7 @@
 use crossterm::{
    event::{self, Event as CEvent, KeyCode},
 };
-use std::path::{Path, PathBuf};
+use std::path::{Path/*, PathBuf*/};
 use std::sync::mpsc;
 use std::io;
 use std::thread;
@@ -14,12 +14,12 @@ use tui::{
 };
 
 use crate::{
-   error::SnapmailError,
+   //error::SnapmailError,
    tui2::*,
    tui2::menu::*,
    globals::*,
-   app::*,
-   holochain::*,
+   //app::*,
+   //holochain::*,
    conductor::*,
 };
 
@@ -160,9 +160,16 @@ pub async fn run(
                   }
                },
                KeyCode::Enter => {
-                  if app.active_menu_item == TopMenuItem::Write &&
-                     app.active_write_block == WriteBlock::Contacts {
-                     app.contacts_table.toggle_selected();
+                  if app.active_menu_item == TopMenuItem::Write {
+                     match app.active_write_block {
+                        WriteBlock::Contacts => {
+                           app.contacts_table.toggle_selected();
+                        },
+                        // WriteBlock::Subject | WriteBlock::Attachment => {
+                        //    app.toggle_write_block();
+                        // }
+                           _ => {},
+                     }
                   }
                }
                _ => {}
@@ -172,6 +179,10 @@ pub async fn run(
             match key_code  {
                KeyCode::Esc => {
                   app.input_mode = InputMode::Normal;
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.set_write_block(WriteBlock::Contacts);
+                     app.active_menu_item = TopMenuItem::View;
+                  }
                },
                KeyCode::Tab => {
                   if app.active_menu_item == TopMenuItem::Write {
@@ -184,8 +195,8 @@ pub async fn run(
                   }
                }
                KeyCode::Enter => {
-                  app.input_mode = InputMode::Normal;
                   if app.active_menu_item == TopMenuItem::Settings {
+                     app.input_mode = InputMode::Normal;
                      match app.input_variable {
                         InputVariable::Handle => {
                            let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
@@ -203,15 +214,17 @@ pub async fn run(
                      }
                   }
                   if app.active_menu_item == TopMenuItem::Write {
-                     match app.input_variable {
-                        InputVariable::Attachment => {
-                           let path = PathBuf::from(app.input.clone());
-                           app.write_attachments.push(path);
-                           app.input = String::new();
-                        }
-                        _ => {}
-                        //InputVariable::Mail => { }
+                     if app.active_write_block == WriteBlock::Content {
+                        app.input.push('\n');
                      }
+                     //    match app.input_variable {
+                     //       InputVariable::Attachment => {
+                     //          let path = PathBuf::from(app.input.clone());
+                     //          app.write_attachments.push(path);
+                     //          app.input = String::new();
+                     //       }
+                     //       _ => {}
+                     //    }
                   }
                },
                KeyCode::Char('\n') => {

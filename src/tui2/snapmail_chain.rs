@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use snapmail::mail::entries::*;
 use snapmail::mail::*;
 use snapmail::handle::*;
-use snapmail::file::*;
+//use snapmail::file::*;
 
 pub struct SnapmailChain {
    pub my_handle: String,

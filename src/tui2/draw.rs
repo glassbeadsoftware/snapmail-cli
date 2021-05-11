@@ -7,16 +7,17 @@ use tui::{
    style::{Color, Modifier, Style},
    text::{Span, Spans},
    widgets::{
-      Widget,
-      Block, BorderType, Borders, Cell, List, ListItem, ListState, Paragraph, Row, Table, Tabs,
+      // Widget, List, ListItem, ListState,
+      Block, BorderType, Borders, Cell, Paragraph, Row, Table, Tabs,
    },
 };
-
+//use std::path::PathBuf;
 use crate::{
    tui2::*,
    tui2::menu::*,
 };
 
+///
 pub fn draw(
    main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
    chain: &SnapmailChain,
@@ -218,9 +219,14 @@ fn render_write(
    area: Rect,
    app: &mut App,
 ) {
-
-   let subject_block = Paragraph::new("Subject")
-      .alignment(Alignment::Center)
+   /// Subject Block
+   let current_subject = if app.active_write_block == WriteBlock::Subject {
+      app.input.clone()
+   } else {
+      app.write_subject.clone()
+   };
+   let subject_block = Paragraph::new(current_subject)
+      .alignment(Alignment::Left)
       .block(
          Block::default()
             .borders(Borders::ALL)
@@ -232,8 +238,14 @@ fn render_write(
             .border_type(BorderType::Plain),
       );
 
-   let content_block = Paragraph::new("")
-      .alignment(Alignment::Center)
+   /// Attachment Block
+   let current_content = if app.active_write_block == WriteBlock::Content {
+      app.input.clone()
+   } else {
+      app.write_content.clone()
+   };
+   let content_block = Paragraph::new(current_content)
+      .alignment(Alignment::Left)
       .block(
          Block::default()
             .borders(Borders::ALL)
@@ -245,8 +257,22 @@ fn render_write(
             .border_type(BorderType::Plain),
       );
 
-   let attachment_block = Paragraph::new("Attachments")
-      .alignment(Alignment::Center)
+   /// Attachment Block
+   // let empty_path = PathBuf::new();
+   // let current_attachment = if app.active_write_block == WriteBlock::Attachments {
+   //    PathBuf::from(app.input.clone())
+   // } else {
+   //    app.write_attachments.first().unwrap_or(&empty_path).to_owned()
+   // };
+   // current_attachment.as_os_str().to_str().unwrap()
+
+   let current_attachment = if app.active_write_block == WriteBlock::Attachments {
+      app.input.clone()
+   } else {
+      app.write_attachment.clone()
+   };
+   let attachment_block = Paragraph::new(current_attachment)
+      .alignment(Alignment::Left)
       .block(
          Block::default()
             .borders(Borders::ALL)
@@ -254,15 +280,13 @@ fn render_write(
                WriteBlock::Attachments => Style::default().fg(Color::Yellow),
                _ => Style::default(),
             })
-            .title("Attachments")
+            .title("Attachment")
             .border_type(BorderType::Plain),
       );
 
-   /// -- Set Mail Table
-
+   /// - Contacts Table
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
    //let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);
-
    let rows = app.contacts_table.items.iter().map(|item| {
       let height = item
          .iter()
@@ -289,25 +313,7 @@ fn render_write(
          Constraint::Length(20),
       ]);
 
-
-   /// - Cursor
-   // match app.input_mode {
-   //    InputMode::Normal =>
-   //    // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
-   //       {}
-   //    InputMode::Editing => {
-   //       // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
-   //       main_rect.set_cursor(
-   //          // Put cursor past the end of the input text
-   //          settings_chunks[1].x + app.input.len() as u16 + 1,
-   //          // Move one line down, from the border to the input line
-   //          settings_chunks[1].y + 1,
-   //       )
-   //    }
-   // }
-
-   /// - Layout Render
-   ///
+   /// - Layout
    let hori_chunks = Layout::default()
       .direction(Direction::Horizontal)
       .constraints(
@@ -320,12 +326,35 @@ fn render_write(
       .constraints(
          [
             Constraint::Length(3),
-            Constraint::Percentage(75),
-            Constraint::Percentage(25),
+            Constraint::Min(10),
+            Constraint::Length(3),
          ].as_ref(),
       )
       .split(hori_chunks[0]);
 
+   /// - Cursor
+   match app.input_mode {
+      InputMode::Normal => {},
+      InputMode::Editing => {
+         let index =
+            match app.active_write_block {
+               WriteBlock::Subject => 0,
+               WriteBlock::Content => 1,
+               WriteBlock::Attachments => 2,
+               _ => 0,
+
+            };
+         // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
+         main_rect.set_cursor(
+            // Put cursor past the end of the input text
+            verti_chunks[index].x + app.input.len() as u16 + 1,
+            // Move one line down, from the border to the input line
+            verti_chunks[index].y + 1,
+         )
+      }
+   }
+
+   /// - Render
    main_rect.render_widget(subject_block, verti_chunks[0]);
    main_rect.render_widget(content_block, verti_chunks[1]);
    main_rect.render_widget(attachment_block, verti_chunks[2]);

@@ -21,7 +21,7 @@ extern crate url2;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
 use crate::{
-   tui2::*,
+   //tui2::*,
    globals::*,
 };
 use tui::{

@@ -21,16 +21,24 @@ impl MailTable {
          mail_index_map.insert(i, mail.address.clone());
          i+= 1;
          let status = get_status_string(mail);
-         let username = get_username(mail, handle_map.clone());
-         let subject: String = if mail.mail.payload.len() > 28 {
+         /// From
+         let mut username = get_username(mail, handle_map.clone());
+         username = if username.len() > 20 {
+            let base = username[0..17].to_string();
+            base + "..."
+         } else { username.clone() };
+         /// Subject
+         let subject: String = if mail.mail.subject.len() > 28 {
             let base = mail.mail.subject[0..25].to_string();
             base + "..."
          } else { mail.mail.subject.clone() };
+         /// Content
          let first_line = mail.mail.payload.lines().next().unwrap_or("");
          let message: String = if first_line.len() > 12 {
             let base = first_line[0..9].to_string();
             base + "..."
          } else { first_line.to_string() };
+         /// Date
          let date: DateTime<Local> = Local.timestamp(mail.mail.date_sent as i64, 0);
          let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
 

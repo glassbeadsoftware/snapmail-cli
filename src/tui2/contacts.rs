@@ -27,7 +27,7 @@ impl ContactsTable {
 
       }).collect();
 
-      let mut state = TableState::default();
+      let state = TableState::default();
       //state.select(Some(0));
 
       ContactsTable {

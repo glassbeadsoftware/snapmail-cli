@@ -42,6 +42,7 @@ pub enum WriteBlock {
    Contacts,
    Attachments,
    Subject,
+   None,
 }
 
 #[derive(Copy, Clone, Debug)]

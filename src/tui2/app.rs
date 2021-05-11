@@ -89,7 +89,7 @@ impl App {
          uid,
          mail_table,
          contacts_table,
-         active_write_block: WriteBlock::Contacts,
+         active_write_block: WriteBlock::None,
          write_subject: String::new(),
          write_content: String::new(),
          write_attachment: String::new(),
@@ -108,37 +108,60 @@ impl App {
 
    ///
    pub fn set_write_block(&mut self, block: WriteBlock) {
+      if block == WriteBlock::None {
+         self.save_input();
+         self.input_mode = InputMode::Normal;
+         self.active_write_block = WriteBlock::None;
+      }
       while self.active_write_block != block {
          self.toggle_write_block();
       }
    }
 
    ///
-   pub fn toggle_write_block(&mut self) {
-      self.active_write_block = match self.active_write_block {
+   pub fn save_input(&mut self) {
+      match self.active_write_block {
          WriteBlock::Subject => {
             self.write_subject = self.input.clone();
+         }
+         WriteBlock::Content => {
+            self.write_content = self.input.clone();
+         },
+         WriteBlock::Attachments => {
+            self.write_attachment = self.input.clone();
+         },
+         WriteBlock::Contacts => {
+            self.contacts_table.state.select(None);
+         }
+         _ => {},
+      }
+   }
+
+
+   ///
+   pub fn toggle_write_block(&mut self) {
+      self.save_input();
+      self.input_mode = InputMode::Editing;
+      self.active_write_block = match self.active_write_block {
+         WriteBlock::Subject => {
             self.input = self.write_content.clone();
             self.input_variable = InputVariable::Content;
             WriteBlock::Content
          }
          WriteBlock::Content => {
-            self.write_content = self.input.clone();
             self.input = self.write_attachment.clone();
             self.input_variable = InputVariable::Attachment;
             WriteBlock::Attachments
          },
          WriteBlock::Attachments => {
-            self.write_attachment = self.input.clone();
             self.input = String::new();
-            self.input_mode = InputMode::Normal;
+            //self.input_mode = InputMode::Normal;
             self.contacts_table.state.select(Some(1));
             WriteBlock::Contacts
          },
-         WriteBlock::Contacts => {
-            self.contacts_table.state.select(None);
+         WriteBlock::None | WriteBlock::Contacts => {
             self.input = self.write_subject.clone();
-            self.input_mode = InputMode::Editing;
+            //self.input_mode = InputMode::Editing;
             self.input_variable = InputVariable::Subject;
             WriteBlock::Subject
          },
@@ -167,6 +190,11 @@ impl App {
             _ => { } ,
          }
       }
+      if 0 == to_list.len() + cc_list.len() + bcc_list.len() {
+         self.messages.insert(0, "Send aborted: No recepient selected".to_string());
+         return;
+      }
+
       /// Form attachment list
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
       // for attachment in &self.write_attachments {

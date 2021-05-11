@@ -29,7 +29,7 @@ pub fn draw(
    let size = main_rect.size();
    let chunks = Layout::default()
       .direction(Direction::Vertical)
-      .margin(0)// FIXME
+      .margin(0)
       .constraints(
          [
             Constraint::Length(3),
@@ -66,8 +66,6 @@ pub fn draw(
       .divider(Span::raw("|"));
    main_rect.render_widget(tabs, chunks[0]);
 
-   //let app = g_app.read().unwrap();
-   //let input_mode = app.input_mode.clone();
    let feedback = Paragraph::new(app.messages[0].clone())
       .alignment(Alignment::Center)
       .block(
@@ -336,21 +334,35 @@ fn render_write(
    match app.input_mode {
       InputMode::Normal => {},
       InputMode::Editing => {
-         let index =
-            match app.active_write_block {
-               WriteBlock::Subject => 0,
-               WriteBlock::Content => 1,
-               WriteBlock::Attachments => 2,
-               _ => 0,
-
+         if app.active_write_block != WriteBlock::Contacts {
+            let (x_offset, y_offset) = if app.active_write_block == WriteBlock::Content {
+               //             app.input.as_bytes().iter().filter(|&&c| c == b'\n').count() as u16
+               let lines: Vec<&str> = app.input.lines().collect();
+               let x = if let Some(line) = lines.last() {
+                  line.len() as u16
+               } else { 0 };
+               let y = std::cmp::max(0, lines.len() as i32 - 1) as u16;
+               (x, y)
+            } else {
+               (app.input.len() as u16, 0)
             };
-         // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
-         main_rect.set_cursor(
-            // Put cursor past the end of the input text
-            verti_chunks[index].x + app.input.len() as u16 + 1,
-            // Move one line down, from the border to the input line
-            verti_chunks[index].y + 1,
-         )
+
+            let index =
+               match app.active_write_block {
+                  WriteBlock::Subject => 0,
+                  WriteBlock::Content => 1,
+                  WriteBlock::Attachments => 2,
+                  _ => 0,
+               };
+
+            // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
+            main_rect.set_cursor(
+               // Put cursor past the end of the input text
+               verti_chunks[index].x + 1 + x_offset,
+               // Move one line down, from the border to the input line
+               verti_chunks[index].y + 1 + y_offset,
+            )
+         }
       }
    }
 
@@ -358,7 +370,6 @@ fn render_write(
    main_rect.render_widget(subject_block, verti_chunks[0]);
    main_rect.render_widget(content_block, verti_chunks[1]);
    main_rect.render_widget(attachment_block, verti_chunks[2]);
-   //main_rect.render_widget(right, write_chunks[1]);
    main_rect.render_stateful_widget(table, hori_chunks[1], &mut app.contacts_table.state);
 }
 

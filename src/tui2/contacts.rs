@@ -27,8 +27,11 @@ impl ContactsTable {
 
       }).collect();
 
+      let mut state = TableState::default();
+      //state.select(Some(0));
+
       ContactsTable {
-         state: TableState::default(),
+         state,
          items,
          agent_index_map,
       }

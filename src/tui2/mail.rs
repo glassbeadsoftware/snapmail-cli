@@ -26,10 +26,11 @@ impl MailTable {
             let base = mail.mail.subject[0..25].to_string();
             base + "..."
          } else { mail.mail.subject.clone() };
-         let message: String = if mail.mail.payload.len() > 12 {
-            let base = mail.mail.payload[0..9].to_string();
+         let first_line = mail.mail.payload.lines().next().unwrap_or("");
+         let message: String = if first_line.len() > 12 {
+            let base = first_line[0..9].to_string();
             base + "..."
-         } else { mail.mail.payload.clone() };
+         } else { first_line.to_string() };
          let date: DateTime<Local> = Local.timestamp(mail.mail.date_sent as i64, 0);
          let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
 

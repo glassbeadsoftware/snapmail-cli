@@ -137,21 +137,11 @@ pub async fn run(
                      app.messages.insert(0, "MailTable NEXT".to_string());
                      app.mail_table.next();
                   }
-                  if app.active_menu_item == TopMenuItem::Write &&
-                     app.active_write_block == WriteBlock::Contacts {
-                     app.messages.insert(0, "ContactsTable NEXT".to_string());
-                     app.contacts_table.next();
-                  }
                }
                KeyCode::Up => {
                   if app.active_menu_item == TopMenuItem::View {
                      app.messages.insert(0, "MailTable PREVIOUS".to_string());
                      app.mail_table.previous();
-                  }
-                  if app.active_menu_item == TopMenuItem::Write  &&
-                     app.active_write_block == WriteBlock::Contacts {
-                     app.messages.insert(0, "ContactsTable PREVIOUS".to_string());
-                     app.contacts_table.previous();
                   }
                },
                KeyCode::Tab => {
@@ -159,19 +149,7 @@ pub async fn run(
                      app.toggle_write_block();
                   }
                },
-               KeyCode::Enter => {
-                  if app.active_menu_item == TopMenuItem::Write {
-                     match app.active_write_block {
-                        WriteBlock::Contacts => {
-                           app.contacts_table.toggle_selected();
-                        },
-                        // WriteBlock::Subject | WriteBlock::Attachment => {
-                        //    app.toggle_write_block();
-                        // }
-                           _ => {},
-                     }
-                  }
-               }
+               KeyCode::Enter => {}
                _ => {}
             }
          },
@@ -180,8 +158,9 @@ pub async fn run(
                KeyCode::Esc => {
                   app.input_mode = InputMode::Normal;
                   if app.active_menu_item == TopMenuItem::Write {
-                     app.set_write_block(WriteBlock::Contacts);
-                     app.active_menu_item = TopMenuItem::View;
+                     app.set_write_block(WriteBlock::None)
+                     //app.set_write_block(WriteBlock::Contacts);
+                     //app.active_menu_item = TopMenuItem::View;
                   }
                },
                KeyCode::Tab => {
@@ -189,11 +168,20 @@ pub async fn run(
                      app.toggle_write_block();
                   }
                },
-               KeyCode::Insert => {
-                  if app.active_menu_item == TopMenuItem::Write {
-                     app.send_mail(conductor.clone(), &chain);
+               KeyCode::Down => {
+                  if app.active_menu_item == TopMenuItem::Write &&
+                     app.active_write_block == WriteBlock::Contacts {
+                     app.messages.insert(0, "ContactsTable NEXT".to_string());
+                     app.contacts_table.next();
                   }
                }
+               KeyCode::Up => {
+                  if app.active_menu_item == TopMenuItem::Write  &&
+                     app.active_write_block == WriteBlock::Contacts {
+                     app.messages.insert(0, "ContactsTable PREVIOUS".to_string());
+                     app.contacts_table.previous();
+                  }
+               },
                KeyCode::Enter => {
                   if app.active_menu_item == TopMenuItem::Settings {
                      app.input_mode = InputMode::Normal;
@@ -214,17 +202,20 @@ pub async fn run(
                      }
                   }
                   if app.active_menu_item == TopMenuItem::Write {
-                     if app.active_write_block == WriteBlock::Content {
-                        app.input.push('\n');
+                     match app.active_write_block {
+                        WriteBlock::Contacts => {
+                           app.contacts_table.toggle_selected();
+                        },
+                        WriteBlock::Content => {
+                           app.input.push('\n');
+                        },
+                        // WriteBlock::Attachments => {
+                        //    let path = PathBuf::from(app.input.clone());
+                        //    app.write_attachments.push(path);
+                        //    app.input = String::new();
+                        // },
+                        _ => {}
                      }
-                     //    match app.input_variable {
-                     //       InputVariable::Attachment => {
-                     //          let path = PathBuf::from(app.input.clone());
-                     //          app.write_attachments.push(path);
-                     //          app.input = String::new();
-                     //       }
-                     //       _ => {}
-                     //    }
                   }
                },
                KeyCode::Char('\n') => {

@@ -6,6 +6,7 @@ use crate::{
    globals::*,
    subcommands::*,
    conductor::*,
+   attachment::*,
    subcommands::open,
 };
 

@@ -1,7 +1,7 @@
 use crossterm::{
    event::{self, Event as CEvent, KeyCode},
 };
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::io;
 use std::thread;
@@ -39,11 +39,8 @@ pub async fn run(
    let chain = pull_source_chain(conductor.clone()).await;
    terminal.clear()?;
 
-
    /// - Setup UI
-
    let mut app = App::new(sid, &chain);
-
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();
@@ -87,8 +84,8 @@ pub async fn run(
       match input_mode {
          InputMode::Normal => {
             match key_code  {
-               KeyCode::Esc => return Ok(()),
                /// Top Menu
+               KeyCode::Esc |
                KeyCode::Char('q') => return Ok(()),
                KeyCode::Char('v') => app.active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => app.active_menu_item = TopMenuItem::Write,
@@ -106,6 +103,12 @@ pub async fn run(
                KeyCode::Char('a') => {
                   app.update_active_folder(&chain, FolderItem::All)
                },
+
+               KeyCode::Insert => {
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.send_mail(conductor.clone(), &chain);
+                  }
+               }
 
                /// Settings Menu
                KeyCode::Char('b') => {
@@ -166,27 +169,49 @@ pub async fn run(
             }
          },
          InputMode::Editing => {
-
             match key_code  {
                KeyCode::Esc => {
                   app.input_mode = InputMode::Normal;
                },
+               KeyCode::Tab => {
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.toggle_write_block();
+                  }
+               },
+               KeyCode::Insert => {
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.send_mail(conductor.clone(), &chain);
+                  }
+               }
                KeyCode::Enter => {
                   app.input_mode = InputMode::Normal;
-                  match app.input_variable {
-                     InputVariable::Handle => {
-                        let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
-                        app.messages.insert(0, format!("Handle entry hash: {}", hash.to_string()));
-                     },
-                     InputVariable::Uid => {
-                        app.uid = app.input.clone();
-                        let config_path = Path::new(&*CONFIG_PATH).join(app.sid.clone());
-                        let app_filepath = config_path.join(APP_CONFIG_FILENAME);
-                        std::fs::write(app_filepath, app.uid.as_bytes()).unwrap();
-                        // Must restart conductor
-                        return Ok(());
-                     },
-                     _ => {},
+                  if app.active_menu_item == TopMenuItem::Settings {
+                     match app.input_variable {
+                        InputVariable::Handle => {
+                           let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
+                           app.messages.insert(0, format!("Handle entry hash: {}", hash.to_string()));
+                        },
+                        InputVariable::Uid => {
+                           app.uid = app.input.clone();
+                           let config_path = Path::new(&*CONFIG_PATH).join(app.sid.clone());
+                           let app_filepath = config_path.join(APP_CONFIG_FILENAME);
+                           std::fs::write(app_filepath, app.uid.as_bytes()).unwrap();
+                           // Must restart conductor
+                           return Ok(());
+                        },
+                        _ => {},
+                     }
+                  }
+                  if app.active_menu_item == TopMenuItem::Write {
+                     match app.input_variable {
+                        InputVariable::Attachment => {
+                           let path = PathBuf::from(app.input.clone());
+                           app.write_attachments.push(path);
+                           app.input = String::new();
+                        }
+                        _ => {}
+                        //InputVariable::Mail => { }
+                     }
                   }
                },
                KeyCode::Char('\n') => {

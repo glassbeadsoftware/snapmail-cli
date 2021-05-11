@@ -9,6 +9,7 @@ pub mod holochain;
 pub mod conductor;
 pub mod tui2;
 pub mod wasm;
+pub mod attachment;
 
 #[macro_use]
 extern crate strum_macros;

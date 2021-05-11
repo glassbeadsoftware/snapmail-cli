@@ -1,12 +1,20 @@
 use std::string::ToString;
 use crate::{
+   attachment::*,
    globals::*,
    tui2::{
       menu::*, MailTable, ContactsTable, SnapmailChain,
    }
 };
-use snapmail::mail::entries::*;
-
+use holochain_types::dna::*;
+use snapmail::{
+   mail::*,
+   mail::entries::*,
+   //file::*,
+   //handle::*,
+};
+use holochain::conductor::ConductorHandle;
+use std::path::PathBuf;
 
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
@@ -22,6 +30,7 @@ pub enum InputVariable {
    Uid,
    Mail,
    Attachment,
+   Subject,
 }
 
 /// App holds the state of the application
@@ -42,8 +51,9 @@ pub struct App {
    pub mail_table: MailTable,
 
    pub contacts_table: ContactsTable,
+   pub write_subject: String,
    pub write_content: String,
-   pub write_attachments: Vec<String>,
+   pub write_attachments: Vec<PathBuf>,
    pub active_write_block: WriteBlock,
 
    /// - Debug
@@ -79,6 +89,7 @@ impl App {
          mail_table,
          contacts_table,
          active_write_block: WriteBlock::Contacts,
+         write_subject: String::new(),
          write_content: String::new(),
          write_attachments: Vec::new(),
       }
@@ -96,11 +107,86 @@ impl App {
    ///
    pub fn toggle_write_block(&mut self) {
       self.active_write_block = match self.active_write_block {
-         WriteBlock::Contacts => WriteBlock::Attachments,
-         WriteBlock::Attachments => WriteBlock::Content,
-         WriteBlock::Content => WriteBlock::Contacts,
+         WriteBlock::Subject => {
+            self.input_variable = InputVariable::Subject;
+            self.input = self.write_subject.clone();
+            WriteBlock::Content
+         }
+         WriteBlock::Content => {
+            self.input_mode = InputMode::Normal;
+            self.write_content = self.input.clone();
+            WriteBlock::Contacts
+         },
+         WriteBlock::Contacts => {
+            self.input_mode = InputMode::Editing;
+            self.input_variable = InputVariable::Attachment;
+            WriteBlock::Attachments
+         },
+         WriteBlock::Attachments => {
+            self.input_mode = InputMode::Editing;
+            self.input_variable = InputVariable::Subject;
+            self.input = self.write_content.clone();
+            WriteBlock::Subject
+         },
+
       }
    }
+
+   ///
+   pub fn send_mail(&mut self, conductor: ConductorHandle, chain: &SnapmailChain) {
+      /// Form recepient lists from ContactsTable
+      let mut to_list: Vec<AgentPubKey> = Vec::new();
+      let mut cc_list: Vec<AgentPubKey> = Vec::new();
+      let mut bcc_list: Vec<AgentPubKey> = Vec::new();
+      let mut i: i32 = -1;
+      for contact_item in &self.contacts_table.items {
+         i += 1;
+         match contact_item[0].as_str() {
+            " to " => {
+               to_list.push(self.contacts_table.agent_index_map.get(&(i as usize)).unwrap().clone());
+            },
+            " cc " =>  {
+               cc_list.push(self.contacts_table.agent_index_map.get(&(i as usize)).unwrap().clone());
+            },
+            " bcc " =>  {
+               bcc_list.push(self.contacts_table.agent_index_map.get(&(i as usize)).unwrap().clone());
+            },
+            _ => { } ,
+         }
+      }
+      /// Form attachment list
+      let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
+      for attachment in &self.write_attachments {
+         let maybe_hh = write_attachment(conductor.clone(), attachment.clone());
+         if let Ok(hh) = maybe_hh {
+            manifest_address_list.push(hh);
+         }
+      }
+      /// Form MailInput
+      let mail = SendMailInput {
+         subject: self.write_subject.clone(),
+         payload: self.write_content.clone(),
+         to: to_list,
+         cc: cc_list,
+         bcc: bcc_list,
+         manifest_address_list,
+      };
+      let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
+      /// Send
+      let output = snapmail_send_mail(conductor, mail).unwrap();
+      /// Show results
+      let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
+      let message = format!("Send done ({} / {}): {:?}", pending_count, send_count, output.outmail);
+      self.messages.insert(0, message);
+
+      // Erase State
+      self.input = String::new();
+      self.write_content = String::new();
+      self.write_attachments = Vec::new();
+      self.write_subject = String::new();
+      self.contacts_table = ContactsTable::new(&chain.handle_map);
+   }
+
 }
 
 

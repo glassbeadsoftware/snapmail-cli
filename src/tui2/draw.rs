@@ -218,7 +218,21 @@ fn render_write(
    area: Rect,
    app: &mut App,
 ) {
-   let content_block = Paragraph::new("Write")
+
+   let subject_block = Paragraph::new("Subject")
+      .alignment(Alignment::Center)
+      .block(
+         Block::default()
+            .borders(Borders::ALL)
+            .style(match app.active_write_block {
+               WriteBlock::Subject => Style::default().fg(Color::Yellow),
+               _ => Style::default(),
+            })
+            .title("Subject")
+            .border_type(BorderType::Plain),
+      );
+
+   let content_block = Paragraph::new("")
       .alignment(Alignment::Center)
       .block(
          Block::default()
@@ -227,7 +241,7 @@ fn render_write(
             WriteBlock::Content => Style::default().fg(Color::Yellow),
             _ => Style::default(),
          })
-            .title("Write")
+            .title("Content")
             .border_type(BorderType::Plain),
       );
 
@@ -304,12 +318,17 @@ fn render_write(
    let verti_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
-         [Constraint::Percentage(75), Constraint::Percentage(25)].as_ref(),
+         [
+            Constraint::Length(3),
+            Constraint::Percentage(75),
+            Constraint::Percentage(25),
+         ].as_ref(),
       )
       .split(hori_chunks[0]);
 
-   main_rect.render_widget(content_block, verti_chunks[0]);
-   main_rect.render_widget(attachment_block, verti_chunks[1]);
+   main_rect.render_widget(subject_block, verti_chunks[0]);
+   main_rect.render_widget(content_block, verti_chunks[1]);
+   main_rect.render_widget(attachment_block, verti_chunks[2]);
    //main_rect.render_widget(right, write_chunks[1]);
    main_rect.render_stateful_widget(table, hori_chunks[1], &mut app.contacts_table.state);
 }

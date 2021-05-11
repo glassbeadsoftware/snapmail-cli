@@ -15,6 +15,7 @@ pub mod globals;
 pub mod holochain;
 pub mod conductor;
 pub mod error;
+pub mod attachment;
 
 pub mod wasm;
 

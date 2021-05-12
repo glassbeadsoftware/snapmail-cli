@@ -6,6 +6,7 @@ use crate::{
       menu::*, MailTable, ContactsTable, SnapmailChain,
    }
 };
+use tui::style::Color;
 use holochain_types::dna::*;
 use snapmail::{
    mail::*,
@@ -33,6 +34,13 @@ pub enum InputVariable {
    Subject,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum AppCommand {
+   None,
+   SendMail,
+   AcknowledgeMail(HeaderHash),
+}
+
 /// App holds the state of the application
 pub struct App {
    /// Current value of the input box
@@ -44,6 +52,8 @@ pub struct App {
 
    pub sid: String,
    pub uid: String,
+
+   pub command: AppCommand,
 
    pub active_menu_item: TopMenuItem,
    pub active_folder_item: FolderItem,
@@ -59,8 +69,10 @@ pub struct App {
 
    /// - Debug
    pub frame_count: u32,
+
    /// History of recorded messages
-   pub messages: Vec<String>,
+   pub feedback_index: u32,
+   pub feedbacks: Vec<(String, Color, Color)>,
 }
 
 impl App {
@@ -80,8 +92,9 @@ impl App {
          input: String::new(),
          input_mode: InputMode::Normal,
          input_variable: InputVariable::Content,
-         messages: vec!["Welcome to Snapmail".to_string()],
-
+         feedback_index: 0,
+         feedbacks: Vec::new(),
+         command: AppCommand::None,
          frame_count: 0,
          active_menu_item: TopMenuItem::View,
          active_folder_item: FolderItem::Inbox,
@@ -95,6 +108,63 @@ impl App {
          write_attachment: String::new(),
          //write_attachments: Vec::new(),
       }
+   }
+
+   pub fn update_data(&mut self, chain: &SnapmailChain) {
+      // Update mail table && keep current selection
+      let mail_list = filter_chain(&chain, self.active_folder_item);
+      let maybe_hh = if let Some(i) = self.mail_table.state.selected() {
+         Some(self.mail_table.mail_index_map.get(&i).unwrap().clone())
+      } else { None };
+      self.mail_table = MailTable::new(mail_list, &chain.handle_map);
+      if let Some(hh) = maybe_hh {
+         for (index, current) in &self.mail_table.mail_index_map {
+            if *current == hh {
+               self.mail_table.state.select(Some(*index));
+            }
+         }
+      }
+      // Update contacts table
+      self.contacts_table = ContactsTable::new(&chain.handle_map);
+   }
+
+   pub fn feedback(&mut self, msg: &str) {
+      self.feedback_ext(msg, Color::White, Color::Black);
+   }
+
+   pub fn feedback_ext(&mut self, msg: &str, fg: Color, bg: Color) {
+      self.feedbacks.push((msg.to_string(), fg, bg));
+      self.feedback_index = self.feedbacks.len() as u32 - 1;
+   }
+
+   /// Returns true if chain should be updated
+   pub fn process_command(&mut self, conductor: ConductorHandle, chain: &SnapmailChain) -> bool {
+      let mut can_update_chain = false;
+      match &self.command {
+         AppCommand::SendMail => {
+            self.send_mail(conductor.clone(), chain);
+            can_update_chain = true;
+         },
+         AppCommand::AcknowledgeMail(hh) => {
+            if let Some(mail_item) = chain.mail_map.get(hh) {
+               match mail_item.state {
+                  MailState::In(InMailState::Incoming) |
+                  MailState::In(InMailState::Arrived) => {
+                     let res = snapmail_acknowledge_mail(conductor, hh.clone());
+                     if let Ok(_entry_hash) = res {
+                        let msg = format!("Mail acknowledged: {}", hh);
+                        self.feedback_ext(&msg, Color::Green, Color::Black);
+                        can_update_chain = true;
+                     }
+                  }
+                  _ => {},
+               }
+            }
+         },
+         _ => {},
+      }
+      self.command = AppCommand::None;
+      can_update_chain
    }
 
    ///
@@ -155,13 +225,13 @@ impl App {
          },
          WriteBlock::Attachments => {
             self.input = String::new();
-            //self.input_mode = InputMode::Normal;
-            self.contacts_table.state.select(Some(1));
+            if let None = self.contacts_table.state.selected() {
+               self.contacts_table.state.select(Some(0));
+            }
             WriteBlock::Contacts
          },
          WriteBlock::None | WriteBlock::Contacts => {
             self.input = self.write_subject.clone();
-            //self.input_mode = InputMode::Editing;
             self.input_variable = InputVariable::Subject;
             WriteBlock::Subject
          },
@@ -191,7 +261,7 @@ impl App {
          }
       }
       if 0 == to_list.len() + cc_list.len() + bcc_list.len() {
-         self.messages.insert(0, "Send aborted: No recepient selected".to_string());
+         self.feedback("Send aborted: No recepient selected");
          return;
       }
 
@@ -225,8 +295,16 @@ impl App {
       let output = snapmail_send_mail(conductor, mail).unwrap();
       /// Show results
       let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
-      let message = format!("Send done ({} / {}): {:?}", pending_count, send_count, output.outmail);
-      self.messages.insert(0, message);
+      let message = format!("Mail sent. Pendings:  {} / {} ({})", pending_count, send_count, output.outmail);
+      let fg_color =  if pending_count == 0 {
+         Color::Green
+      } else if pending_count == send_count {
+         Color::LightMagenta
+      }  else {
+         Color::Yellow
+      };
+
+      self.feedback_ext(&message, fg_color, Color::Black);
 
       // Erase State
       self.input = String::new();

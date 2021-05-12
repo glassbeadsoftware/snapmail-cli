@@ -11,6 +11,7 @@ use snapmail::handle::*;
 use tui::{
    backend::CrosstermBackend,
    Terminal,
+   style::Color,
 };
 
 use crate::{
@@ -36,11 +37,12 @@ pub async fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
    /// - Startup holochain
    let conductor = start_conductor(sid.clone()).await;
-   let chain = pull_source_chain(conductor.clone()).await;
+   let mut chain = pull_source_chain(conductor.clone()).await;
    terminal.clear()?;
 
    /// - Setup UI
    let mut app = App::new(sid, &chain);
+   app.feedback("Welcome to Snapmail");
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();
@@ -71,12 +73,18 @@ pub async fn run(
       terminal.draw(|main_rect| {
          draw(main_rect, &chain, &mut app);
       })?;
-
+      /// Process Command
+      let can_update_chain = app.process_command(conductor.clone(), &chain);
+      if can_update_chain {
+         // app.feedback("Updating source chain and app tables");
+         chain = pull_source_chain(conductor.clone()).await;
+         app.update_data(&chain);
+      }
       /// Check if input received
       let event = rx.recv()?;
       let key_code =
          if let Event::Input(key_event) = event {
-            app.messages.insert(0, format!("Key pressed: {:?}", key_event.code));
+            //app.feedback(&format!("Key pressed: {:?}", key_event.code));
             key_event.code
          } else { KeyCode::Null };
       let input_mode = app.input_mode.clone();
@@ -90,7 +98,7 @@ pub async fn run(
                KeyCode::Char('v') => app.active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => app.active_menu_item = TopMenuItem::Write,
                KeyCode::Char('e') => app.active_menu_item = TopMenuItem::Settings,
-
+               /// View Menu
                KeyCode::Char('i') => {
                   app.update_active_folder(&chain, FolderItem::Inbox)
                },
@@ -103,14 +111,19 @@ pub async fn run(
                KeyCode::Char('a') => {
                   app.update_active_folder(&chain, FolderItem::All)
                },
-
+               /// Write Screen
                KeyCode::Insert => {
                   if app.active_menu_item == TopMenuItem::Write {
-                     app.send_mail(conductor.clone(), &chain);
+                     app.feedback_ext("Sending mail...", Color::Black, Color::Red);
+                     app.command = AppCommand::SendMail;
                   }
                }
-
-               /// Settings Menu
+               KeyCode::Tab => {
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.toggle_write_block();
+                  }
+               },
+               /// Settings Screen
                KeyCode::Char('b') => {
                   if app.active_menu_item == TopMenuItem::Settings {
                      app.input_variable = InputVariable::BoostrapUrl;
@@ -132,24 +145,35 @@ pub async fn run(
                      app.input = app.uid.clone();
                   }
                },
+               /// View Screen
                KeyCode::Down => {
                   if app.active_menu_item == TopMenuItem::View {
-                     app.messages.insert(0, "MailTable NEXT".to_string());
                      app.mail_table.next();
+                     if let Some(index) = app.mail_table.state.selected() {
+                        let hh = app.mail_table.mail_index_map.get(&index).unwrap().clone();
+                        app.command = AppCommand::AcknowledgeMail(hh.clone());
+                        app.feedback(&format!("Reading mail: {}", hh));
+                     }
                   }
                }
                KeyCode::Up => {
                   if app.active_menu_item == TopMenuItem::View {
-                     app.messages.insert(0, "MailTable PREVIOUS".to_string());
                      app.mail_table.previous();
+                     if let Some(index) = app.mail_table.state.selected() {
+                        let hh = app.mail_table.mail_index_map.get(&index).unwrap().clone();
+                        app.command = AppCommand::AcknowledgeMail(hh.clone());
+                        app.feedback(&format!("Reading mail: {}", hh));
+                     }
                   }
                },
-               KeyCode::Tab => {
-                  if app.active_menu_item == TopMenuItem::Write {
-                     app.toggle_write_block();
-                  }
+               /// Misc
+               KeyCode::Enter => {},
+               KeyCode::PageUp => {
+                  app.feedback_index = std::cmp::max(0 as i32, app.feedback_index as i32 - 1) as u32;
                },
-               KeyCode::Enter => {}
+               KeyCode::PageDown => {
+                  app.feedback_index = std::cmp::min(app.feedbacks.len() as i32 - 1, app.feedback_index as i32 + 1) as u32;
+               },
                _ => {}
             }
          },
@@ -171,14 +195,14 @@ pub async fn run(
                KeyCode::Down => {
                   if app.active_menu_item == TopMenuItem::Write &&
                      app.active_write_block == WriteBlock::Contacts {
-                     app.messages.insert(0, "ContactsTable NEXT".to_string());
+                     app.feedback("ContactsTable NEXT");
                      app.contacts_table.next();
                   }
                }
                KeyCode::Up => {
                   if app.active_menu_item == TopMenuItem::Write  &&
                      app.active_write_block == WriteBlock::Contacts {
-                     app.messages.insert(0, "ContactsTable PREVIOUS".to_string());
+                     app.feedback("ContactsTable PREVIOUS");
                      app.contacts_table.previous();
                   }
                },
@@ -188,7 +212,7 @@ pub async fn run(
                      match app.input_variable {
                         InputVariable::Handle => {
                            let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
-                           app.messages.insert(0, format!("Handle entry hash: {}", hash.to_string()));
+                           app.feedback(&format!("Handle entry hash: {}", hash.to_string()));
                         },
                         InputVariable::Uid => {
                            app.uid = app.input.clone();

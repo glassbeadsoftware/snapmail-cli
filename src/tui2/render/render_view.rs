@@ -38,9 +38,10 @@ pub fn render_view(
          ])
       })
       .collect();
+   let filebox_title = format!("Filebox: {} / {}", app.mail_table.items.len(), chain.mail_map.len());
    let tabs = Tabs::new(top_menu)
       .select(app.active_folder_item.to_owned().into())
-      .block(Block::default().title("Filebox").borders(Borders::ALL))
+      .block(Block::default().title(filebox_title).borders(Borders::ALL))
       .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
       .divider(Span::raw("|"));
@@ -87,7 +88,7 @@ pub fn render_view(
    let mail_txt = if let Some(index) = app.mail_table.state.selected() {
       app.mail_table.get_mail_text(index, &chain)
    } else {
-      "No Mail Selected".to_string()
+      "<No Mail Selected>".to_string()
    };
    let bottom = Paragraph::new(mail_txt)
       .alignment(Alignment::Left)

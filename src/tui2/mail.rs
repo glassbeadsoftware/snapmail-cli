@@ -16,8 +16,12 @@ pub struct MailTable {
 impl MailTable {
    pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable {
       let mut mail_index_map = HashMap::new();
+      let mut sorted_mails = mails.clone();
+      sorted_mails.sort_by(|a, b| {a.date.cmp(&b.date)});
       let mut i = 0;
-      let items: Vec<Vec<String>> = mails.iter().map(|mail| {
+      let items: Vec<Vec<String>> = sorted_mails
+         .iter()
+         .map(|mail| {
          mail_index_map.insert(i, mail.address.clone());
          i+= 1;
          let status = get_status_string(mail);

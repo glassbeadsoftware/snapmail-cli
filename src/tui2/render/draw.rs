@@ -23,7 +23,6 @@ pub fn draw(
    app: &mut App,
 ) {
    let menu_titles = vec!["View", "Write", "Edit Settings", "Quit"];
-
    /// Set vertical layout
    let size = main_rect.size();
    let chunks = Layout::default()
@@ -37,7 +36,6 @@ pub fn draw(
          ].as_ref(),
       )
       .split(size);
-
    /// Set top menu
    let top_menu = menu_titles
       .iter()
@@ -54,7 +52,6 @@ pub fn draw(
          ])
       })
       .collect();
-
    let title = format!("Snapmail {} - {} - {} - {} - {}", SNAPMAIL_VERSION,
                        app.sid, app.uid, chain.my_handle.clone(), app.frame_count);
    let tabs = Tabs::new(top_menu)
@@ -65,16 +62,20 @@ pub fn draw(
       .divider(Span::raw("|"));
    main_rect.render_widget(tabs, chunks[0]);
 
-   let feedback = Paragraph::new(app.messages[0].clone())
+   /// Set feedback block
+   let feedback = app.feedbacks[app.feedback_index as usize].clone();
+   //let feedback = format!("{}. {}",app.feedback_index, app.feedbacks[app.feedback_index as usize].clone().0)
+   let feedback_block = Paragraph::new(feedback.0)
       .alignment(Alignment::Center)
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
-            .title("Feedback")
+            .style(Style::default().fg(feedback.1).bg(feedback.2))
+            .border_style(Style::default().fg(feedback.1))
+            .title("")
             .border_type(BorderType::Plain),
       );
-   main_rect.render_widget(feedback, chunks[2]);
+   main_rect.render_widget(feedback_block, chunks[2]);
 
    /// Render main block according to active menu item
    match app.active_menu_item {

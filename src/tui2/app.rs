@@ -3,7 +3,9 @@ use crate::{
    attachment::*,
    globals::*,
    tui2::{
-      menu::*, MailTable, ContactsTable, SnapmailChain,
+      menu::*,
+      tables::{MailTable, ContactsTable},
+      SnapmailChain,
    }
 };
 use tui::style::Color;

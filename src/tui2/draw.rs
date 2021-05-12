@@ -56,7 +56,7 @@ pub fn draw(
       })
       .collect();
 
-   let title = format!("Snapmail v0.0.4 - {} - {} - {} - {}",
+   let title = format!("Snapmail {} - {} - {} - {} - {}", SNAPMAIL_VERSION,
                        app.sid, app.uid, chain.my_handle.clone(), app.frame_count);
    let tabs = Tabs::new(top_menu)
       .select(app.active_menu_item.to_owned().into())

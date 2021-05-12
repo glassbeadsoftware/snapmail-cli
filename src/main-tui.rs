@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       return Ok(());
    }
    if args[1] == "-v" {
-      println!("\n v0.0.4");
+      println!("\n{}", SNAPMAIL_VERSION);
       return Ok(());
    }
    if args[1] == "-l" {
@@ -82,6 +82,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    terminal.clear()?;
 
    /// Run TUI app
+   std::env::set_var("WASM_LOG", "NONE");
+   std::env::set_var("RUST_LOG", "NONE");
    let _res = tui2::run(&mut terminal, args[1].clone()).await;
 
    terminal.clear()?;

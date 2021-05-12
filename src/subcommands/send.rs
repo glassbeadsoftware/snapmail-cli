@@ -44,6 +44,7 @@ impl SendCommand {
       // Form attachment list
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
       if let Some(attachment) = self.maybe_attachment {
+         msg!("Reading attachment file: {:?}", attachment);
          let hh = write_attachment(conductor.clone(), attachment).unwrap();
          manifest_address_list.push(hh);
       }

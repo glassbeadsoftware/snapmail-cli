@@ -90,7 +90,7 @@ pub fn render_view(
    } else {
       "<No Mail Selected>".to_string()
    };
-   let bottom = Paragraph::new(mail_txt)
+   let mail_content_block = Paragraph::new(mail_txt)
       .alignment(Alignment::Left)
       .block(
          Block::default()
@@ -100,15 +100,42 @@ pub fn render_view(
             .border_type(BorderType::Plain),
       );
 
-   let right = Paragraph::new("Attachments")
-      .alignment(Alignment::Center)
-      .block(
-         Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
-            .title("Attachments")
-            .border_type(BorderType::Plain),
-      );
+
+   // let attachments_block = Paragraph::new("Attachments")
+   //    .alignment(Alignment::Center)
+   //    .block(
+   //       Block::default()
+   //          .borders(Borders::ALL)
+   //          .style(Style::default().fg(Color::White))
+   //          .title("Attachments")
+   //          .border_type(BorderType::Plain),
+   //    );
+
+   let selected_style = Style::default().add_modifier(Modifier::REVERSED);
+   let att_rows = app.attachments_table.items.iter().map(|item| {
+      let height = item
+         .iter()
+         .map(|content| content.chars().filter(|c| *c == '\n').count())
+         .max()
+         .unwrap_or(0)
+         + 1;
+      let cells = item.iter().map(|c| Cell::from(c.as_str()));
+      Row::new(cells).height(height as u16).bottom_margin(0)
+   });
+   let att_table = Table::new(att_rows)
+      //.header(header)
+      .block(Block::default()
+         .borders(Borders::ALL).title("Attachments"))
+      .highlight_style(selected_style)
+      //.highlight_symbol(">> ")
+      .widths(&[
+         //Constraint::Min(10),
+         Constraint::Length(4),
+         Constraint::Min(6),
+         Constraint::Length(9),
+      ]);
+
+
 
    /// - Layout and render
    let vert_chunks = Layout::default()
@@ -132,7 +159,7 @@ pub fn render_view(
    main_rect.render_widget(tabs, vert_chunks[0]);
    main_rect.render_stateful_widget(table, vert_chunks[1], &mut app.mail_table.state);
    //main_rect.render_widget(top, vert_chunks[1]);
-   main_rect.render_widget(bottom, hori_chunks[0]);
-   main_rect.render_widget(right, hori_chunks[1]);
+   main_rect.render_widget(mail_content_block, hori_chunks[0]);
+   main_rect.render_widget(att_table, hori_chunks[1]);
 
 }

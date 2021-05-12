@@ -148,22 +148,13 @@ pub async fn run(
                /// View Screen
                KeyCode::Down => {
                   if app.active_menu_item == TopMenuItem::View {
-                     app.mail_table.next();
-                     if let Some(index) = app.mail_table.state.selected() {
-                        let hh = app.mail_table.mail_index_map.get(&index).unwrap().clone();
-                        app.command = AppCommand::AcknowledgeMail(hh.clone());
-                        app.feedback(&format!("Reading mail: {}", hh));
-                     }
+                     app.next_mail(&chain);
+
                   }
                }
                KeyCode::Up => {
                   if app.active_menu_item == TopMenuItem::View {
-                     app.mail_table.previous();
-                     if let Some(index) = app.mail_table.state.selected() {
-                        let hh = app.mail_table.mail_index_map.get(&index).unwrap().clone();
-                        app.command = AppCommand::AcknowledgeMail(hh.clone());
-                        app.feedback(&format!("Reading mail: {}", hh));
-                     }
+                     app.previous_mail(&chain);
                   }
                },
                /// Misc

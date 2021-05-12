@@ -4,7 +4,7 @@ use crate::{
    globals::*,
    tui2::{
       menu::*,
-      tables::{MailTable, ContactsTable},
+      tables::{MailTable, ContactsTable, AttachmentsTable},
       SnapmailChain,
    }
 };
@@ -57,6 +57,8 @@ pub struct App {
 
    pub command: AppCommand,
 
+   pub attachments_table: AttachmentsTable,
+
    pub active_menu_item: TopMenuItem,
    pub active_folder_item: FolderItem,
 
@@ -97,6 +99,7 @@ impl App {
          feedback_index: 0,
          feedbacks: Vec::new(),
          command: AppCommand::None,
+         attachments_table: AttachmentsTable::new(Vec::new()),
          frame_count: 0,
          active_menu_item: TopMenuItem::View,
          active_folder_item: FolderItem::Inbox,
@@ -112,6 +115,33 @@ impl App {
       }
    }
 
+   ///
+   pub fn next_mail(&mut self, chain: &SnapmailChain) {
+      self.mail_table.next();
+      if let Some(index) = self.mail_table.state.selected() {
+         let hh = self.mail_table.mail_index_map.get(&index).unwrap().clone();
+         self.command = AppCommand::AcknowledgeMail(hh.clone());
+         self.feedback(&format!("Reading mail: {}", hh));
+         /// Attachment
+         let item = chain.mail_map.get(&hh).unwrap();
+         self.attachments_table = AttachmentsTable::new(item.mail.attachments.clone());
+      }
+   }
+
+   ///
+   pub fn previous_mail(&mut self, chain: &SnapmailChain) {
+      self.mail_table.previous();
+      if let Some(index) = self.mail_table.state.selected() {
+         let hh = self.mail_table.mail_index_map.get(&index).unwrap().clone();
+         self.command = AppCommand::AcknowledgeMail(hh.clone());
+         self.feedback(&format!("Reading mail: {}", hh));
+         /// Attachment
+         let item = chain.mail_map.get(&hh).unwrap();
+         self.attachments_table = AttachmentsTable::new(item.mail.attachments.clone());
+      }
+   }
+
+   ///
    pub fn update_data(&mut self, chain: &SnapmailChain) {
       // Update mail table && keep current selection
       let mail_list = filter_chain(&chain, self.active_folder_item);

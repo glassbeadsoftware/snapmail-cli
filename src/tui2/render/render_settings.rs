@@ -6,14 +6,11 @@ use tui::{
    style::{Color, Modifier, Style},
    text::{Span, Spans},
    widgets::{
-      // Widget, List, ListItem, ListState,
-      Block, BorderType, Borders, Cell, Paragraph, Row, Table, Tabs,
+      Block, BorderType, Borders, Paragraph,
    },
 };
-//use std::path::PathBuf;
 use crate::{
    tui2::*,
-   tui2::menu::*,
 };
 
 ///

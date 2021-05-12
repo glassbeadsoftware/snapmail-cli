@@ -6,14 +6,12 @@ use tui::{
    style::{Color, Modifier, Style},
    text::{Span, Spans},
    widgets::{
-      // Widget, List, ListItem, ListState,
       Block, BorderType, Borders, Cell, Paragraph, Row, Table, Tabs,
    },
 };
-//use std::path::PathBuf;
 use crate::{
-   tui2::*,
-   tui2::menu::*,
+   tui2::snapmail_chain::*,
+   tui2::App,
 };
 
 ///

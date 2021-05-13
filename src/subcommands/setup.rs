@@ -18,7 +18,7 @@ use crate::{
    conductor::*,
 };
 //use holochain_conductor_api::config::conductor::ConductorConfig;
-use crate::subcommands::config::*;
+use crate::config::*;
 use snapmail::handle::*;
 
 /// This creates a new holochain sandbox
@@ -28,12 +28,16 @@ use snapmail::handle::*;
 /// - keystore
 #[derive(Debug, StructOpt, Clone)]
 pub struct SetupCommand {
-   /// Network ID that this session will use
-   uid: String,
-   // #[structopt(name = "mdns")]
-   // maybe_can_mdns: Option<bool>,
+
    #[structopt(subcommand, name = "network")]
    pub maybe_network: Option<NetworkCmd>,
+
+   /// Network ID that this session will use
+   uid: String,
+
+   // #[structopt(name = "mdns")]
+   // maybe_can_mdns: Option<bool>,
+
    // Set a root directory for the app's storage data to be placed into.
    // Defaults to the system's temp directory.
    // This directory must already exist.
@@ -54,7 +58,8 @@ impl SetupCommand {
       ).expect("Generate config failed. Maybe Invalid params.");
 
 
-      let _ = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
+      let wasm_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
+      // msg!("    Using wasm: {}", wasm_hash);
       let conductor = start_conductor(sid_str.clone()).await;
       let hash = snapmail_set_handle(conductor, sid_str.clone()).unwrap();
       msg!(" handle set: {} - {:?}", sid_str, hash);

@@ -16,7 +16,7 @@ pub mod holochain;
 pub mod conductor;
 pub mod error;
 pub mod attachment;
-
+pub mod config;
 pub mod wasm;
 
 ///

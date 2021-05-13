@@ -37,7 +37,7 @@ pub async fn run(
    sid: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
    /// - Startup holochain
-   let conductor = start_conductor(sid.clone()).await;
+   let conductor = start_conductor_or_abort(sid.clone()).await;
    let mut chain = pull_source_chain(conductor.clone()).await;
    terminal.clear()?;
 

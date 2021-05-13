@@ -37,13 +37,13 @@ pub async fn run(
    sid: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
    /// - Startup holochain
-   let conductor = start_conductor_or_abort(sid.clone()).await;
+   let (conductor, dna_hash) = start_conductor_or_abort(sid.clone()).await;
    let mut chain = pull_source_chain(conductor.clone()).await;
    terminal.clear()?;
 
    /// - Setup UI
    let mut app = App::new(sid, &chain);
-   app.feedback("Welcome to Snapmail");
+   app.feedback(&format!("Welcome to Snapmail ! {:?}", dna_hash));
 
    /// Setup input loop
    let (tx, rx) = mpsc::channel();

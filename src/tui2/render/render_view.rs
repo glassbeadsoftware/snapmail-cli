@@ -48,12 +48,12 @@ pub fn render_view(
 
    /// -- Set Mail Table
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
-   let normal_style = Style::default().bg(Color::Blue).add_modifier(Modifier::BOLD);
+   let normal_style = Style::default().bg(Color::Magenta);
 
    //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
    let header_cells = ["", "From", "Subject", "Message", "Date"]
       .iter()
-      .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
+      .map(|h| Cell::from(*h).style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD)));
    let header = Row::new(header_cells)
       .style(normal_style)
       .height(1)

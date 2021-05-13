@@ -19,7 +19,7 @@ use holochain_keystore::keystore_actor::KeystoreSenderExt;
 use holochain::conductor::config::ConductorConfig;
 
 ///
-pub async fn start_conductor_or_abort(sid: String) -> ConductorHandle {
+pub async fn start_conductor_or_abort(sid: String) -> (ConductorHandle, DnaHash) {
    /// Make sure config exists
    let config_path = Path::new(&*CONFIG_PATH).join(sid.clone()).join(CONDUCTOR_CONFIG_FILENAME);
    if let Err(_e) = ConductorConfig::load_yaml(config_path.as_ref()) {
@@ -50,7 +50,7 @@ pub async fn start_conductor_or_abort(sid: String) -> ConductorHandle {
       std::process::abort();
    }
    /// Done
-   return conductor;
+   return (conductor, expected_hash);
 }
 
 

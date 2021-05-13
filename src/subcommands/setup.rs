@@ -58,8 +58,8 @@ impl SetupCommand {
       ).expect("Generate config failed. Maybe Invalid params.");
 
 
-      let wasm_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
-      // msg!("    Using wasm: {}", wasm_hash);
+      let _dna_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
+      // msg!("    Using DNA: {}", dna_hash);
       let conductor = start_conductor(sid_str.clone()).await;
       let hash = snapmail_set_handle(conductor, sid_str.clone()).unwrap();
       msg!(" handle set: {} - {:?}", sid_str, hash);

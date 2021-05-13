@@ -120,7 +120,7 @@ impl App {
          active_write_block: WriteBlock::None,
          write_subject: String::new(),
          write_content: String::new(),
-         write_attachment: String::new(),
+         write_attachment: std::env::current_dir().unwrap().into_os_string().into_string().unwrap(),
          //write_attachments: Vec::new(),
       }
    }
@@ -382,14 +382,12 @@ impl App {
       // Erase State
       self.input = String::new();
       self.write_content = String::new();
-      self.write_attachment = String::new();
+      self.write_attachment = std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
       //self.write_attachments = Vec::new();
       self.write_subject = String::new();
       self.contacts_table = ContactsTable::new(&chain.handle_map);
    }
-
 }
-
 
 ///
 pub fn filter_chain(chain: &SnapmailChain, folder: FolderItem) -> Vec<MailItem> {

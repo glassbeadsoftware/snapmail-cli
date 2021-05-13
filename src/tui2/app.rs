@@ -34,6 +34,7 @@ pub enum InputVariable {
    Content,
    Attachment,
    Subject,
+   DownloadFolder,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -54,6 +55,8 @@ pub struct App {
 
    pub sid: String,
    pub uid: String,
+
+   pub download_folder: PathBuf,
 
    pub command: AppCommand,
 
@@ -92,6 +95,12 @@ impl App {
       let uid = std::fs::read_to_string(app_filepath)
          .unwrap_or("test-network".to_string());
 
+      let dl_filepath = path.join(APP_DL_CONFIG_FILENAME);
+      let mut download_folder = std::env::current_dir().unwrap();
+       if let Ok(s) = std::fs::read_to_string(dl_filepath) {
+          download_folder = PathBuf::from(s);
+       }
+
       App {
          input: String::new(),
          input_mode: InputMode::Normal,
@@ -105,6 +114,7 @@ impl App {
          active_folder_item: FolderItem::Inbox,
          sid,
          uid,
+         download_folder,
          mail_table,
          contacts_table,
          active_write_block: WriteBlock::None,
@@ -124,12 +134,17 @@ impl App {
          return;
       }
       let info = maybe_info.unwrap();
-      if let Ok(path) = get_attachment(conductor.clone(), info.manifest_eh.clone()) {
-         let msg = format!("File writen at: {:?}", path);
+      let maybe_path = get_attachment(
+         conductor.clone(),
+         info.manifest_eh.clone(),
+         self.download_folder.clone(),
+      );
+      if let Ok(path) = maybe_path {
+         let msg = format!("File written at: {:?}", path);
          self.feedback_ext(&msg, Color::Green, Color::Black);
       } else {
-         let msg = format!("Failed getting file {}", info.manifest_eh.clone());
-         self.feedback_ext(&msg, Color::Yellow, Color::Black);
+         let msg = format!("Failed written file ({})", info.manifest_eh.clone());
+         self.feedback_ext(&msg, Color::Red, Color::Black);
       }
    }
 

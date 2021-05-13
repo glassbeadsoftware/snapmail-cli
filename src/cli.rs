@@ -159,7 +159,7 @@ impl SnapSubcommand {
             let eh: EntryHash = stoh(hash);
             //let uid_str = uid.to_string_lossy().to_string();
             let conductor = start_conductor(sid_str).await;
-            let path = get_attachment(conductor, eh)?;
+            let path = get_attachment(conductor, eh, std::env::current_dir().unwrap())?;
             msg!("File writen at: {:?}", path);
          },
          Self::Directory => {

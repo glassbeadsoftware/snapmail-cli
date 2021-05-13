@@ -75,7 +75,7 @@ pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result
 }
 
 ///
-pub fn get_attachment(conductor: ConductorHandle, eh: EntryHash) -> std::io::Result<PathBuf> {
+pub fn get_attachment(conductor: ConductorHandle, eh: EntryHash, path: PathBuf) -> std::io::Result<PathBuf> {
    let manifest = snapmail_get_manifest(conductor.clone(), AnyDhtHash::from(eh)).unwrap();
 
    // /// Print
@@ -93,8 +93,7 @@ pub fn get_attachment(conductor: ConductorHandle, eh: EntryHash) -> std::io::Res
    }
 
    /// Write file to local dir
-   let cd = std::env::current_dir().unwrap();
-   let filepath = cd.join(manifest.filename);
+   let filepath = path.join(manifest.filename);
    let mut file = std::fs::File::create(filepath.clone())?;
    file.write_all(&data)?;
    Ok(filepath)

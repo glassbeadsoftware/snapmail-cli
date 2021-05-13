@@ -14,7 +14,11 @@ use crate::{
 };
 
 ///
-pub fn render_settings(app: &App, main_rect: &mut Frame<CrosstermBackend<io::Stdout>>, area: Rect) {
+pub fn render_settings(
+   app: &App,
+   main_rect: &mut Frame<CrosstermBackend<io::Stdout>>,
+   area: Rect,
+) {
    let settings_chunks = Layout::default()
       .direction(Direction::Vertical)
       .constraints(
@@ -22,7 +26,7 @@ pub fn render_settings(app: &App, main_rect: &mut Frame<CrosstermBackend<io::Std
       )
       .split(area);
 
-   let items = vec!["Handle", "UID", "Proxy URL", "Bootstrap URL"];
+   let items = vec!["Handle", "UID", "Proxy URL", "Bootstrap URL", "Download Folder"];
 
    let items: Vec<Spans> = items
       .iter()

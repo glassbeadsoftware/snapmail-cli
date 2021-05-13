@@ -7,6 +7,7 @@ use std::io;
 use std::thread;
 use std::time::{Duration, Instant};
 use snapmail::handle::*;
+use std::path::PathBuf;
 
 use tui::{
    backend::CrosstermBackend,
@@ -190,6 +191,13 @@ pub async fn run(
                      app.input = app.uid.clone();
                   }
                },
+               KeyCode::Char('d') => {
+                  if app.active_menu_item == TopMenuItem::Settings {
+                     app.input_variable = InputVariable::DownloadFolder;
+                     app.input_mode = InputMode::Editing;
+                     app.input = app.download_folder.clone().into_os_string().into_string().unwrap();
+                  }
+               },
                /// View Screen
                KeyCode::Down => {
                   if app.active_menu_item == TopMenuItem::View {
@@ -257,6 +265,12 @@ pub async fn run(
                            std::fs::write(app_filepath, app.uid.as_bytes()).unwrap();
                            // Must restart conductor
                            return Ok(());
+                        },
+                        InputVariable::DownloadFolder => {
+                           app.download_folder = PathBuf::from(app.input.clone());
+                           let config_path = Path::new(&*CONFIG_PATH).join(app.sid.clone());
+                           let app_filepath = config_path.join(APP_DL_CONFIG_FILENAME);
+                           std::fs::write(app_filepath, app.input.as_bytes()).unwrap();
                         },
                         _ => {},
                      }

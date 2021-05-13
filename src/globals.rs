@@ -9,6 +9,7 @@ pub const SNAPMAIL_APP_NAME: &str          = "snapmail-cli";
 pub const LAIR_MAGIC_READY_STRING: &str    = "#lair-keystore-ready#";
 pub const CONDUCTOR_CONFIG_FILENAME: &str  = "conductor-config.yaml";
 pub const APP_CONFIG_FILENAME: &str        = "app-config.txt";
+pub const APP_DL_CONFIG_FILENAME: &str     = "app-dl-config.txt"; // FIXME
 
 lazy_static! {
    pub static ref DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(9);

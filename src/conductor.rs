@@ -61,7 +61,11 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<()> {
    // let dna_wasm = DnaWasm::from(wasm.to_owned());
 
    println!("Loading DNA wasm vec!");
-   let dna_wasm = DnaWasm::from(crate::wasm::DNA_WASM.to_vec());
+   //let compressed = crate::wasm::DNA_WASM.to_vec();
+   let compressed = base64::decode_config(crate::wasm::DNA_WASM_B64, base64::URL_SAFE_NO_PAD).unwrap();
+   let (decompressed, _checksum) = yazi::decompress(&compressed, yazi::Format::Zlib).unwrap();
+
+   let dna_wasm = DnaWasm::from(decompressed);
 
    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
       .await

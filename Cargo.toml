@@ -34,6 +34,7 @@ rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
 lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
 
 [dependencies]
+yazi = "0.1.3"
 strum = "0.19"
 strum_macros = "0.19"
 crossterm = { version = "0.19", features = [ "serde" ] }

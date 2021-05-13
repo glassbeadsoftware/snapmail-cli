@@ -120,7 +120,7 @@ impl App {
          active_write_block: WriteBlock::None,
          write_subject: String::new(),
          write_content: String::new(),
-         write_attachment: std::env::current_dir().unwrap().into_os_string().into_string().unwrap(),
+         write_attachment: String::new(), //std::env::current_dir().unwrap().into_os_string().into_string().unwrap(),
          //write_attachments: Vec::new(),
       }
    }
@@ -334,7 +334,7 @@ impl App {
          }
       }
       if 0 == to_list.len() + cc_list.len() + bcc_list.len() {
-         self.feedback("Send aborted: No recepient selected");
+         self.feedback_ext("Send aborted: No recepient selected", Color::Yellow, Color::Black);
          return;
       }
 
@@ -347,13 +347,17 @@ impl App {
       //    }
       // }
 
-      //if let Ok(path) = PathBuf::from(self.write_attachment.clone()) {
-      let path = PathBuf::from(self.write_attachment.clone());
+      if !self.write_attachment.is_empty() {
+         let path = PathBuf::from(self.write_attachment.clone());
          let maybe_hh = write_attachment(conductor.clone(), path);
          if let Ok(hh) = maybe_hh {
             manifest_address_list.push(hh);
+         } else {
+            self.feedback_ext("Send Aborted. Failed loading attachment file", Color::Black, Color::Red);
+            return;
          }
-      //}
+      }
+
       /// Form MailInput
       let mail = SendMailInput {
          subject: self.write_subject.clone(),
@@ -382,7 +386,7 @@ impl App {
       // Erase State
       self.input = String::new();
       self.write_content = String::new();
-      self.write_attachment = std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
+      self.write_attachment = String::new(); //std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
       //self.write_attachments = Vec::new();
       self.write_subject = String::new();
       self.contacts_table = ContactsTable::new(&chain.handle_map);

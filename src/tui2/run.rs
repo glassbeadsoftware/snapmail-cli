@@ -160,7 +160,7 @@ pub async fn run(
                /// Write Screen
                KeyCode::Insert => {
                   if app.active_menu_item == TopMenuItem::Write {
-                     app.feedback_ext("Sending mail...", Color::Black, Color::Red);
+                     app.feedback_ext("Sending mail...", Color::White, Color::Blue);
                      app.command = AppCommand::SendMail;
                   }
                }

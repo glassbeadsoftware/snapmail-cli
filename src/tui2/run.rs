@@ -98,6 +98,51 @@ pub async fn run(
                KeyCode::Char('v') => app.active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => app.active_menu_item = TopMenuItem::Write,
                KeyCode::Char('e') => app.active_menu_item = TopMenuItem::Settings,
+               KeyCode::Char('1') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 0)
+                  }
+               },
+               KeyCode::Char('2') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 1)
+                  }
+               },
+               KeyCode::Char('3') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 2)
+                  }
+               },
+               KeyCode::Char('4') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 3)
+                  }
+               },
+               KeyCode::Char('5') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 4)
+                  }
+               },
+               KeyCode::Char('6') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 5)
+                  }
+               },
+               KeyCode::Char('7') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 6)
+                  }
+               },
+               KeyCode::Char('8') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 7)
+                  }
+               },
+               KeyCode::Char('9') => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.try_download(conductor.clone(), 8)
+                  }
+               },
                /// View Menu
                KeyCode::Char('i') => {
                   app.update_active_folder(&chain, FolderItem::Inbox)

@@ -119,7 +119,11 @@ pub fn render_view(
          .max()
          .unwrap_or(0)
          + 1;
-      let cells = item.iter().map(|c| Cell::from(c.as_str()));
+      let cells = item.iter()
+         .map(|c|
+            Cell::from(c.as_str())
+            .style(Style::default().fg(if c.chars().last() == Some('.') {Color::Yellow} else {Color::White})
+            ));
       Row::new(cells).height(height as u16).bottom_margin(0)
    });
    let att_table = Table::new(att_rows)
@@ -130,8 +134,9 @@ pub fn render_view(
       //.highlight_symbol(">> ")
       .widths(&[
          //Constraint::Min(10),
-         Constraint::Length(4),
-         Constraint::Min(6),
+         //Constraint::Length(4),
+         Constraint::Length(2),
+         Constraint::Min(20), // FIXME
          Constraint::Length(9),
       ]);
 

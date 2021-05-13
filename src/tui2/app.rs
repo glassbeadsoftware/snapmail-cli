@@ -116,6 +116,24 @@ impl App {
    }
 
    ///
+   pub fn try_download(&mut self, conductor: ConductorHandle, index: usize) {
+      let maybe_info = self.attachments_table.manifest_index_map.get(&index);
+      if let None = maybe_info {
+         let msg = format!("No attachment at index {}", index);
+         self.feedback_ext(&msg, Color::Yellow, Color::Black);
+         return;
+      }
+      let info = maybe_info.unwrap();
+      if let Ok(path) = get_attachment(conductor.clone(), info.manifest_eh.clone()) {
+         let msg = format!("File writen at: {:?}", path);
+         self.feedback_ext(&msg, Color::Green, Color::Black);
+      } else {
+         let msg = format!("Failed getting file {}", info.manifest_eh.clone());
+         self.feedback_ext(&msg, Color::Yellow, Color::Black);
+      }
+   }
+
+   ///
    pub fn next_mail(&mut self, chain: &SnapmailChain) {
       self.mail_table.next();
       if let Some(index) = self.mail_table.state.selected() {
@@ -125,6 +143,10 @@ impl App {
          /// Attachment
          let item = chain.mail_map.get(&hh).unwrap();
          self.attachments_table = AttachmentsTable::new(item.mail.attachments.clone());
+         if self.attachments_table.manifest_index_map.len() > 9 {
+            let msg = format!("Max attachments exceeded({})", self.attachments_table.manifest_index_map.len());
+            self.feedback_ext(&msg, Color::Red, Color::Black);
+         }
       }
    }
 
@@ -138,6 +160,10 @@ impl App {
          /// Attachment
          let item = chain.mail_map.get(&hh).unwrap();
          self.attachments_table = AttachmentsTable::new(item.mail.attachments.clone());
+         if self.attachments_table.manifest_index_map.len() > 9 {
+            let msg = format!("Max attachments exceeded({})", self.attachments_table.manifest_index_map.len());
+            self.feedback_ext(&msg, Color::Red, Color::Black);
+         }
       }
    }
 

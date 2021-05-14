@@ -282,9 +282,9 @@ pub async fn run(
                   }
                   if app.active_menu_item == TopMenuItem::Write {
                      match app.active_write_block {
-                        WriteBlock::Contacts => {
-                           app.contacts_table.toggle_selected();
-                        },
+                        // WriteBlock::Contacts => {
+                        //    app.contacts_table.toggle_selected();
+                        // },
                         WriteBlock::Content => {
                            app.input.push('\n');
                         },
@@ -293,10 +293,16 @@ pub async fn run(
                         //    app.write_attachments.push(path);
                         //    app.input = String::new();
                         // },
-                        _ => {}
+                        _ => { app.set_write_block(WriteBlock::None); }
                      }
                   }
                },
+               KeyCode::Left | KeyCode::Right | KeyCode::Char(' ') => {
+                  if app.active_menu_item == TopMenuItem::Write &&
+                     app.active_write_block == WriteBlock::Contacts {
+                        app.contacts_table.toggle_selected();
+                  }
+               }
                KeyCode::Char('\n') => {
                   app.input_mode = InputMode::Normal;
                }

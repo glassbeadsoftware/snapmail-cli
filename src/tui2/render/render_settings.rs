@@ -63,8 +63,8 @@ pub fn render_settings(
          Block::default()
             .borders(Borders::ALL)
             .style(match app.input_mode {
-               InputMode::Normal => Style::default(),
                InputMode::Editing => Style::default().fg(Color::Yellow),
+               _ => Style::default(),
             })
             .title(app.input_variable.to_string())
             .border_type(BorderType::Plain),
@@ -72,6 +72,7 @@ pub fn render_settings(
 
 
    match app.input_mode {
+      InputMode::Scrolling => {},
       InputMode::Normal =>
       // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
          {}

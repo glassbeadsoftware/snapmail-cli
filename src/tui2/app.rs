@@ -23,6 +23,7 @@ use std::path::PathBuf;
 pub enum InputMode {
    Normal,
    Editing,
+   Scrolling,
 }
 
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
@@ -56,6 +57,8 @@ pub struct App {
 
    pub sid: String,
    pub uid: String,
+
+   pub scroll_y: u16,
 
    pub download_folder: PathBuf,
 
@@ -116,6 +119,7 @@ impl App {
          sid,
          uid,
          download_folder,
+         scroll_y: 0,
          mail_table,
          contacts_table,
          active_write_block: WriteBlock::None,

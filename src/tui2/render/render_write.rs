@@ -5,7 +5,7 @@ use tui::{
    layout::{Alignment, Constraint, Direction, Layout, Rect},
    style::{Color, Modifier, Style},
    widgets::{
-      Block, BorderType, Borders, Cell, Paragraph, Row, Table,
+      Block, BorderType, Borders, Cell, Paragraph, Row, Table, Wrap,
    },
 };
 use crate::{
@@ -27,6 +27,7 @@ pub fn render_write(
       app.write_subject.clone()
    };
    let subject_block = Paragraph::new(current_subject)
+      .wrap(Wrap {trim: false})
       .alignment(Alignment::Left)
       .block(
          Block::default()
@@ -39,13 +40,14 @@ pub fn render_write(
             .border_type(BorderType::Plain),
       );
 
-   /// Attachment Block
+   /// Content Block
    let current_content = if app.active_write_block == WriteBlock::Content {
       app.input.clone()
    } else {
       app.write_content.clone()
    };
-   let content_block = Paragraph::new(current_content)
+   let mut content_block = Paragraph::new(current_content)
+      .wrap(Wrap {trim: false})
       .alignment(Alignment::Left)
       .block(
          Block::default()
@@ -135,21 +137,10 @@ pub fn render_write(
 
    /// - Cursor
    match app.input_mode {
+      InputMode::Scrolling => {},
       InputMode::Normal => {},
       InputMode::Editing => {
          if app.active_write_block != WriteBlock::Contacts {
-            let (x_offset, y_offset) = if app.active_write_block == WriteBlock::Content {
-               //             app.input.as_bytes().iter().filter(|&&c| c == b'\n').count() as u16
-               let lines: Vec<&str> = app.input.lines().collect();
-               let x = if let Some(line) = lines.last() {
-                  line.len() as u16
-               } else { 0 };
-               let y = std::cmp::max(0, lines.len() as i32 - 1) as u16;
-               (x, y)
-            } else {
-               (app.input.len() as u16, 0)
-            };
-
             let index =
                match app.active_write_block {
                   WriteBlock::Subject => 0,
@@ -157,13 +148,34 @@ pub fn render_write(
                   WriteBlock::Attachments => 2,
                   _ => 0,
                };
+            let block_width = verti_chunks[index].width - 2;
+            let block_height = verti_chunks[index].height - 2;
+            let (x_offset, y_offset) = if app.active_write_block == WriteBlock::Content {
+               let lines: Vec<&str> = app.input.lines().collect();
+               let mut overlap = 0;
+               for line in lines.clone() {
+                  overlap += line.len() as u16 / block_width;
+               }
+               let scroll_y = lines.len().saturating_sub(block_height as usize) as u16;
+               if app.active_write_block == WriteBlock::Content {
+                  content_block = content_block.scroll((scroll_y, 0));
+               }
+               let x = if let Some(line) = lines.last() {
+                  let line_width = line.len() as u16;
+                  line_width % block_width
+               } else { 0 };
+               let y = std::cmp::max(0, lines.len() as i32 - 1) as u16;
+               (x, y + overlap)
+            } else {
+               (app.input.len() as u16, 0)
+            };
 
             // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
             main_rect.set_cursor(
                // Put cursor past the end of the input text
                verti_chunks[index].x + 1 + x_offset,
                // Move one line down, from the border to the input line
-               verti_chunks[index].y + 1 + y_offset,
+               std::cmp::min(verti_chunks[index].y + block_height, verti_chunks[index].y + 1 + y_offset),
             )
          }
       }

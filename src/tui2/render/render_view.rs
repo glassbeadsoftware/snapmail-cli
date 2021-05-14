@@ -6,12 +6,13 @@ use tui::{
    style::{Color, Modifier, Style},
    text::{Span, Spans},
    widgets::{
-      Block, BorderType, Borders, Cell, Paragraph, Row, Table, Tabs,
+      Block, BorderType, Borders, Cell, Paragraph, Row, Table, Tabs, Wrap,
    },
 };
 use crate::{
    tui2::snapmail_chain::*,
    tui2::App,
+   tui2::app::InputMode,
 };
 
 ///
@@ -91,11 +92,16 @@ pub fn render_view(
       "<No Mail Selected>".to_string()
    };
    let mail_content_block = Paragraph::new(mail_txt)
+      .wrap(Wrap {trim: false})
+      .scroll((app.scroll_y, 0))
       .alignment(Alignment::Left)
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
+            .style(Style::default().fg(match app.input_mode {
+               InputMode::Scrolling => Color::Yellow,
+               _ => Color::White,}
+            ))
             .title("Mail")
             .border_type(BorderType::Plain),
       );

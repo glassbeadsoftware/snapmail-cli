@@ -216,7 +216,11 @@ pub async fn run(
                   }
                },
                /// Misc
-               KeyCode::Enter => {},
+               KeyCode::Enter => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.input_mode = InputMode::Scrolling;
+                  }
+               },
                KeyCode::PageUp => {
                   app.feedback_index = std::cmp::max(0 as i32, app.feedback_index as i32 - 1) as u32;
                },
@@ -282,9 +286,9 @@ pub async fn run(
                   }
                   if app.active_menu_item == TopMenuItem::Write {
                      match app.active_write_block {
-                        // WriteBlock::Contacts => {
-                        //    app.contacts_table.toggle_selected();
-                        // },
+                        WriteBlock::Contacts => {
+                           app.contacts_table.toggle_selected();
+                        },
                         WriteBlock::Content => {
                            app.input.push('\n');
                         },
@@ -297,12 +301,6 @@ pub async fn run(
                      }
                   }
                },
-               KeyCode::Left | KeyCode::Right | KeyCode::Char(' ') => {
-                  if app.active_menu_item == TopMenuItem::Write &&
-                     app.active_write_block == WriteBlock::Contacts {
-                        app.contacts_table.toggle_selected();
-                  }
-               }
                KeyCode::Char('\n') => {
                   app.input_mode = InputMode::Normal;
                }
@@ -314,6 +312,20 @@ pub async fn run(
                }
                _ => {},
             }
+         },
+         InputMode::Scrolling => {
+            match key_code {
+               KeyCode::Esc => {
+                  app.input_mode = InputMode::Normal;
+                  app.scroll_y = 0;
+               },
+               KeyCode::Down => app.scroll_y = app.scroll_y.saturating_add(1),
+               KeyCode::Up =>   app.scroll_y = app.scroll_y.saturating_sub(1),
+               KeyCode::PageDown => app.scroll_y = app.scroll_y.saturating_add(10),
+               KeyCode::PageUp => app.scroll_y = app.scroll_y.saturating_sub(10),
+               _ => {},
+            }
+            // app.feedback(&format!("scroll_y = {}", app.scroll_y));
          },
       }
    }

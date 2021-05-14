@@ -210,6 +210,11 @@ pub async fn run(
                      app.previous_mail(&chain);
                   }
                },
+               KeyCode::Delete => {
+                  if app.active_menu_item == TopMenuItem::View {
+                     app.command = AppCommand::DeleteMail;
+                  }
+               },
                /// Misc
                KeyCode::Enter => {},
                KeyCode::PageUp => {

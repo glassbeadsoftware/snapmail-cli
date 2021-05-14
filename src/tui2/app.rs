@@ -42,6 +42,7 @@ pub enum AppCommand {
    None,
    SendMail,
    AcknowledgeMail(HeaderHash),
+   DeleteMail,
 }
 
 /// App holds the state of the application
@@ -149,6 +150,22 @@ impl App {
    }
 
    ///
+   fn delete_mail(&mut self, conductor: ConductorHandle) {
+      if let Some(index) = self.mail_table.state.selected() {
+         let hh = self.mail_table.mail_index_map.get(&index).unwrap().clone();
+         let res = snapmail_delete_mail(conductor, hh);
+         if let Ok(output) = res {
+            if let Some(hh2) = output.0 {
+               let msg = &format!("Deleted mail {}", hh2);
+               self.feedback_ext(&msg, Color::Green, Color::Black);
+               return;
+            }
+         }
+      }
+      self.feedback_ext("Could not delete selected mail", Color::Yellow, Color::Black);
+   }
+
+   ///
    pub fn next_mail(&mut self, chain: &SnapmailChain) {
       self.mail_table.next();
       if let Some(index) = self.mail_table.state.selected() {
@@ -233,6 +250,10 @@ impl App {
                   _ => {},
                }
             }
+         },
+         AppCommand::DeleteMail => {
+            self.delete_mail(conductor);
+            can_update_chain = true;
          },
          _ => {},
       }
@@ -399,15 +420,19 @@ pub fn filter_chain(chain: &SnapmailChain, folder: FolderItem) -> Vec<MailItem> 
    match folder {
       FolderItem::Inbox => {
          for item in chain.mail_map.values() {
-            if let MailState::In(_) = item.state {
-               res.push(item.clone());
+            if let MailState::In(state) = &item.state {
+               if state != &InMailState::Deleted {
+                  res.push(item.clone());
+               }
             }
          }
       }
       FolderItem::Sent => {
          for item in chain.mail_map.values() {
-            if let MailState::Out(_) = item.state {
-               res.push(item.clone());
+            if let MailState::Out(state) = &item.state {
+               if state != &OutMailState::Deleted {
+                  res.push(item.clone());
+               }
             }
          }
       }

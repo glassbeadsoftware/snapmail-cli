@@ -19,7 +19,7 @@ impl AttachmentsTable {
          i+= 1;
          let _status = String::new();
          let mut row: Vec<String> = Vec::new();
-         let index_str = format!("{}.", i);
+         let index_str = format!(" {}.", i);
          let filesize_str = format!("{} KiB", info.orig_filesize / 1024);
          //row.push(status);
          row.push(index_str);

@@ -14,7 +14,7 @@ pub struct MailTable {
 }
 
 impl MailTable {
-   pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>) -> MailTable {
+   pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>, width: usize) -> MailTable {
       let mut mail_index_map = HashMap::new();
       let mut sorted_mails = mails.clone();
       sorted_mails.sort_by(|a, b| {a.date.cmp(&b.date)});
@@ -38,10 +38,15 @@ impl MailTable {
          } else { mail.mail.subject.clone() };
          /// Content
          let first_line = mail.mail.payload.lines().next().unwrap_or("");
-         let message: String = if first_line.len() > 12 {
-            let base = first_line[0..9].to_string();
+         let mut concat = first_line.to_string();
+         for line in mail.mail.payload.lines().next().iter() {
+            concat = format!("{} {}", concat, line);
+         }
+         let width = std::cmp::max(4, width);
+         let message: String = if concat.len() > width {
+            let base = concat[0..width - 3].to_string();
             base + "..."
-         } else { first_line.to_string() };
+         } else { concat.to_string() };
          /// Date
          let date: DateTime<Local> = Local.timestamp(mail.mail.date_sent as i64, 0);
          let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));

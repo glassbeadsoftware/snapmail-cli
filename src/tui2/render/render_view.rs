@@ -22,6 +22,25 @@ pub fn render_view(
    area: Rect,
    app: &mut App,
 ) {
+
+   /// - Layout
+   let vert_chunks = Layout::default()
+      .direction(Direction::Vertical)
+      .constraints(
+         [
+            Constraint::Length(3),
+            Constraint::Percentage(55),
+            Constraint::Percentage(45),
+         ].as_ref(),
+      )
+      .split(area);
+   let hori_chunks = Layout::default()
+      .direction(Direction::Horizontal)
+      .constraints(
+         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
+      )
+      .split(vert_chunks[2]);
+
    /// -- Set top menu
    let menu_titles = vec!["Inbox", "Sent", "Trash", "All"];
    let top_menu = menu_titles
@@ -70,20 +89,20 @@ pub fn render_view(
       let cells = item.iter().map(|c| Cell::from(c.as_str()));
       Row::new(cells).height(height as u16).bottom_margin(0)
    });
+   let msg_width = area.width.saturating_sub(4 + 20 + 28 + 16 + 5);
+   let mail_table_widths = [
+      Constraint::Length(4),
+      Constraint::Length(20),
+      Constraint::Length(28),
+      Constraint::Length(msg_width),
+      Constraint::Length(16),
+   ];
    let table = Table::new(rows)
       .header(header)
       .block(Block::default().borders(Borders::NONE).title(""))
       .highlight_style(selected_style)
       //.highlight_symbol(">> ")
-      .widths(&[
-         //Constraint::Min(10),
-         Constraint::Length(4),
-         Constraint::Length(20),
-         Constraint::Length(28),
-         Constraint::Length(12),
-         Constraint::Length(16),
-      ]);
-
+      .widths(&mail_table_widths);
 
    /// -- Draw selected mail
    let mail_txt = if let Some(index) = app.mail_table.state.selected() {
@@ -106,17 +125,7 @@ pub fn render_view(
             .border_type(BorderType::Plain),
       );
 
-
-   // let attachments_block = Paragraph::new("Attachments")
-   //    .alignment(Alignment::Center)
-   //    .block(
-   //       Block::default()
-   //          .borders(Borders::ALL)
-   //          .style(Style::default().fg(Color::White))
-   //          .title("Attachments")
-   //          .border_type(BorderType::Plain),
-   //    );
-
+   /// -- Draw Attachments table
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
    let att_rows = app.attachments_table.items.iter().map(|item| {
       let height = item
@@ -132,45 +141,28 @@ pub fn render_view(
             ));
       Row::new(cells).height(height as u16).bottom_margin(0)
    });
+   let att_name_len = hori_chunks[1].width.saturating_sub(3 + 9 + 2);
+   let att_table_widths = [
+      Constraint::Length(3),
+      Constraint::Length(att_name_len),
+      Constraint::Length(9),
+   ];
    let att_table = Table::new(att_rows)
       //.header(header)
       .block(Block::default()
          .borders(Borders::ALL).title("Attachments"))
       .highlight_style(selected_style)
       //.highlight_symbol(">> ")
-      .widths(&[
-         //Constraint::Min(10),
-         //Constraint::Length(4),
-         Constraint::Length(2),
-         Constraint::Min(20), // FIXME
-         Constraint::Length(9),
-      ]);
+      .widths(&att_table_widths);
 
-
-
-   /// - Layout and render
-   let vert_chunks = Layout::default()
-      .direction(Direction::Vertical)
-      .constraints(
-         [
-            Constraint::Length(3),
-            Constraint::Percentage(55),
-            Constraint::Percentage(45),
-         ].as_ref(),
-      )
-      .split(area);
-
-   let hori_chunks = Layout::default()
-      .direction(Direction::Horizontal)
-      .constraints(
-         [Constraint::Percentage(66), Constraint::Percentage(34)].as_ref(),
-      )
-      .split(vert_chunks[2]);
-
+   /// - Render
    main_rect.render_widget(tabs, vert_chunks[0]);
    main_rect.render_stateful_widget(table, vert_chunks[1], &mut app.mail_table.state);
-   //main_rect.render_widget(top, vert_chunks[1]);
    main_rect.render_widget(mail_content_block, hori_chunks[0]);
    main_rect.render_widget(att_table, hori_chunks[1]);
 
+   /// - Notify resize event
+   if msg_width != app.content_width as u16 {
+      app.resize_width(msg_width, chain)
+   }
 }

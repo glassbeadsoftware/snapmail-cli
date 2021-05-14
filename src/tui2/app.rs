@@ -58,6 +58,7 @@ pub struct App {
    pub sid: String,
    pub uid: String,
 
+   pub content_width: usize,
    pub scroll_y: u16,
 
    pub download_folder: PathBuf,
@@ -90,7 +91,7 @@ impl App {
    ///
    pub fn new(sid: String, chain: &SnapmailChain) -> App {
       let mail_list = filter_chain(&chain, FolderItem::Inbox);
-      let mail_table = MailTable::new(mail_list, &chain.handle_map);
+      let mail_table = MailTable::new(mail_list, &chain.handle_map, 12);
       let contacts_table = ContactsTable::new(&chain.handle_map);
 
       /// - Get UID
@@ -118,6 +119,7 @@ impl App {
          active_folder_item: FolderItem::Inbox,
          sid,
          uid,
+         content_width: 12,
          download_folder,
          scroll_y: 0,
          mail_table,
@@ -128,6 +130,13 @@ impl App {
          write_attachment: String::new(), //std::env::current_dir().unwrap().into_os_string().into_string().unwrap(),
          //write_attachments: Vec::new(),
       }
+   }
+
+   ///
+   pub fn resize_width(&mut self, new_width: u16, chain: &SnapmailChain) {
+      self.content_width = new_width as usize;
+      let mail_list = filter_chain(&chain, self.active_folder_item);
+      self.mail_table = MailTable::new(mail_list, &chain.handle_map, self.content_width);
    }
 
    ///
@@ -210,7 +219,7 @@ impl App {
       let maybe_hh = if let Some(i) = self.mail_table.state.selected() {
          Some(self.mail_table.mail_index_map.get(&i).unwrap().clone())
       } else { None };
-      self.mail_table = MailTable::new(mail_list, &chain.handle_map);
+      self.mail_table = MailTable::new(mail_list, &chain.handle_map, self.content_width);
       if let Some(hh) = maybe_hh {
          for (index, current) in &self.mail_table.mail_index_map {
             if *current == hh {
@@ -270,7 +279,7 @@ impl App {
       if self.active_menu_item == TopMenuItem::View {
          self.active_folder_item = folder_item;
          let mail_list = filter_chain(&chain, self.active_folder_item);
-         self.mail_table = MailTable::new(mail_list, &chain.handle_map);
+         self.mail_table = MailTable::new(mail_list, &chain.handle_map, self.content_width);
       }
    }
 

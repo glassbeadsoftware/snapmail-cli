@@ -121,7 +121,7 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
    // //let wasm2 = &std::fs::read("./dump.rs")?;
    // let dna_wasm = DnaWasm::from(wasm.to_owned());
 
-   println!("Building DNA from wasm as rust code.");
+   println!("Building DNA from wasm stored in Rust code.");
    let dna_file = load_dna_from_rs(uid).await;
 
    /// Register DNA

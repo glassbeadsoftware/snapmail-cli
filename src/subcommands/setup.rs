@@ -1,18 +1,7 @@
 use structopt::StructOpt;
-//use tokio::io::AsyncBufReadExt;
-//use tokio::io::BufReader;
-//use tokio::process::{Child, Command};
-//use tokio::sync::oneshot;
-//use derive_more::FromStr;
-//use std::path::Path;
 use std::path::PathBuf;
-use holochain_p2p::kitsune_p2p::KitsuneP2pConfig;
-use holochain_p2p::kitsune_p2p::TransportConfig;
+use holochain_p2p::kitsune_p2p::{KitsuneP2pConfig, TransportConfig, NetworkType};
 use url2::Url2;
-//use std::fs::File;
-//use std::io::prelude::*;
-//use std::fs;
-//use directories::ProjectDirs;
 use crate::{
    globals::*,
    conductor::*,
@@ -84,7 +73,7 @@ impl NetworkCmd {
 pub struct Network {
    #[structopt(subcommand)]
    /// Set the type of network.
-   pub transport: NetworkType,
+   pub transport_type: TransportType,
    #[structopt(short, long, parse(from_str = Url2::parse))]
    /// Optionally set a bootstrap service URL.
    /// A bootstrap service can used for peers to discover each other without
@@ -93,7 +82,7 @@ pub struct Network {
 }
 
 #[derive(Debug, StructOpt, Clone)]
-pub enum NetworkType {
+pub enum TransportType {
    /// A transport that uses MDNS
    Mdns,
    /// A transport that uses the QUIC protocol.
@@ -125,15 +114,15 @@ pub struct Quic {
 impl From<Network> for KitsuneP2pConfig {
    fn from(n: Network) -> Self {
       let Network {
-         transport,
+         transport_type: transport,
          bootstrap,
       } = n;
       let mut kit = KitsuneP2pConfig::default();
       kit.bootstrap_service = bootstrap;
 
       match transport {
-         NetworkType::Mdns => (),
-         NetworkType::Quic(Quic {
+         TransportType::Mdns => kit.network_type = NetworkType::QuicMdns,
+         TransportType::Quic(Quic {
                               bind_to,
                               override_host,
                               override_port,
@@ -145,7 +134,7 @@ impl From<Network> for KitsuneP2pConfig {
                override_port,
             }];
          }
-         NetworkType::Quic(Quic {
+         TransportType::Quic(Quic {
                               bind_to,
                               override_host,
                               override_port,

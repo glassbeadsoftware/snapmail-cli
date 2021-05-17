@@ -11,10 +11,11 @@ use crate::{
 use tui::style::Color;
 use holochain_types::dna::*;
 use snapmail::{
+   api_error::*,
    mail::*,
    mail::entries::*,
    //file::*,
-   //handle::*,
+   handle::*,
 };
 use holochain::conductor::ConductorHandle;
 use std::path::PathBuf;
@@ -44,6 +45,7 @@ pub enum AppCommand {
    SendMail,
    AcknowledgeMail(HeaderHash),
    DeleteMail,
+   UpdateHandle,
 }
 
 /// App holds the state of the application
@@ -214,7 +216,7 @@ impl App {
 
    ///
    pub fn update_data(&mut self, chain: &SnapmailChain) {
-      // Update mail table && keep current selection
+      /// Update mail table && keep current selection
       let mail_list = filter_chain(&chain, self.active_folder_item);
       let maybe_hh = if let Some(i) = self.mail_table.state.selected() {
          Some(self.mail_table.mail_index_map.get(&i).unwrap().clone())
@@ -245,8 +247,11 @@ impl App {
       let mut can_update_chain = false;
       match &self.command {
          AppCommand::SendMail => {
-            self.send_mail(conductor.clone(), chain);
-            can_update_chain = true;
+            let res = self.send_mail(conductor.clone(), chain);
+            match res {
+               Err(e) => self.feedback_ext(&format!("Send mail failed: {}", e), Color::Black, Color::Red),
+               Ok(_) => can_update_chain = true,
+            }
          },
          AppCommand::AcknowledgeMail(hh) => {
             if let Some(mail_item) = chain.mail_map.get(hh) {
@@ -267,6 +272,16 @@ impl App {
          AppCommand::DeleteMail => {
             self.delete_mail(conductor);
             can_update_chain = true;
+         },
+         AppCommand::UpdateHandle => {
+            let res = snapmail_set_handle(conductor.clone(), self.input.clone());
+            match res {
+               Err(e) => self.feedback_ext(&format!("Set handle failed: {}", e), Color::Black, Color::Red),
+               Ok(hash) => {
+                  can_update_chain = true;
+                  self.feedback_ext(&format!("New Handle entry hash: {}", hash.to_string()), Color::Green, Color::Black);
+               }
+            }
          },
          _ => {},
       }
@@ -346,7 +361,7 @@ impl App {
    }
 
    ///
-   pub fn send_mail(&mut self, conductor: ConductorHandle, chain: &SnapmailChain) {
+   pub fn send_mail(&mut self, conductor: ConductorHandle, chain: &SnapmailChain) -> SnapmailApiResult<()> {
       /// Form recepient lists from ContactsTable
       let mut to_list: Vec<AgentPubKey> = Vec::new();
       let mut cc_list: Vec<AgentPubKey> = Vec::new();
@@ -369,7 +384,7 @@ impl App {
       }
       if 0 == to_list.len() + cc_list.len() + bcc_list.len() {
          self.feedback_ext("Send aborted: No recepient selected", Color::Yellow, Color::Black);
-         return;
+         return Err(SnapmailApiError::Unique("No recepient selected".to_string()));
       }
 
       /// Form attachment list
@@ -384,11 +399,12 @@ impl App {
       if !self.write_attachment.is_empty() {
          let path = PathBuf::from(self.write_attachment.clone());
          let maybe_hh = write_attachment(conductor.clone(), path);
-         if let Ok(hh) = maybe_hh {
-            manifest_address_list.push(hh);
-         } else {
-            self.feedback_ext("Send Aborted. Failed loading attachment file", Color::Black, Color::Red);
-            return;
+         match maybe_hh {
+            Ok(hh) => manifest_address_list.push(hh),
+            Err(e) => {
+               self.feedback_ext("Send Aborted. Failed loading attachment file", Color::Black, Color::Red);
+               return Err(SnapmailApiError::IoError(e));
+            }
          }
       }
 
@@ -403,7 +419,7 @@ impl App {
       };
       let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
       /// Send
-      let output = snapmail_send_mail(conductor, mail).unwrap();
+      let output = snapmail_send_mail(conductor, mail)?;
       /// Show results
       let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
       let message = format!("Mail sent. Pendings:  {} / {} ({})", pending_count, send_count, output.outmail);
@@ -424,6 +440,7 @@ impl App {
       //self.write_attachments = Vec::new();
       self.write_subject = String::new();
       self.contacts_table = ContactsTable::new(&chain.handle_map);
+      Ok(())
    }
 }
 

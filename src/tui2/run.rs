@@ -6,7 +6,6 @@ use std::sync::mpsc;
 use std::io;
 use std::thread;
 use std::time::{Duration, Instant};
-use snapmail::handle::*;
 use std::path::PathBuf;
 
 use tui::{
@@ -16,12 +15,9 @@ use tui::{
 };
 
 use crate::{
-   //error::SnapmailError,
    tui2::*,
    tui2::menu::*,
    globals::*,
-   //app::*,
-   //holochain::*,
    conductor::*,
 };
 
@@ -264,8 +260,8 @@ pub async fn run(
                      app.input_mode = InputMode::Normal;
                      match app.input_variable {
                         InputVariable::Handle => {
-                           let hash = snapmail_set_handle(conductor.clone(), app.input.clone())?;
-                           app.feedback(&format!("Handle entry hash: {}", hash.to_string()));
+                           app.command = AppCommand::UpdateHandle;
+                           app.feedback_ext("Updating Handle", Color::White, Color::Blue);
                         },
                         InputVariable::Uid => {
                            app.uid = app.input.clone();

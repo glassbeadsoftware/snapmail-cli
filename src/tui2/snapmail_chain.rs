@@ -17,8 +17,13 @@ pub struct SnapmailChain {
 
 ///
 pub async fn pull_source_chain(conductor: ConductorHandle) -> SnapmailChain {
+   /// Cell ID and agent pubkey
+   let cell_ids = conductor.list_cell_ids().await.expect("list_cell_ids() should work");
+   assert!(!cell_ids.is_empty());
+   let agent_pubkey = cell_ids[0].agent_pubkey().to_owned();
+   //let my_handle = snapmail_get_handle(conductor.clone(), agent_pubkey).unwrap();
    /// Query DHT
-   let my_handle = snapmail_get_my_handle(conductor.clone(), ()).unwrap();
+   //let my_handle = snapmail_get_my_handle(conductor.clone(), ()).unwrap();
    let handle_list = snapmail_get_all_handles(conductor.clone(), ()).unwrap().0;
    let _new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ()).unwrap();
    let _new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ()).unwrap();
@@ -28,6 +33,7 @@ pub async fn pull_source_chain(conductor: ConductorHandle) -> SnapmailChain {
    for item in handle_list {
       handle_map.insert(item.1, item.0);
    }
+   let my_handle = handle_map.get(&agent_pubkey).unwrap().to_string();
    /// Change list to HashMap
    let mut mail_map = HashMap::new();
    for item in all_mail_list {

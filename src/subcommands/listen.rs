@@ -14,9 +14,9 @@ use tokio::time::{Duration};
 
 
 /// Launch an "always on" conductor that displays events & signals
-pub async fn listen(conductor: ConductorHandle) -> anyhow::Result<()> {
+pub async fn listen(conductor: ConductorHandle, loop_interval_sec: u64) -> anyhow::Result<()> {
 
-   // Add app interface so we can get signals
+   /// Add app interface so we can get signals
    let mut interfaces = conductor.list_app_interfaces().await.unwrap();
    if interfaces.is_empty() {
       let _port = conductor.clone().add_app_interface(0).await.unwrap();
@@ -36,7 +36,7 @@ pub async fn listen(conductor: ConductorHandle) -> anyhow::Result<()> {
    /// Infinite loop
    loop {
       let res = tokio::time::timeout(
-         Duration::from_secs(5),
+         Duration::from_secs(loop_interval_sec),
          signal_stream.next(),
       ).await;
       match res {

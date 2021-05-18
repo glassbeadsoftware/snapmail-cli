@@ -81,6 +81,8 @@ pub struct App {
    pub write_attachment: String,
    pub active_write_block: WriteBlock,
 
+   pub peer_count: usize,
+
    /// - Debug
    pub frame_count: u32,
 
@@ -121,6 +123,7 @@ impl App {
          active_folder_item: FolderItem::Inbox,
          sid,
          uid,
+         peer_count: 0,
          content_width: 12,
          download_folder,
          scroll_y: 0,
@@ -238,6 +241,9 @@ impl App {
    }
 
    pub fn feedback_ext(&mut self, msg: &str, fg: Color, bg: Color) {
+      if msg.is_empty() {
+         return;
+      }
       self.feedbacks.push((msg.to_string(), fg, bg));
       self.feedback_index = self.feedbacks.len() as u32 - 1;
    }

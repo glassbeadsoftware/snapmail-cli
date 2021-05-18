@@ -63,7 +63,11 @@ pub enum SnapSubcommand {
       hash: String,
    },
    /// Launch an "always on" conductor that displays events & signals
-   Listen,
+   Listen {
+      #[structopt(short, long)]
+      /// Interval in seconds between each status print
+      tick: Option<u32>,
+   },
 }
 
 impl SnapSubcommand {
@@ -104,10 +108,10 @@ impl SnapSubcommand {
             }
          },
          Self::Clear => { msg!("Clearing..."); clear(sid); },
-         Self::Listen => {
+         Self::Listen {tick } => {
             msg!("Listening forever:");
             let conductor = start_conductor(sid_str).await;
-            listen(conductor).await?;
+            listen(conductor, tick.unwrap_or(10) as u64).await?;
          },
          Self::Send(cmd) => {
             msg!("Send!");

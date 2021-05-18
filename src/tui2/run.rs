@@ -1,10 +1,9 @@
 use crossterm::{
    event::{self, Event as CEvent, KeyCode},
 };
-use std::path::{Path/*, PathBuf*/};
+use std::path::Path;
 use std::sync::mpsc;
 use std::io;
-use std::thread;
 use std::time::{Duration, Instant};
 use std::path::PathBuf;
 
@@ -39,12 +38,12 @@ pub async fn run(
 
    /// - Setup UI
    let mut app = App::new(sid, &chain);
-   app.feedback(&format!("Welcome to Snapmail ! {:?}", dna_hash));
+   app.feedback(&format!("Welcome to Snapmail! - {:?}", dna_hash));
 
    /// Setup input loop
-   let (tx, rx) = mpsc::channel();
+   let (input_tx, input_rx) = mpsc::channel();
    let tick_rate = Duration::from_millis(200);
-   thread::spawn(move || {
+   tokio::spawn( async move {
       let mut last_tick = Instant::now();
       loop {
          let timeout = tick_rate
@@ -52,20 +51,30 @@ pub async fn run(
             .unwrap_or_else(|| Duration::from_secs(0));
          if event::poll(timeout).expect("poll works") {
             if let CEvent::Key(key) = event::read().expect("can read events") {
-               tx.send(Event::Input(key)).expect("can send events");
+               input_tx.send(Event::Input(key)).expect("can send events");
             }
          }
          if last_tick.elapsed() >= tick_rate {
-            if let Ok(_) = tx.send(Event::Tick) {
+            let res = input_tx.send(Event::Tick);
+            if let Ok(_) = res {
                last_tick = Instant::now();
             }
          }
       }
    });
 
+   /// Setup Signal receive loop
+   let (signal_tx, signal_rx) = mpsc::channel();
+   let conductor_c = conductor.clone();
+   tokio::spawn(async move {
+      let _res = listen_signal(conductor_c,  signal_tx).await;
+   });
+
    /// Render loop
    loop {
       app.frame_count += 1;
+      app.peer_count = dump_state(conductor.clone());
+
       /// Render
       terminal.draw(|main_rect| {
          draw(main_rect, &chain, &mut app);
@@ -77,8 +86,15 @@ pub async fn run(
          chain = pull_source_chain(conductor.clone()).await;
          app.update_data(&chain);
       }
+
+      /// Check if Signal received
+      // let maybe_signal_msg = signal_rx.recv();
+      if let Ok(signal_msg) = signal_rx.recv() {
+         app.feedback_ext(&signal_msg, Color::White, Color::Blue);
+      }
+
       /// Check if input received
-      let event = rx.recv()?;
+      let event = input_rx.recv()?;
       let key_code =
          if let Event::Input(key_event) = event {
             //app.feedback(&format!("Key pressed: {:?}", key_event.code));

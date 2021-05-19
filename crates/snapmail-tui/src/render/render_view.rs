@@ -10,9 +10,9 @@ use tui::{
    },
 };
 use crate::{
-   tui2::snapmail_chain::*,
-   tui2::App,
-   tui2::app::InputMode,
+   snapmail_chain::*,
+   app::App,
+   app::InputMode,
 };
 
 ///

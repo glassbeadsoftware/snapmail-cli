@@ -2,22 +2,14 @@
 
 use structopt::StructOpt;
 
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate url2;
+// #[macro_use]
+// extern crate lazy_static;
 
 #[macro_use]
-pub mod utils;
+extern crate snapmail_common;
+
 pub mod subcommands;
 pub mod cli;
-pub mod globals;
-pub mod holochain;
-pub mod conductor;
-pub mod error;
-pub mod attachment;
-pub mod config;
-pub mod wasm;
 
 ///
 #[tokio::main]

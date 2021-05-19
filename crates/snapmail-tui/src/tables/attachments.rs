@@ -4,6 +4,7 @@ use tui::{
 use std::collections::HashMap;
 use snapmail::mail::entries::*;
 
+///
 pub struct AttachmentsTable {
    pub state: TableState,
    pub items: Vec<Vec<String>>,

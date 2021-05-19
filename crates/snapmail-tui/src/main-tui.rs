@@ -1,27 +1,20 @@
 #![allow(unused_doc_comments)]
 #![allow(non_upper_case_globals)]
 
-pub mod error;
-pub mod globals;
-#[macro_use]
-pub mod utils;
-pub mod holochain;
-pub mod conductor;
-pub mod tui2;
-pub mod wasm;
-pub mod attachment;
-
 #[macro_use]
 extern crate strum_macros;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate url2;
+
+pub mod render;
+pub mod tables;
+pub mod app;
+pub mod listen_signal;
+pub mod menu;
+pub mod run;
+pub mod snapmail_chain;
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::io;
-use crate::{
-   //tui2::*,
+use snapmail_common::{
    globals::*,
 };
 use tui::{
@@ -84,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    /// Run TUI app
    std::env::set_var("WASM_LOG", "NONE");
    std::env::set_var("RUST_LOG", "NONE");
-   let _res = tui2::run(&mut terminal, args[1].clone()).await;
+   let _res = crate::run::run(&mut terminal, args[1].clone()).await;
 
    terminal.clear()?;
 

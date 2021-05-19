@@ -9,8 +9,8 @@ use tui::{
       Block, BorderType, Borders, Paragraph,
    },
 };
-use crate::{
-   tui2::*,
+use crate::app::{
+   InputMode, App,
 };
 
 ///

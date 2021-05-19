@@ -1,4 +1,4 @@
-use crate::{
+use snapmail_common::{
    utils::*,
    attachment::*,
 };

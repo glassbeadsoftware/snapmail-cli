@@ -1,13 +1,16 @@
 //! Definitions of StructOpt options for use in the CLI
 ///
 
-use crate::{
+use snapmail_common::{
    utils::*,
    globals::*,
-   subcommands::*,
    conductor::*,
    attachment::*,
+};
+
+use crate::{
    subcommands::open,
+   subcommands::*,
 };
 
 use snapmail::handle::*;

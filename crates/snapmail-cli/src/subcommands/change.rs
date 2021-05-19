@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 use std::path::PathBuf;
-use crate::{
+use snapmail_common::{
    globals::*,
 };
 use lazy_static::lazy_static;

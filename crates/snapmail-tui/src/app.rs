@@ -1,12 +1,12 @@
 use std::string::ToString;
-use crate::{
+use snapmail_common::{
    attachment::*,
    globals::*,
-   tui2::{
+};
+use crate::{
       menu::*,
       tables::{MailTable, ContactsTable, AttachmentsTable},
-      SnapmailChain,
-   }
+      snapmail_chain::SnapmailChain,
 };
 use tui::style::Color;
 use holochain_types::dna::*;
@@ -14,7 +14,6 @@ use snapmail::{
    api_error::*,
    mail::*,
    mail::entries::*,
-   //file::*,
    handle::*,
 };
 use holochain::conductor::ConductorHandle;

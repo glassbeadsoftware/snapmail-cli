@@ -5,7 +5,7 @@ use chrono::{DateTime, TimeZone, Local};
 use snapmail::mail::entries::*;
 use std::collections::HashMap;
 use holochain_types::dna::*;
-use crate::tui2::snapmail_chain::*;
+use crate::snapmail_chain::*;
 
 pub struct MailTable {
    pub state: TableState,

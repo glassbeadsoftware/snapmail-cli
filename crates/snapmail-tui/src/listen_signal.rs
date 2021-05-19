@@ -4,7 +4,7 @@ use snapmail::mail::*;
 use snapmail::handle::*;
 use snapmail::signal_protocol::*;
 use holochain::conductor::ConductorHandle;
-use crate::{
+use snapmail_common::{
    utils::*,
 };
 use tokio_stream::{StreamExt};

@@ -6,20 +6,25 @@ use std::sync::mpsc;
 use std::io;
 use std::time::{Duration, Instant};
 use std::path::PathBuf;
-
 use tui::{
    backend::CrosstermBackend,
    Terminal,
    style::Color,
 };
-
-use crate::{
-   tui2::*,
-   tui2::menu::*,
+use snapmail_common::{
    globals::*,
    conductor::*,
 };
+use crate::{
+   menu::*,
+   app::InputMode, app::InputVariable,
+   app::AppCommand, app::App,
+   snapmail_chain::*,
+   listen_signal::listen_signal,
+   render::draw,
+};
 
+///
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Event<I> {
    Input(I),

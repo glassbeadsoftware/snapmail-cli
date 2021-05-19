@@ -1,0 +1,26 @@
+[package]
+name = "snapmail_tui"
+version = "0.0.1"
+keywords = [ "holochain" ]
+categories = [ "command-line-utilities"]
+edition = "2018"
+
+[[bin]]
+name = "snapmail-tui"
+path = "src/main-tui.rs"
+
+[dependencies]
+snapmail_common = { path = "../common" }
+strum = "0.19"
+strum_macros = "0.19"
+crossterm = { version = "0.19", features = [ "serde" ] }
+chrono = { version = "0.4", features = ["serde"] }
+tui = { version = "0.15", default-features = false, features = ['crossterm', 'serde'] }
+anyhow = "1.0"
+tokio = { version = "1.5", features = [ "full" ] }
+tokio-stream = { version = "0.1.5" }
+futures-util = "0.3.1"
+snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
+
+holochain = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain", features = ["test_utils"] }
+holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_types" }

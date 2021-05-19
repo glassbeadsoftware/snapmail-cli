@@ -10,11 +10,13 @@ use tui::{
    },
 };
 use crate::{
-   tui2::*,
-   tui2::menu::*,
-   globals::*,
-   tui2::render::*,
+   menu::*,
+   render::*,
+   app::App,
+   snapmail_chain::SnapmailChain,
 };
+
+use snapmail_common::globals::*;
 
 ///
 pub fn draw(

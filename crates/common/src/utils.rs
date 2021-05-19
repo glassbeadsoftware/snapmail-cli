@@ -3,6 +3,7 @@ use snapmail::handle::GetAllHandlesOutput;
 
 /// Print a msg with `snapmail: ` pre-pended
 /// and ansi colors.
+#[macro_export]
 macro_rules! msg {
     ($($arg:tt)*) => ({
         use ansi_term::Color::*;
@@ -14,6 +15,7 @@ macro_rules! msg {
 }
 
 #[allow(unused_macros)]
+#[macro_export]
 macro_rules! dbg {
     ($($arg:tt)*) => ({
         use ansi_term::Color::*;
@@ -23,6 +25,7 @@ macro_rules! dbg {
 }
 
 #[allow(unused_macros)]
+#[macro_export]
 macro_rules! err_msg {
     ($($arg:tt)*) => ({
         use ansi_term::Color::*;

@@ -2,12 +2,11 @@ use structopt::StructOpt;
 use std::path::PathBuf;
 use holochain_p2p::kitsune_p2p::{KitsuneP2pConfig, TransportConfig, NetworkType};
 use url2::Url2;
-use crate::{
+use snapmail_common::{
    globals::*,
    conductor::*,
+   config::*,
 };
-//use holochain_conductor_api::config::conductor::ConductorConfig;
-use crate::config::*;
 use snapmail::handle::*;
 
 /// This creates a new holochain sandbox

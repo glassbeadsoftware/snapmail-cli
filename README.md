@@ -44,7 +44,7 @@ SUBCOMMANDS:
 
 ##### Setup
 `````
-snapmail-cli alex setup my-network-id network -b https://bootstrap-staging.holo.host/ quic
+snapmail-cli alex setup testnet network -b https://bootstrap-staging.holo.host/ quic
 `````
 ##### Send mail
 `````

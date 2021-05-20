@@ -72,7 +72,7 @@ pub fn render_settings(
 
    match app.input_mode {
       InputMode::Scrolling => {},
-      InputMode::Normal =>
+      InputMode::Navigation =>
       // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
          {}
       InputMode::Editing => {

@@ -139,7 +139,7 @@ pub fn render_write(
    /// - Cursor
    match app.input_mode {
       InputMode::Scrolling => {},
-      InputMode::Normal => {},
+      InputMode::Navigation => {}
       InputMode::Editing => {
          if app.active_write_block != WriteBlock::Contacts {
             let index =

@@ -21,7 +21,7 @@ use std::path::PathBuf;
 
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
-   Normal,
+   Navigation,
    Editing,
    Scrolling,
 }
@@ -111,7 +111,7 @@ impl App {
 
       App {
          input: String::new(),
-         input_mode: InputMode::Normal,
+         input_mode: InputMode::Navigation,
          input_variable: InputVariable::Content,
          feedback_index: 0,
          feedbacks: Vec::new(),
@@ -136,6 +136,17 @@ impl App {
       }
    }
 
+   pub fn show_selected_contact(&mut self) {
+      let selected = self.contacts_table.state.selected();
+      if selected.is_none() {
+         self.feedback(&format!("No selection"));
+         return;
+      }
+      let index = selected.unwrap();
+      let key = self.contacts_table.agent_index_map.get(&index).unwrap();
+      let msg = format!("({}) Selected agent: {}", index, key);
+      self.feedback(&msg);
+   }
    ///
    pub fn resize_width(&mut self, new_width: u16, chain: &SnapmailChain) {
       self.content_width = new_width as usize;
@@ -253,6 +264,7 @@ impl App {
       match &self.command {
          AppCommand::SendMail => {
             let res = self.send_mail(conductor.clone(), chain);
+            self.input_mode = InputMode::Navigation;
             match res {
                Err(e) => self.feedback_ext(&format!("Send mail failed: {}", e), Color::Black, Color::Red),
                Ok(_) => can_update_chain = true,
@@ -307,7 +319,7 @@ impl App {
    pub fn set_write_block(&mut self, block: WriteBlock) {
       if block == WriteBlock::None {
          self.save_input();
-         self.input_mode = InputMode::Normal;
+         self.input_mode = InputMode::Navigation;
          self.active_write_block = WriteBlock::None;
       }
       while self.active_write_block != block {
@@ -354,6 +366,7 @@ impl App {
             self.input = String::new();
             if let None = self.contacts_table.state.selected() {
                self.contacts_table.state.select(Some(0));
+               self.show_selected_contact();
             }
             WriteBlock::Contacts
          },

@@ -56,7 +56,7 @@ pub async fn run(
             .unwrap_or_else(|| Duration::from_secs(0));
          if event::poll(timeout).expect("poll works") {
             if let CEvent::Key(key) = event::read().expect("can read events") {
-               input_tx.send(Event::Input(key)).expect("can send events");
+               let _res = input_tx.send(Event::Input(key));
             }
          }
          if last_tick.elapsed() >= tick_rate {
@@ -92,12 +92,6 @@ pub async fn run(
          app.update_data(&chain);
       }
 
-      /// Check if Signal received
-      // let maybe_signal_msg = signal_rx.recv();
-      if let Ok(signal_msg) = signal_rx.recv() {
-         app.feedback_ext(&signal_msg, Color::White, Color::Blue);
-      }
-
       /// Check if input received
       let event = input_rx.recv()?;
       let key_code =
@@ -107,8 +101,14 @@ pub async fn run(
          } else { KeyCode::Null };
       let input_mode = app.input_mode.clone();
 
+      /// Check if Signal received
+      // let maybe_signal_msg = signal_rx.recv();
+      if let Ok(signal_msg) = signal_rx.recv() {
+         app.feedback_ext(&signal_msg, Color::White, Color::Blue);
+      }
+
       match input_mode {
-         InputMode::Normal => {
+         InputMode::Navigation => {
             match key_code  {
                /// Top Menu
                KeyCode::Esc |
@@ -179,6 +179,7 @@ pub async fn run(
                   if app.active_menu_item == TopMenuItem::Write {
                      app.feedback_ext("Sending mail...", Color::White, Color::Blue);
                      app.command = AppCommand::SendMail;
+                     app.input_mode = InputMode::Scrolling;
                   }
                }
                KeyCode::Tab => {
@@ -221,7 +222,7 @@ pub async fn run(
                      app.next_mail(&chain);
 
                   }
-               }
+               },
                KeyCode::Up => {
                   if app.active_menu_item == TopMenuItem::View {
                      app.previous_mail(&chain);
@@ -240,6 +241,7 @@ pub async fn run(
                   if app.active_menu_item == TopMenuItem::Write {
                      app.feedback_ext("Sending mail...", Color::White, Color::Blue);
                      app.command = AppCommand::SendMail;
+                     app.input_mode = InputMode::Scrolling;
                   }
                },
                KeyCode::PageUp => {
@@ -254,11 +256,9 @@ pub async fn run(
          InputMode::Editing => {
             match key_code  {
                KeyCode::Esc => {
-                  app.input_mode = InputMode::Normal;
+                  app.input_mode = InputMode::Navigation;
                   if app.active_menu_item == TopMenuItem::Write {
                      app.set_write_block(WriteBlock::None)
-                     //app.set_write_block(WriteBlock::Contacts);
-                     //app.active_menu_item = TopMenuItem::View;
                   }
                },
                KeyCode::Tab => {
@@ -269,20 +269,20 @@ pub async fn run(
                KeyCode::Down => {
                   if app.active_menu_item == TopMenuItem::Write &&
                      app.active_write_block == WriteBlock::Contacts {
-                     app.feedback("ContactsTable NEXT");
                      app.contacts_table.next();
+                     app.show_selected_contact();
                   }
                }
                KeyCode::Up => {
-                  if app.active_menu_item == TopMenuItem::Write  &&
-                     app.active_write_block == WriteBlock::Contacts {
-                     app.feedback("ContactsTable PREVIOUS");
+                  if app.active_menu_item == TopMenuItem::Write
+                     && app.active_write_block == WriteBlock::Contacts {
                      app.contacts_table.previous();
+                     app.show_selected_contact();
                   }
                },
                KeyCode::Enter => {
                   if app.active_menu_item == TopMenuItem::Settings {
-                     app.input_mode = InputMode::Normal;
+                     app.input_mode = InputMode::Navigation;
                      match app.input_variable {
                         InputVariable::Handle => {
                            app.command = AppCommand::UpdateHandle;
@@ -323,7 +323,7 @@ pub async fn run(
                   }
                },
                KeyCode::Char('\n') => {
-                  app.input_mode = InputMode::Normal;
+                  app.input_mode = InputMode::Navigation;
                }
                KeyCode::Char(c) => {
                   app.input.push(c);
@@ -337,7 +337,7 @@ pub async fn run(
          InputMode::Scrolling => {
             match key_code {
                KeyCode::Esc => {
-                  app.input_mode = InputMode::Normal;
+                  app.input_mode = InputMode::Navigation;
                   app.scroll_y = 0;
                },
                KeyCode::Down => app.scroll_y = app.scroll_y.saturating_add(1),

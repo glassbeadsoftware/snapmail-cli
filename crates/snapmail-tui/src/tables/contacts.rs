@@ -38,6 +38,10 @@ impl ContactsTable {
    }
 
    pub fn next(&mut self) {
+      if self.items.is_empty() {
+         self.state.select(None);
+         return;
+      }
       let i = match self.state.selected() {
          Some(i) => {
             if i >= self.items.len() - 1 {
@@ -52,20 +56,21 @@ impl ContactsTable {
    }
 
    pub fn previous(&mut self) {
-      let i = match self.state.selected() {
+      let selection = match self.state.selected() {
          Some(i) => {
-            if i == 0 {
+            Some(if i == 0 {
                self.items.len() - 1
             } else {
                i - 1
-            }
+            })
          }
-         None => 0,
+         None => if self.items.is_empty() {None} else {Some(0)},
       };
-      self.state.select(Some(i));
+      self.state.select(selection);
    }
 
    pub fn toggle_state(&mut self, index: usize) {
+      assert!(!self.items.is_empty());
       let current_state = self.items[index][0].as_str();
       let new_state = match current_state {
          "" => " to ",

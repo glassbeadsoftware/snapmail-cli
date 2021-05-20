@@ -21,8 +21,10 @@ regex = "1"
 tokio = { version = "1.5", features = [ "full" ] }
 tokio-stream = { version = "0.1.5" }
 futures-util = "0.3.1"
-snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 snapmail_common = { path = "../common" }
+
+snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
+
 holochain = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain" }
 holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_types" }
 holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_p2p" }

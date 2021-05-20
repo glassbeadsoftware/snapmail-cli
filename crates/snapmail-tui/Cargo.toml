@@ -20,6 +20,7 @@ anyhow = "1.0"
 tokio = { version = "1.5", features = [ "full" ] }
 tokio-stream = { version = "0.1.5" }
 futures-util = "0.3.1"
+
 snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 
 holochain = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain" }

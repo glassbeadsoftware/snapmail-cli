@@ -237,6 +237,10 @@ pub async fn run(
                   if app.active_menu_item == TopMenuItem::View {
                      app.input_mode = InputMode::Scrolling;
                   }
+                  if app.active_menu_item == TopMenuItem::Write {
+                     app.feedback_ext("Sending mail...", Color::White, Color::Blue);
+                     app.command = AppCommand::SendMail;
+                  }
                },
                KeyCode::PageUp => {
                   app.feedback_index = std::cmp::max(0 as i32, app.feedback_index as i32 - 1) as u32;

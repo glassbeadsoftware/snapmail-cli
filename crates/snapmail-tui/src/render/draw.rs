@@ -50,7 +50,7 @@ pub fn draw(
                   .fg(Color::Yellow)
                   .add_modifier(Modifier::UNDERLINED),
             ),
-            Span::styled(rest, Style::default().fg(Color::White)),
+            Span::styled(rest, Style::default()),
          ])
       })
       .collect();
@@ -59,20 +59,24 @@ pub fn draw(
    let tabs = Tabs::new(top_menu)
       .select(app.active_menu_item.to_owned().into())
       .block(Block::default().title(title).borders(Borders::ALL))
-      .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
       .divider(Span::raw("|"));
    main_rect.render_widget(tabs, chunks[0]);
 
    /// Set feedback block
    let feedback = app.feedbacks[app.feedback_index as usize].clone();
+   let feedback_style = if feedback.1 == Color::White && feedback.2 == Color::Black {
+      Style::default()
+   } else {
+      Style::default().fg(feedback.1).bg(feedback.2)
+   };
    //let feedback = format!("{}. {}",app.feedback_index, app.feedbacks[app.feedback_index as usize].clone().0)
    let feedback_block = Paragraph::new(feedback.0)
       .alignment(Alignment::Center)
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(feedback.1).bg(feedback.2))
+            .style(feedback_style)
             .border_style(Style::default().fg(feedback.1))
             .title("")
             .border_type(BorderType::Plain),

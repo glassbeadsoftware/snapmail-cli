@@ -40,7 +40,7 @@ pub fn render_settings(
                      .fg(Color::Yellow)
                      .add_modifier(Modifier::UNDERLINED),
                ),
-               Span::styled(rest, Style::default().fg(Color::White)),
+               Span::styled(rest, Style::default()),
             ]);
          //ListItem::new(span)
          span
@@ -53,7 +53,6 @@ pub fn render_settings(
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White))
             .title("Settings")
             .border_type(BorderType::Plain),
       );

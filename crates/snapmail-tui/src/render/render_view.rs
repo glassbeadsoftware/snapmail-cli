@@ -54,7 +54,7 @@ pub fn render_view(
                   .fg(Color::Yellow)
                   .add_modifier(Modifier::UNDERLINED),
             ),
-            Span::styled(rest, Style::default().fg(Color::White)),
+            Span::styled(rest, Style::default()),
          ])
       })
       .collect();
@@ -62,7 +62,6 @@ pub fn render_view(
    let tabs = Tabs::new(top_menu)
       .select(app.active_folder_item.to_owned().into())
       .block(Block::default().title(filebox_title).borders(Borders::ALL))
-      .style(Style::default().fg(Color::White))
       .highlight_style(Style::default().fg(Color::Yellow))
       .divider(Span::raw("|"));
 
@@ -117,10 +116,9 @@ pub fn render_view(
       .block(
          Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(match app.input_mode {
-               InputMode::Scrolling => Color::Yellow,
-               _ => Color::White,}
-            ))
+            .style(match app.input_mode {
+               InputMode::Scrolling => Style::default().fg(Color::Yellow),
+               _ => Style::default()})
             .title("Mail")
             .border_type(BorderType::Plain),
       );
@@ -137,8 +135,7 @@ pub fn render_view(
       let cells = item.iter()
          .map(|c|
             Cell::from(c.as_str())
-            .style(Style::default().fg(if c.chars().last() == Some('.') {Color::Yellow} else {Color::White})
-            ));
+            .style(if c.chars().last() == Some('.') {Style::default().fg(Color::Yellow)} else {Style::default()}));
       Row::new(cells).height(height as u16).bottom_margin(0)
    });
    let att_name_len = hori_chunks[1].width.saturating_sub(3 + 9 + 2);

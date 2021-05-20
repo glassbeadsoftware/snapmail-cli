@@ -120,7 +120,14 @@ impl From<Network> for KitsuneP2pConfig {
       kit.bootstrap_service = bootstrap;
 
       match transport {
-         TransportType::Mdns => kit.network_type = NetworkType::QuicMdns,
+         TransportType::Mdns => {
+            kit.network_type = NetworkType::QuicMdns;
+            kit.transport_pool = vec![TransportConfig::Quic {
+               bind_to: None,
+               override_host: None,
+               override_port: None,
+            }];
+         },
          TransportType::Quic(Quic {
                               bind_to,
                               override_host,

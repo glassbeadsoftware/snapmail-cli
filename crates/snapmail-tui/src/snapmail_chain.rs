@@ -6,8 +6,8 @@ use std::collections::HashMap;
 use snapmail::mail::entries::*;
 use snapmail::mail::*;
 use snapmail::handle::*;
-//use snapmail::file::*;
 
+///
 pub struct SnapmailChain {
    pub my_handle: String,
    pub handle_map: HashMap<AgentPubKey, String>,
@@ -15,15 +15,16 @@ pub struct SnapmailChain {
 }
 
 
-///
+/// Pull latest data from the DHT and local source chain
 pub async fn pull_source_chain(conductor: ConductorHandle) -> SnapmailChain {
+   /// Get my handle
    /// Cell ID and agent pubkey
    let cell_ids = conductor.list_cell_ids().await.expect("list_cell_ids() should work");
    assert!(!cell_ids.is_empty());
    let agent_pubkey = cell_ids[0].agent_pubkey().to_owned();
    //let my_handle = snapmail_get_handle(conductor.clone(), agent_pubkey).unwrap();
-   /// Query DHT
    //let my_handle = snapmail_get_my_handle(conductor.clone(), ()).unwrap();
+   /// Query DHT
    let handle_list = snapmail_get_all_handles(conductor.clone(), ()).unwrap().0;
    let _new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ()).unwrap();
    let _new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ()).unwrap();

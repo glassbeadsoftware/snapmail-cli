@@ -1,6 +1,6 @@
 [package]
 name = "snapmail_tui"
-version = "0.0.1"
+version = "0.0.4"
 keywords = [ "holochain" ]
 categories = [ "command-line-utilities"]
 edition = "2018"

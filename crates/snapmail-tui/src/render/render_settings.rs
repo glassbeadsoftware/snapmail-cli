@@ -42,12 +42,10 @@ pub fn render_settings(
                ),
                Span::styled(rest, Style::default()),
             ]);
-         //ListItem::new(span)
          span
       })
       .collect();
 
-   //List::new(items)
    let top = Paragraph::new(items)
       .alignment(Alignment::Center)
       .block(
@@ -71,7 +69,7 @@ pub fn render_settings(
 
 
    match app.input_mode {
-      InputMode::Scrolling => {},
+      InputMode::Scrolling |
       InputMode::Navigation =>
       // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
          {}

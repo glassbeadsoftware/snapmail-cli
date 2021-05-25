@@ -19,6 +19,7 @@ use snapmail::{
 use holochain::conductor::ConductorHandle;
 use std::path::PathBuf;
 
+
 #[derive(AsStaticStr, ToString, Copy, Clone, Debug, PartialEq)]
 pub enum InputMode {
    Navigation,
@@ -76,7 +77,7 @@ pub struct App {
    pub contacts_table: ContactsTable,
    pub write_subject: String,
    pub write_content: String,
-   // pub write_attachments: Vec<PathBuf>,
+   // pub write_attachments: Vec<PathBuf>, // TODO multi attachments support
    pub write_attachment: String,
    pub active_write_block: WriteBlock,
 
@@ -93,22 +94,25 @@ pub struct App {
 impl App {
    ///
    pub fn new(sid: String, chain: &SnapmailChain) -> App {
+      /// Setup Tables
       let mail_list = filter_chain(&chain, FolderItem::Inbox);
       let mail_table = MailTable::new(mail_list, &chain.handle_map, 12);
       let contacts_table = ContactsTable::new(&chain.handle_map);
 
-      /// - Get UID
+      /// Get UID
       let path = CONFIG_PATH.as_path().join(sid.clone());
       let app_filepath = path.join(APP_CONFIG_FILENAME);
       let uid = std::fs::read_to_string(app_filepath)
          .unwrap_or("test-network".to_string());
 
+      /// Get Download folder
       let dl_filepath = path.join(APP_DL_CONFIG_FILENAME);
       let mut download_folder = std::env::current_dir().unwrap();
        if let Ok(s) = std::fs::read_to_string(dl_filepath) {
           download_folder = PathBuf::from(s);
        }
 
+      /// Done
       App {
          input: String::new(),
          input_mode: InputMode::Navigation,
@@ -131,11 +135,12 @@ impl App {
          active_write_block: WriteBlock::None,
          write_subject: String::new(),
          write_content: String::new(),
-         write_attachment: String::new(), //std::env::current_dir().unwrap().into_os_string().into_string().unwrap(),
-         //write_attachments: Vec::new(),
+         write_attachment: String::new(),
+         //write_attachments: Vec::new(), // TODO multi attachment support
       }
    }
 
+   ///
    pub fn show_selected_contact(&mut self) {
       let selected = self.contacts_table.state.selected();
       if selected.is_none() {
@@ -147,6 +152,7 @@ impl App {
       let msg = format!("({}) Selected agent: {}", index, key);
       self.feedback(&msg);
    }
+
    ///
    pub fn resize_width(&mut self, new_width: u16, chain: &SnapmailChain) {
       self.content_width = new_width as usize;
@@ -258,6 +264,7 @@ impl App {
       self.feedback_index = self.feedbacks.len() as u32 - 1;
    }
 
+   /// Process the AppCommand stored in self.command
    /// Returns true if chain should be updated
    pub fn process_command(&mut self, conductor: ConductorHandle, chain: &SnapmailChain) -> bool {
       let mut can_update_chain = false;
@@ -346,7 +353,6 @@ impl App {
       }
    }
 
-
    ///
    pub fn toggle_write_block(&mut self) {
       self.save_input();
@@ -406,6 +412,7 @@ impl App {
       }
 
       /// Form attachment list
+      /// TODO multi attachments support
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
       // for attachment in &self.write_attachments {
       //    let maybe_hh = write_attachment(conductor.clone(), attachment.clone());
@@ -448,14 +455,13 @@ impl App {
       }  else {
          Color::Yellow
       };
-
       self.feedback_ext(&message, fg_color, Color::Black);
 
       // Erase State
       self.input = String::new();
       self.write_content = String::new();
-      self.write_attachment = String::new(); //std::env::current_dir().unwrap().into_os_string().into_string().unwrap();
-      //self.write_attachments = Vec::new();
+      self.write_attachment = String::new();
+      // self.write_attachments = Vec::new(); // TODO multi attachments support
       self.write_subject = String::new();
       self.contacts_table = ContactsTable::new(&chain.handle_map);
       Ok(())

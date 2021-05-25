@@ -39,6 +39,7 @@ ARGS:
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
+   /// Parse args
    let args: Vec<String> = std::env::args().collect();
    //println!("{:?}", args);
    if args.len() != 2 {
@@ -63,7 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       }
       return Ok(());
    }
-   //let sid = args[1].to_string();
+   let sid = args[1].to_string();
 
    /// Set raw mode ('Enter' not required)
    enable_raw_mode().expect("can run in raw mode");
@@ -77,11 +78,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    /// Run TUI app
    std::env::set_var("WASM_LOG", "NONE");
    std::env::set_var("RUST_LOG", "NONE");
-   let _res = crate::run::run(&mut terminal, args[1].clone()).await;
+   let _res = crate::run::run(&mut terminal, sid).await;
 
+   /// Clean up & Shutdown
    terminal.clear()?;
-
-   /// Shutdown terminal
    disable_raw_mode()?;
    terminal.show_cursor()?;
    Ok(())

@@ -62,6 +62,7 @@ pub fn render_write(
       );
 
    /// Attachment Block
+   // TODO multi attachments support
    // let empty_path = PathBuf::new();
    // let current_attachment = if app.active_write_block == WriteBlock::Attachments {
    //    PathBuf::from(app.input.clone())
@@ -99,10 +100,9 @@ pub fn render_write(
          .unwrap_or(0)
          + 1;
       let cells = item.iter().map(|c| Cell::from(c.as_str()));
-      Row::new(cells).height(height as u16).bottom_margin(0)//.horizontal_margin(2)
+      Row::new(cells).height(height as u16).bottom_margin(0)
    });
    let table = Table::new(rows)
-      //.header(header)
       .block(Block::default()
          .style(match app.active_write_block {
             WriteBlock::Contacts => Style::default().fg(Color::Yellow),
@@ -110,7 +110,6 @@ pub fn render_write(
          })
          .borders(Borders::ALL).title("Contacts"))
       .highlight_style(selected_style)
-      //.highlight_symbol(">> ")
       .widths(&[
          //Constraint::Min(10),
          Constraint::Length(5),

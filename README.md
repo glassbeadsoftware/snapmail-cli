@@ -73,8 +73,9 @@ USAGE:
     snapmail-tui <sid>
 
 FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+    -l, List available Session IDs
+    -h, Prints help information
+    -V, Prints version information
 
 ARGS:
     <sid>    Session ID. Corresponds to an unique config, network id and agent

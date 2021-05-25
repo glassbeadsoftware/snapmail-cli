@@ -69,7 +69,6 @@ pub fn render_view(
    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
    let normal_style = Style::default().bg(Color::Magenta);
 
-   //let header_cells = ["ID", "Username", "Subject", "Date", "Status"]
    let header_cells = ["", "From", "Subject", "Message", "Date"]
       .iter()
       .map(|h| Cell::from(*h).style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD)));
@@ -145,11 +144,9 @@ pub fn render_view(
       Constraint::Length(9),
    ];
    let att_table = Table::new(att_rows)
-      //.header(header)
       .block(Block::default()
          .borders(Borders::ALL).title("Attachments"))
       .highlight_style(selected_style)
-      //.highlight_symbol(">> ")
       .widths(&att_table_widths);
 
    /// - Render

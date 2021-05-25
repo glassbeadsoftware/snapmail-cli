@@ -13,8 +13,7 @@ use tokio::time::{Duration};
 use std::sync::mpsc::Sender;
 
 /// Listen to signals and display them in the feedback box
-pub async fn listen_signal(/*app: &App, */conductor: ConductorHandle, signal_tx: Sender<String>) -> anyhow::Result<()> {
-
+pub async fn listen_signal(conductor: ConductorHandle, signal_tx: Sender<String>) -> anyhow::Result<()> {
    /// Add app interface so we can get signals
    let mut interfaces = conductor.list_app_interfaces().await.unwrap();
    if interfaces.is_empty() {
@@ -24,12 +23,14 @@ pub async fn listen_signal(/*app: &App, */conductor: ConductorHandle, signal_tx:
    }
    // msg!("App Interfaces: {:?}", interfaces);
 
+   /// Get handles from DHT
    let mut handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
 
+   /// Setup signal stream
    let signal_stream = conductor.signal_broadcaster().await.subscribe_merged();
    pin_mut!(signal_stream);
 
-   /// Infinite loop
+   /// Infinite loop for querying stream
    loop {
       let res = tokio::time::timeout(
          Duration::from_millis(50),

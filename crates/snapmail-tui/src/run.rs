@@ -87,7 +87,6 @@ pub async fn run(
       /// Process Command
       let can_update_chain = app.process_command(conductor.clone(), &chain);
       if can_update_chain {
-         // app.feedback("Updating source chain and app tables");
          chain = pull_source_chain(conductor.clone()).await;
          app.update_data(&chain);
       }
@@ -102,7 +101,6 @@ pub async fn run(
       let input_mode = app.input_mode.clone();
 
       /// Check if Signal received
-      // let maybe_signal_msg = signal_rx.recv();
       if let Ok(signal_msg) = signal_rx.recv() {
          app.feedback_ext(&signal_msg, Color::White, Color::Blue);
       }
@@ -116,6 +114,7 @@ pub async fn run(
                KeyCode::Char('v') => app.active_menu_item = TopMenuItem::View,
                KeyCode::Char('w') => app.active_menu_item = TopMenuItem::Write,
                KeyCode::Char('e') => app.active_menu_item = TopMenuItem::Settings,
+               /// Attachments
                KeyCode::Char('1') => {
                   if app.active_menu_item == TopMenuItem::View {
                      app.try_download(conductor.clone(), 0)
@@ -293,7 +292,7 @@ pub async fn run(
                            let config_path = Path::new(&*CONFIG_PATH).join(app.sid.clone());
                            let app_filepath = config_path.join(APP_CONFIG_FILENAME);
                            std::fs::write(app_filepath, app.uid.as_bytes()).unwrap();
-                           // Must restart conductor
+                           /// Must restart conductor
                            return Ok(());
                         },
                         InputVariable::DownloadFolder => {
@@ -313,6 +312,7 @@ pub async fn run(
                         WriteBlock::Content => {
                            app.input.push('\n');
                         },
+                        // TODO: multi attachments support
                         // WriteBlock::Attachments => {
                         //    let path = PathBuf::from(app.input.clone());
                         //    app.write_attachments.push(path);

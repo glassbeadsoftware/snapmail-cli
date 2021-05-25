@@ -12,6 +12,7 @@ pub struct AttachmentsTable {
 }
 
 impl AttachmentsTable {
+   ///
    pub fn new(attachments: Vec<AttachmentInfo>) -> AttachmentsTable {
       let mut manifest_index_map = HashMap::new();
       let mut i = 0;
@@ -40,6 +41,7 @@ impl AttachmentsTable {
       }
    }
 
+   ///
    pub fn next(&mut self) {
       let i = match self.state.selected() {
          Some(i) => {
@@ -54,6 +56,7 @@ impl AttachmentsTable {
       self.state.select(Some(i));
    }
 
+   ///
    pub fn previous(&mut self) {
       let i = match self.state.selected() {
          Some(i) => {
@@ -68,6 +71,7 @@ impl AttachmentsTable {
       self.state.select(Some(i));
    }
 
+   ///
    pub fn toggle_state(&mut self, index: usize) {
       let current_state = self.items[index][0].as_str();
       let new_state = match current_state {
@@ -79,6 +83,7 @@ impl AttachmentsTable {
       self.items[index][0] = new_state.to_string();
    }
 
+   ///
    pub fn toggle_selected(&mut self) {
       if let Some(index) = self.state.selected() {
          self.toggle_state(index);

@@ -15,10 +15,12 @@ pub struct MailTable {
 
 impl MailTable {
    pub fn new(mails: Vec<MailItem>, handle_map: &HashMap<AgentPubKey, String>, width: usize) -> MailTable {
-      let mut mail_index_map = HashMap::new();
+      /// Sort mails
       let mut sorted_mails = mails.clone();
       sorted_mails.sort_by(|a, b| {a.date.cmp(&b.date)});
+      /// Convert each mail item to table item
       let mut i = 0;
+      let mut mail_index_map = HashMap::new();
       let items: Vec<Vec<String>> = sorted_mails
          .iter()
          .map(|mail| {
@@ -99,29 +101,38 @@ impl MailTable {
    pub fn get_mail_text(&self, index: usize, chain: &SnapmailChain) -> String {
       let hh = self.mail_index_map.get(&index).unwrap();
       let item = chain.mail_map.get(hh).unwrap();
-      let _author = chain.handle_map.get(&item.author).unwrap();
+      let author = chain.handle_map.get(&item.author).unwrap();
       let date: DateTime<Local> = Local.timestamp(item.mail.date_sent as i64, 0);
-      let _date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
-
-
+      let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
+      /// TO line
       let mut to_line = "     To:".to_string();
-      for to in &item.mail.to {
+      if let Some(first) = item.mail.to.first() {
+         to_line += &format!(" {}", chain.handle_map.get(&first).unwrap());
+      }
+      for to in item.mail.to.iter().skip(1) {
          to_line +=  &format!(", {}", chain.handle_map.get(&to).unwrap());
       }
-
+      /// CC line
       let mut cc_line = "     Cc:".to_string();
-      for to in &item.mail.cc {
+      if let Some(first) = item.mail.cc.first() {
+         cc_line += &format!(" {}", chain.handle_map.get(&first).unwrap());
+      }
+      for to in item.mail.cc.iter().skip(1) {
          cc_line +=  &format!(", {}", chain.handle_map.get(&to).unwrap());
       }
-
+      /// BCC line
       let mut bcc_line = "    Bcc:".to_string();
-      for to in &item.bcc {
+      if let Some(first) = item.bcc.first() {
+         bcc_line += &format!(" {}", chain.handle_map.get(&first).unwrap());
+      }
+      for to in item.bcc.iter().skip(1) {
          bcc_line +=  &format!(", {}", chain.handle_map.get(&to).unwrap());
       }
-
+      /// Subject & From
       let mut text = format!("Subject: {}\n", item.mail.subject);
-      //text += &format!("From: {}\nSent at: {}\n", author, date_str);
+      text += &format!("   From: {} - {}\n", author, date_str);
 
+      /// Add recepîents if there are some
       if to_line.len() > 9 {
          text += &format!("{}\n", to_line);
       }
@@ -132,6 +143,7 @@ impl MailTable {
          text += &format!("{}\n", bcc_line);
       }
 
+      // Payload
       text += &format!("\n{}", &item.mail.payload);
       text
    }

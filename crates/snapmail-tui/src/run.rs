@@ -38,7 +38,7 @@ pub async fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
    /// - Startup holochain
    let (conductor, dna_hash) = start_conductor_or_abort(sid.clone()).await;
-   let mut chain = pull_source_chain(conductor.clone()).await;
+   let mut chain = SnapmailChain::from_latest(conductor.clone()).await;
    terminal.clear()?;
 
    /// - Setup UI
@@ -87,7 +87,7 @@ pub async fn run(
       /// Process Command
       let can_update_chain = app.process_command(conductor.clone(), &chain);
       if can_update_chain {
-         chain = pull_source_chain(conductor.clone()).await;
+         chain = SnapmailChain::from_latest(conductor.clone()).await;
          app.update_data(&chain);
       }
 

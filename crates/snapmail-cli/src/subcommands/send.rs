@@ -45,7 +45,7 @@ impl SendCommand {
       let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
       if let Some(attachment) = self.maybe_attachment {
          msg!("Reading attachment file: {:?}", attachment);
-         let hh = write_attachment(conductor.clone(), attachment).unwrap();
+         let hh = write_attachment(conductor.clone(), attachment)?;
          manifest_address_list.push(hh);
       }
       // Form MailInput
@@ -59,7 +59,7 @@ impl SendCommand {
       };
       let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
       // Send
-      let output = snapmail_send_mail(conductor, mail).unwrap();
+      let output = snapmail_send_mail(conductor, mail)?;
       // Show results
       let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
       msg!("Send done: {:?}", output.outmail);

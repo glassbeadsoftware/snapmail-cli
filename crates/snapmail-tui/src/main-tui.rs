@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    if args[1] == "-l" {
       println!("Available Session IDs: ");
       let root = CONFIG_PATH.as_path().to_path_buf();
-      let paths = std::fs::read_dir(root).unwrap();
+      let paths = std::fs::read_dir(root).expect("Should have config dir set up during setup");
       for path in paths {
          println!(" - {}", path.unwrap().path().display());
       }

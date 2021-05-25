@@ -19,7 +19,8 @@ pub fn create_config(environment_path: PathBuf) -> ConductorConfig {
 /// Write [`ConductorConfig`] to [`CONDUCTOR_CONFIG`]
 pub fn write_config(mut path: PathBuf, config: &ConductorConfig) -> PathBuf {
     path.push(CONDUCTOR_CONFIG_FILENAME);
-    std::fs::write(path.clone(), serde_yaml::to_string(&config).unwrap()).unwrap();
+    std::fs::write(path.clone(), serde_yaml::to_string(&config).unwrap())
+       .expect("CONDUCTOR_CONFIG_FILENAME should be writable");
     path
 }
 

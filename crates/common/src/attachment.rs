@@ -17,7 +17,7 @@ pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result
    } else { "__no_filename_found_".to_string() };
    let mut file = std::fs::File::open(filepath.clone())?;
    /// Get metadata and check size
-   let file_meta = file.metadata().unwrap();
+   let file_meta = file.metadata().expect("File should always have metadata");
    if file_meta.len() > FILE_MAX_SIZE as u64 {
       return Err(std::io::Error::new(std::io::ErrorKind::Other, "Attachment too big!"));
    }
@@ -57,7 +57,8 @@ pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result
          chunk_index: i,
          chunk: chunk_b64,
       };
-      let hh = snapmail_write_chunk(conductor.clone(), WriteChunkInput(chunk_input)).unwrap();
+      let hh = snapmail_write_chunk(conductor.clone(), WriteChunkInput(chunk_input))
+         .map_err(|_err| std::io::Error::from(std::io::ErrorKind::Other))?;
       chunk_hh_list.push(hh);
       i += 1;
    }
@@ -70,13 +71,15 @@ pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result
       orig_filesize: file_meta.len() as usize,
       chunks: chunk_hh_list,
    };
-   let res = snapmail_write_manifest(conductor, input).unwrap();
+   let res = snapmail_write_manifest(conductor, input)
+      .map_err(|_err| std::io::Error::from(std::io::ErrorKind::Other))?;
    Ok(res)
 }
 
 ///
 pub fn get_attachment(conductor: ConductorHandle, eh: EntryHash, path: PathBuf) -> std::io::Result<PathBuf> {
-   let manifest = snapmail_get_manifest(conductor.clone(), AnyDhtHash::from(eh)).unwrap();
+   let manifest = snapmail_get_manifest(conductor.clone(), AnyDhtHash::from(eh))
+      .map_err(|_err| std::io::Error::from(std::io::ErrorKind::Other))?;
 
    // /// Print
    // msg!("  Filename: {}", manifest.filename);

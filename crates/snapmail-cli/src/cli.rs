@@ -81,7 +81,7 @@ impl SnapSubcommand {
       match self {
          Self::Setup(cmd)=> {
             msg!("Setup!");
-            cmd.run(sid).await;
+            cmd.run(sid).await?;
          },
          Self::Info => {
             msg!("{} Info:", sid_str);
@@ -105,7 +105,8 @@ impl SnapSubcommand {
          Self::ListSessions => {
             msg!("ListSessions: ");
             let root = CONFIG_PATH.as_path().to_path_buf();
-            let paths = std::fs::read_dir(root).unwrap();
+            let paths = std::fs::read_dir(root)
+               .expect("Missing config folder");
             for path in paths {
                msg!(" - {}", path.unwrap().path().display())
             }
@@ -184,7 +185,8 @@ impl SnapSubcommand {
             let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
             msg!(" {} mail(s) found:", all_mail_list.len());
             for item in all_mail_list.iter() {
-               let username = get_name(&handle_list, &item.author).unwrap();
+               let username = get_name(&handle_list, &item.author)
+                  .expect("DHT incoherent state as author's handle should publicly available");
                msg!("- {:?} | {} | {} | {}", item.state, username, item.mail.subject, item.address);
             }
             dump_state(conductor);

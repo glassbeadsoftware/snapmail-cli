@@ -33,10 +33,10 @@ pub async fn start_conductor_or_abort(sid: String) -> (ConductorHandle, DnaHash)
    /// - Get UID
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);
-   let uid = std::fs::read_to_string(app_filepath).unwrap();
+   let uid = std::fs::read_to_string(app_filepath).expect("Should have config folder");
    let expected_hash = load_dna_from_rs(uid).await.dna_hash().clone();
    /// - Get Installed DNAs
-   let dnas = conductor.list_dnas().await.unwrap();
+   let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
    /// - Check
    if dnas.len() != 1 {
       err_msg!("No installed DNA found ({})", dnas.len());
@@ -137,7 +137,7 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
    /// Activate app
    conductor.activate_app(SNAPMAIL_APP_ID.to_string()).await?;
    /// Done
-   let dnas = conductor.list_dnas().await.unwrap();
+   let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
    msg!("Installed DNAs: {:?}", dnas);
    Ok(dna_file.dna_hash().clone())
 }
@@ -148,7 +148,9 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       //let p2p = conductor.holochain_p2p();
       //let broadcaster = conductor.signal_broadcaster();
 
-      let cell_id = &conductor.list_cell_ids().await.unwrap()[0];
+      let cell_id = &conductor.list_cell_ids().await
+         .expect("Conductor should not fail")
+         [0];
 
       // let cell = conductor.cell_by_id(cell_id).unwrap();
       // let arc = cell.env();
@@ -159,7 +161,7 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       let peer_dump = p2p_store::dump_state(
          conductor.get_p2p_env().await.clone().into(),
          Some(cell_id.clone()),
-      ).unwrap();
+      ).expect("p2p_store should not fail");
 
       //let state = conductor.dump_cell_state(&cell_ids[0]).await.unwrap();
       //msg!(" {}", state);
@@ -169,5 +171,5 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       // msg!(" - Peers: {}", peer_dump.peers.len());
       peer_dump.peers.len()
    }, std::time::Duration::from_secs(9));
-   result.unwrap()
+   result.expect("dump_state() should not fail")
 }

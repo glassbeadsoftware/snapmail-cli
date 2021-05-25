@@ -15,10 +15,10 @@ use std::sync::mpsc::Sender;
 /// Listen to signals and display them in the feedback box
 pub async fn listen_signal(conductor: ConductorHandle, signal_tx: Sender<String>) -> anyhow::Result<()> {
    /// Add app interface so we can get signals
-   let mut interfaces = conductor.list_app_interfaces().await.unwrap();
+   let mut interfaces = conductor.list_app_interfaces().await?;
    if interfaces.is_empty() {
-      let _port = conductor.clone().add_app_interface(0).await.unwrap();
-      interfaces = conductor.list_app_interfaces().await.unwrap();
+      let _port = conductor.clone().add_app_interface(0).await?;
+      interfaces = conductor.list_app_interfaces().await?;
       assert!(interfaces.len() > 0);
    }
    // msg!("App Interfaces: {:?}", interfaces);
@@ -79,7 +79,11 @@ fn print_snapmail_signal(
       }
       SignalProtocol::ReceivedAck(ack) => {
          let name = get_handle(conductor.clone(), handle_list, &ack.from);
-         let maybe_mail = snapmail_get_mail(conductor.clone(), ack.for_mail.clone()).unwrap();
+         let maybe_mail = snapmail_get_mail(conductor.clone(), ack.for_mail.clone());
+         if let Err(_err) = maybe_mail {
+            return format!("Received Acknowledgement for unknown mail {}", ack.for_mail);
+         }
+         let maybe_mail = maybe_mail.unwrap();
          let subject = if let Some(mail) = maybe_mail.0 {
             match mail {
                Ok(inmail) => inmail.mail.subject,
@@ -97,7 +101,9 @@ fn print_snapmail_signal(
 fn get_handle(conductor: ConductorHandle, handle_list: &mut GetAllHandlesOutput, pubkey: &AgentPubKey) -> String {
    let maybe_name = get_name(handle_list, pubkey);
    if maybe_name.is_none() {
-      *handle_list = snapmail_get_all_handles(conductor.clone(), ()).unwrap();
+      if let Ok(list) = snapmail_get_all_handles(conductor.clone(), ()) {
+         *handle_list = list;
+      }
       let maybe_name = get_name(handle_list, pubkey);
       return maybe_name.unwrap_or("<Unknown>".to_string());
    }

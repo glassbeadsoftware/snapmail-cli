@@ -23,9 +23,6 @@ pub struct SetupCommand {
    /// Network ID that this session will use
    uid: String,
 
-   // #[structopt(name = "mdns")]
-   // maybe_can_mdns: Option<bool>,
-
    // Set a root directory for the app's storage data to be placed into.
    // Defaults to the system's temp directory.
    // This directory must already exist.
@@ -35,7 +32,7 @@ pub struct SetupCommand {
 
 impl SetupCommand {
    ///
-   pub async fn run(&self, sid: PathBuf) {
+   pub async fn run(&self, sid: PathBuf) -> anyhow::Result<()> {
       let sid_str = sid.to_string_lossy().to_string();
       //let root = self.maybe_root.clone().unwrap_or(CONFIG_PATH.as_path().to_path_buf());
       let root = CONFIG_PATH.as_path().to_path_buf();
@@ -46,11 +43,12 @@ impl SetupCommand {
       ).expect("Generate config failed. Maybe Invalid params.");
 
 
-      let _dna_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await.unwrap();
+      let _dna_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await?;
       // msg!("    Using DNA: {}", dna_hash);
       let conductor = start_conductor(sid_str.clone()).await;
-      let hash = snapmail_set_handle(conductor, sid_str.clone()).unwrap();
+      let hash = snapmail_set_handle(conductor, sid_str.clone())?;
       msg!(" handle set: {} - {:?}", sid_str, hash);
+      Ok(())
    }
 }
 

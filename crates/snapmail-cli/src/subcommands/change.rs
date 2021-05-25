@@ -36,7 +36,8 @@ impl ChangeCommand {
    fn update_uid(&self, sid: PathBuf, uid: &str) {
       let config_path = Path::new(&*CONFIG_PATH).join(sid.clone());
       let app_filepath = config_path.join(APP_CONFIG_FILENAME);
-      std::fs::write(app_filepath, uid.as_bytes()).unwrap();
+      std::fs::write(app_filepath, uid.as_bytes())
+         .expect("APP_CONFIG_FILENAME should be writable");
    }
 
    ///
@@ -64,6 +65,7 @@ impl ChangeCommand {
       }
       /// Write config
       msg!("New config:\n{}", file_str);
-      std::fs::write(config_filepath.clone(), file_str).unwrap();
+      std::fs::write(config_filepath.clone(), file_str)
+         .expect("CONDUCTOR_CONFIG_FILENAME should be writable");
    }
 }

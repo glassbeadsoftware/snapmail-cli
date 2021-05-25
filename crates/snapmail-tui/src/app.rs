@@ -142,12 +142,13 @@ impl App {
 
    ///
    pub fn show_selected_contact(&mut self) {
-      let selected = self.contacts_table.state.selected();
-      if selected.is_none() {
-         self.feedback(&format!("No selection"));
-         return;
-      }
-      let index = selected.unwrap();
+      let index = match self.contacts_table.state.selected() {
+         None => {
+            self.feedback(&format!("No selection"));
+            return;
+         }
+         Some(s) => s,
+      };
       let key = self.contacts_table.agent_index_map.get(&index).unwrap();
       let msg = format!("({}) Selected agent: {}", index, key);
       self.feedback(&msg);

@@ -81,3 +81,4 @@ ARGS:
     <sid>    Session ID. Corresponds to an unique config, network id and agent
 `````
 
+![screenshot-view](/sshots/snap-view.png)

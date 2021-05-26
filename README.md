@@ -81,6 +81,35 @@ ARGS:
     <sid>    Session ID. Corresponds to an unique config, network id and agent
 `````
 
-## Screenshots
+## Usage Guide
+
+First use the CLI to setup an agent
+
+Press keys corresponding to the highlighted letters to navigate.
+Q Key to exit app.
+
+### View Screen
+
+Up/Down Keys to select mail
+Enter to make selected mail scrollable with Up/Down Keys. Esc key to go back.
+Number keys are used to donwload attachments with corresponding index number.
 
 ![screenshot-view](/sshots/snap-view.png)
+
+### Write Screen
+
+Tab key to toggle between edit blocks.
+Up/Down keys to select a contact.
+Enter to toggle contact send state (to, cc, bcc)
+When no block is selected use Enter or Insert key to send mail
+Attachment must be a valid path on drive.
+
+![screenshot-write](/sshots/snap-write.png)
+
+### Edit Screen
+
+Use the highlighted letters to select which setting to change.
+Press Enter key to confirm settings change.
+Press Esc key to cancel editing.
+
+![screenshot-write](/sshots/snap-edit.png)

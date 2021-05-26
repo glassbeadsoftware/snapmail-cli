@@ -112,6 +112,8 @@ Attachment must be a valid path on drive.
 
 Use the highlighted letters to select which setting to change. <br/>
 Press Enter key to confirm settings change. <br/>
-Press Esc key to cancel editing.
+Press Esc key to cancel editing.<br/>
+
+Bootstrap URL and Proxy URL currently not changeable. Redo setup with CLI or manually edit the conductor-config.yaml in your .config folder.
 
 ![screenshot-write](/sshots/snap-edit.png)

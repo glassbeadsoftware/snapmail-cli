@@ -85,33 +85,33 @@ ARGS:
 
 First use the CLI to setup an agent.
 
-Press keys corresponding to the highlighted letters to navigate.
+Press keys corresponding to the highlighted letters to navigate. <br/>
 'Q' Key to exit app.
 
 ### View Screen
 
-Top bar information corresponds to: SessionId, NetworkId, Username, Number of connected peers in the network.
-Up/Down Keys to select mail.
-Enter to make selected mail scrollable with Up/Down Keys. Esc key to go back.
-Number keys are used to donwload attachments with corresponding index number.
+Top bar information corresponds to: SessionId, NetworkId, Username, Number of connected peers in the network. <br/>
+Up/Down Keys to select mail. <br/>
+Press Enter key to make selected mail scrollable with Up/Down Keys. Esc key to go back. <br/>
+Number keys are used to donwload attachments with corresponding index number. <br/>
 Press Delete key to trash selected mail.
 
 ![screenshot-view](/sshots/snap-view.png)
 
 ### Write Screen
 
-Tab key to toggle between edit blocks.
-Up/Down keys to select a contact.
-Enter to toggle contact send state (to, cc, bcc).
-When no block is selected use Enter or Insert key to send mail.
+Tab key to toggle between edit blocks. <br/>
+Up/Down keys to select a contact. <br/>
+Enter to toggle contact send state (to, cc, bcc). <br/>
+When no block is selected use Enter or Insert key to send mail. <br/>
 Attachment must be a valid path on drive.
 
 ![screenshot-write](/sshots/snap-write.png)
 
 ### Edit Screen
 
-Use the highlighted letters to select which setting to change.
-Press Enter key to confirm settings change.
+Use the highlighted letters to select which setting to change. <br/>
+Press Enter key to confirm settings change. <br/>
 Press Esc key to cancel editing.
 
 ![screenshot-write](/sshots/snap-edit.png)

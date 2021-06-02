@@ -15,6 +15,6 @@ anyhow = "1.0"
 base64 = "0.13"
 tokio = { version = "1.5", features = [ "full" ] }
 # 385 deps wtf
-holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "7f7c926d8eaf57f007848880eea56bf296410096", package = "holochain_types" }
+holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain_types" }
 
 

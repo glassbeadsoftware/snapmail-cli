@@ -6,7 +6,6 @@ use crate::holochain::*;
 use snapmail::ZOME_NAME;
 use holochain::conductor::ConductorHandle;
 use holochain_types::dna::*;
-use holochain_types::dna::zome::*;
 use holochain_types::dna::wasm::DnaWasm;
 use holochain_types::app::*;
 use holochain_zome_types::*;
@@ -84,7 +83,7 @@ async fn load_dna_from_rs(uid: String) -> DnaFile {
    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
    .await
    .into_inner();
-   let zome_def: ZomeDef = WasmZome { wasm_hash: wasm_hash.clone() }.into();
+   let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash);
    let zome = (ZOME_NAME.into(), zome_def).into();
    let dna_file = DnaFile::new(DnaDef {
    name: SNAPMAIL_APP_ID.to_string(),
@@ -144,7 +143,7 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
 
 ///
 pub fn dump_state(conductor: ConductorHandle) -> usize {
-   let result = tokio_helper::block_on(async {
+   let result = holochain_util::tokio_helper::block_on(async {
       //let p2p = conductor.holochain_p2p();
       //let broadcaster = conductor.signal_broadcaster();
 

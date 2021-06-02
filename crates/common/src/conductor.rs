@@ -83,7 +83,7 @@ async fn load_dna_from_rs(uid: String) -> DnaFile {
    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
    .await
    .into_inner();
-   let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash);
+   let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash.clone());
    let zome = (ZOME_NAME.into(), zome_def).into();
    let dna_file = DnaFile::new(DnaDef {
    name: SNAPMAIL_APP_ID.to_string(),

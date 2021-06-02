@@ -27,3 +27,7 @@ holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev
 holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain_conductor_api", default-features = false }
 holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain_types", default-features = false }
 holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain_p2p", default-features = false }
+
+[target.armv7-unknown-linux-gnueabihf.dependencies]
+# Added due to dependency problems when cross-compiling for RPi
+openssl = { version = "0.10.32", features = ["vendored"] }

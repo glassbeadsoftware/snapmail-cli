@@ -23,5 +23,5 @@ futures-util = "0.3.1"
 
 snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 
-holochain = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain" }
-holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "2b1da2486a18d1d34f3ae63003a86b41afcb037a", package = "holochain_types" }
+holochain = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain" }
+holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_types" }

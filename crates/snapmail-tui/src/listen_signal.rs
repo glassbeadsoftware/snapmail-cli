@@ -54,7 +54,7 @@ pub async fn listen_signal(conductor: ConductorHandle, signal_tx: Sender<String>
 
 
 ///
-fn print_signal(conductor: ConductorHandle, handle_list: &mut GetAllHandlesOutput, signal: Signal) -> String {
+fn print_signal(conductor: ConductorHandle, handle_list: &mut Vec<HandleItem>, signal: Signal) -> String {
    match signal {
       Signal::App(_cell_id, app_signal) => {
          let snapmail_signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
@@ -69,7 +69,7 @@ fn print_signal(conductor: ConductorHandle, handle_list: &mut GetAllHandlesOutpu
 ///
 fn print_snapmail_signal(
    conductor: ConductorHandle,
-   handle_list: &mut GetAllHandlesOutput,
+   handle_list: &mut Vec<HandleItem>,
    signal: SignalProtocol,
 ) -> String {
    match signal {
@@ -98,7 +98,7 @@ fn print_snapmail_signal(
    }
 }
 
-fn get_handle(conductor: ConductorHandle, handle_list: &mut GetAllHandlesOutput, pubkey: &AgentPubKey) -> String {
+fn get_handle(conductor: ConductorHandle, handle_list: &mut Vec<HandleItem>, pubkey: &AgentPubKey) -> String {
    let maybe_name = get_name(handle_list, pubkey);
    if maybe_name.is_none() {
       if let Ok(list) = snapmail_get_all_handles(conductor.clone(), ()) {

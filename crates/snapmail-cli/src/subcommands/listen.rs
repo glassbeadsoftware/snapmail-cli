@@ -42,7 +42,7 @@ pub async fn listen(conductor: ConductorHandle, loop_interval_sec: u64) -> anyho
       match res {
          Err(_e) => {
                let peer_count = dump_state(conductor.clone());
-               let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?.0;
+               let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?;
                msg!("Peers: {} | Mails: {}", peer_count, all_mail_list.len());
          },
          Ok(None) => msg!("No signal found"),
@@ -54,7 +54,7 @@ pub async fn listen(conductor: ConductorHandle, loop_interval_sec: u64) -> anyho
 }
 
 ///
-fn print_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, signal: Signal) {
+fn print_signal(conductor: ConductorHandle, handle_list: &Vec<HandleItem>, signal: Signal) {
    match signal {
       Signal::App(_cell_id, app_signal) => {
          let snapmail_signal: SignalProtocol = app_signal.into_inner().decode().unwrap();
@@ -67,7 +67,7 @@ fn print_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, s
 }
 
 ///
-fn print_snapmail_signal(conductor: ConductorHandle, handle_list: &GetAllHandlesOutput, signal: SignalProtocol) {
+fn print_snapmail_signal(conductor: ConductorHandle, handle_list: &Vec<HandleItem>, signal: SignalProtocol) {
    match signal {
       SignalProtocol::ReceivedMail(item) => {
          let name = get_name(handle_list, &item.author).unwrap_or("<unknown>".to_string());
@@ -104,10 +104,9 @@ pub fn try_get_name(conductor: ConductorHandle, candidate: &AgentPubKey) -> Resu
       msg!("snapmail_get_all_handles() failed during try_get_name(): {:?}", err);
       return Err(());
    }
-   let handle_list = handle_list.unwrap().0;
-   for pair in handle_list.iter() {
-      if &pair.1 == candidate {
-         return Ok(pair.0.clone());
+   for handle_item in handle_list.unwrap().iter() {
+      if &handle_item.agentId == candidate {
+         return Ok(handle_item.name.clone());
       }
    }
    Err(())

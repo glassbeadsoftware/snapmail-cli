@@ -173,15 +173,15 @@ impl SnapSubcommand {
          Self::Directory => {
             msg!("Directory...");
             let conductor = start_conductor(sid_str).await;
-            let handle_list = snapmail_get_all_handles(conductor, ())?.0;
-            for pair in handle_list.iter() {
-               msg!(" - {} - {}", pair.0, pair.1);
+            let handle_list = snapmail_get_all_handles(conductor, ())?;
+            for handle_item in handle_list.iter() {
+               msg!(" - {} - {}", handle_item.name, handle_item.agentId);
             }
          },
          Self::List => {
             msg!("List inbox...");
             let conductor = start_conductor(sid_str).await;
-            let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?.0;
+            let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?;
             let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
             msg!(" {} mail(s) found:", all_mail_list.len());
             for item in all_mail_list.iter() {
@@ -194,7 +194,7 @@ impl SnapSubcommand {
          Self::Pull => {
             msg!("Pull...");
             let conductor = start_conductor(sid_str).await;
-            let handle_list = snapmail_get_all_handles(conductor.clone(), ())?.0;
+            let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
             let new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ())?;
             msg!(" -  New Acks: {}", new_ack_list.len());
             let new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ())?;
@@ -203,7 +203,7 @@ impl SnapSubcommand {
                msg!(" - {:?}", mail_item);
             }
             msg!(" -   Handles: {}", handle_list.len());
-            let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?.0;
+            let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?;
             msg!(" - All Mails: {}", all_mail_list.len());
          },
       }

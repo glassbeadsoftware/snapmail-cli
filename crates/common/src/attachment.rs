@@ -57,7 +57,7 @@ pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result
          chunk_index: i,
          chunk: chunk_b64,
       };
-      let hh = snapmail_write_chunk(conductor.clone(), WriteChunkInput(chunk_input))
+      let hh = snapmail_write_chunk(conductor.clone(), chunk_input)
          .map_err(|_err| std::io::Error::from(std::io::ErrorKind::Other))?;
       chunk_hh_list.push(hh);
       i += 1;

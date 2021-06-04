@@ -4,12 +4,12 @@ use snapmail_common::{
 };
 use holochain_types::dna::*;
 use snapmail::mail::entries::Mail;
-use snapmail::handle::GetAllHandlesOutput;
+use snapmail::handle::HandleItem;
 use snapmail::mail::*;
 use snapmail::handle::*;
 use chrono::{DateTime, TimeZone, Local};
 
-fn print_mail(handle_list: &GetAllHandlesOutput, mail: Mail, from: String, bcc: Vec<AgentPubKey>) {
+fn print_mail(handle_list: &Vec<HandleItem>, mail: Mail, from: String, bcc: Vec<AgentPubKey>) {
    /// Get all CCs
    let mut cc_all = String::new();
    for cc in mail.cc.iter() {

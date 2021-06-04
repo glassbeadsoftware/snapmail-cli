@@ -25,21 +25,15 @@ impl SnapmailChain {
       //let my_handle = snapmail_get_handle(conductor.clone(), agent_pubkey).unwrap();
       let my_handle = snapmail_get_my_handle(conductor.clone(), ()).unwrap();
       /// Query DHT
-      let handle_list = match snapmail_get_all_handles(conductor.clone(), ()) {
-         Ok(list) => list.0,
-         Err(_e) => Vec::new(),
-      };
+      let handle_list = snapmail_get_all_handles(conductor.clone(), ()).unwrap_or(Vec::new());
       let _new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ());
       let _new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ());
 
-      let all_mail_list = match snapmail_get_all_mails(conductor.clone(), ()) {
-         Ok(list) => list.0,
-         Err(_e) => Vec::new(),
-      };
+      let all_mail_list = snapmail_get_all_mails(conductor.clone(), ()).unwrap_or(Vec::new());
       /// Change list to HashMap
       let mut handle_map = HashMap::new();
       for item in handle_list {
-         handle_map.insert(item.1, item.0);
+         handle_map.insert(item.agentId, item.name);
       }
       // /// Get my handle
       // let my_handle = handle_map.get(&agent_pubkey)

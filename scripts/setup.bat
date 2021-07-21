@@ -1,9 +1,8 @@
 REM Script for building wasm and rustifying it
 
-Create build Directory
+REM Create build Directory
 rmdir /S /Q build
 mkdir build
-
 cd build
 
 REM Generate WASM

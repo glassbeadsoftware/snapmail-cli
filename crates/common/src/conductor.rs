@@ -9,9 +9,10 @@ use holochain_types::dna::*;
 use holochain_types::dna::wasm::DnaWasm;
 use holochain_types::app::*;
 use holochain_zome_types::*;
+use holochain_p2p::*;
 use holochain::conductor::{
    error::*,
-   p2p_store,
+   p2p_agent_store,
 };
 use std::path::Path;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
@@ -157,8 +158,11 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       // let source_chain_dump = source_chain.dump_state().await.unwrap();
       //let integration_dump = integrate_dht_ops_workflow::dump_state(arc.clone().into())?;
 
-      let peer_dump = p2p_store::dump_state(
-         conductor.get_p2p_env().await.clone().into(),
+      let space = cell_id.dna_hash().to_kitsune();
+      let p2p_env = conductor.get_p2p_env(space).await;
+
+      let peer_dump = p2p_agent_store::dump_state(
+         p2p_env.into(),
          Some(cell_id.clone()),
       ).expect("p2p_store should not fail");
 

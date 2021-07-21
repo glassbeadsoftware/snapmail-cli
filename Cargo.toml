@@ -6,10 +6,11 @@ members = [
     "crates/snapmail-cli",
     "crates/snapmail-tui",
 ]
+resolver="2"
 
-[patch.crates-io]
-rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
-lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
+#[patch.crates-io]
+#rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
+#lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
 
 [profile.release]
 opt-level = 'z'  # Optimize for size.

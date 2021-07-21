@@ -4,17 +4,30 @@ use yazi::*;
 use holochain_types::dna::wasm::DnaWasm;
 //use std::hash::Hash;
 
-pub const WASM_PATH: &str                   = "/home/ddd/github/snapmail-rsm/target/wasm32-unknown-unknown/release/snapmail.wasm";
-//pub const DNA_PATH: &str                   = "/home/ddd/github/snapmail-cli/dna/snapmail.dna";
-//pub const DNA_PATH: &str                   = "~/github/snapmail-cli/dna/snapmail.dna";
+pub const DEFAULT_WASM_PATH: &str = "/home/ddd/github/snapmail-rsm/target/wasm32-unknown-unknown/release/snapmail.wasm";
+//pub const DNA_PATH: &str        = "/home/ddd/github/snapmail-cli/dna/snapmail.dna";
+//pub const DNA_PATH: &str        = "~/github/snapmail-cli/dna/snapmail.dna";
 
 pub const RUST_OUTPUT: &str = "./crates/common/src/wasm.rs";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+
+   // Prints each argument on a separate line
+   // for argument in std::env::args() {
+   //    println!("{}", argument);
+   // }
+   let mut args = std::env::args();
+   args.next(); // skip exe
+   let wasm_path = if let Some(arg) = args.next() {
+      arg
+   } else {
+      DEFAULT_WASM_PATH.to_string()
+   };
+
    /// Load DnaFile
-   println!("Loading DNA wasm file: {}", WASM_PATH);
-   let wasm = &std::fs::read(WASM_PATH)?;
+   println!("Loading DNA wasm file: {}", wasm_path);
+   let wasm = &std::fs::read(wasm_path)?;
    let dna_wasm = DnaWasm::from(wasm.to_vec());
    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
       .await

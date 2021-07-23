@@ -20,24 +20,24 @@ base64 = "0.13"
 snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 
 # online
-#holochain_util = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_util"}
-#holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holo_hash" }
-#holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_keystore" }
-#holochain = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain" }
-#holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_zome_types" }
-#holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_conductor_api" }
-#holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_types" }
-#holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "cfbcc6a310a4f7dfc35f27c304808d165f602e7a", package = "holochain_p2p" }
+holochain_util = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_util"}
+holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holo_hash" }
+holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_keystore" }
+holochain = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain" }
+holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_zome_types" }
+holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_conductor_api" }
+holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_types" }
+holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_p2p" }
 
 # local
-holochain_util = { path = "../../../holochain-develop/crates/holochain_util" }
-holo_hash = { path = "../../../holochain-develop/crates/holo_hash" }
-holochain_keystore = { path = "../../../holochain-develop/crates/holochain_keystore" }
-holochain = { path = "../../../holochain-develop/crates/holochain" }
-holochain_zome_types = { path = "../../../holochain-develop/crates/holochain_zome_types"  }
-holochain_conductor_api = { path = "../../../holochain-develop/crates/holochain_conductor_api" }
-holochain_types = { path = "../../../holochain-develop/crates/holochain_types" }
-holochain_p2p = { path = "../../../holochain-develop/crates/holochain_p2p" }
+#holochain_util = { path = "../../../holochain-develop/crates/holochain_util" }
+#holo_hash = { path = "../../../holochain-develop/crates/holo_hash" }
+#holochain_keystore = { path = "../../../holochain-develop/crates/holochain_keystore" }
+#holochain = { path = "../../../holochain-develop/crates/holochain" }
+#holochain_zome_types = { path = "../../../holochain-develop/crates/holochain_zome_types"  }
+#holochain_conductor_api = { path = "../../../holochain-develop/crates/holochain_conductor_api" }
+#holochain_types = { path = "../../../holochain-develop/crates/holochain_types" }
+#holochain_p2p = { path = "../../../holochain-develop/crates/holochain_p2p" }
 
 #[target.armv7-unknown-linux-gnueabihf.dependencies]
 # Added due to dependency problems when cross-compiling for RPi

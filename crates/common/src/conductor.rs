@@ -135,7 +135,10 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
        .install_app(SNAPMAIL_APP_ID.to_string(), vec![cell_id_with_proof])
        .await?;
    /// Activate app
-   conductor.activate_app(SNAPMAIL_APP_ID.to_string()).await?;
+   conductor
+      .clone()
+      .enable_app(&SNAPMAIL_APP_ID.to_string())
+      .await?;
    /// Done
    let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
    msg!("Installed DNAs: {:?}", dnas);
@@ -148,7 +151,7 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       //let p2p = conductor.holochain_p2p();
       //let broadcaster = conductor.signal_broadcaster();
 
-      let cell_id = &conductor.list_cell_ids().await
+      let cell_id = &conductor.list_cell_ids(None).await
          .expect("Conductor should not fail")
          [0];
 

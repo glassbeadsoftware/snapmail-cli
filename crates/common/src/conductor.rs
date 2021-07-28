@@ -15,6 +15,7 @@ use holochain::conductor::{
    p2p_agent_store,
 };
 use std::path::Path;
+use std::path::PathBuf;
 use holochain_keystore::keystore_actor::KeystoreSenderExt;
 use holochain::conductor::config::ConductorConfig;
 
@@ -34,7 +35,10 @@ pub async fn start_conductor_or_abort(sid: String) -> (ConductorHandle, DnaHash)
    let path = CONFIG_PATH.as_path().join(sid.clone());
    let app_filepath = path.join(APP_CONFIG_FILENAME);
    let uid = std::fs::read_to_string(app_filepath).expect("Should have config folder");
-   let expected_hash = load_dna_from_rs(uid).await.dna_hash().clone();
+   let expected_dna = load_dna_from_rs(uid).await;
+   let expected_wasm = expected_dna.get_wasm_for_zome(&ZomeName::from("snapmail")).unwrap();
+   let expected_wasm_hash = holo_hash::WasmHash::with_data(expected_wasm).await;
+
    /// - Get Installed DNAs
    let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
    /// - Check
@@ -43,9 +47,19 @@ pub async fn start_conductor_or_abort(sid: String) -> (ConductorHandle, DnaHash)
       err_msg!("Make sure it has been setup with snapmail-cli");
       std::process::abort();
    }
-   if dnas[0] != expected_hash {
+   let dna = conductor.get_dna(&dnas[0]).await.unwrap();
+   let expected_hash = dna.dna_hash().clone();
+   let maybe_wasm = dna.get_wasm_for_zome(&ZomeName::from("snapmail"));
+   if maybe_wasm.is_err() {
       err_msg!("Installed DNA Mismatch:");
-      err_msg!(" - Installed DNA: {}\n  - Expected DNA: {}", dnas[0], expected_hash);
+      err_msg!(" - \"snapmail\" zome not found");
+      err_msg!("Make sure it has been setup with snapmail-cli");
+      std::process::abort();
+   }
+   let wasm_hash = holo_hash::WasmHash::with_data(maybe_wasm.unwrap()).await;
+   if wasm_hash != expected_wasm_hash {
+      err_msg!("Installed DNA Mismatch:");
+      err_msg!(" - Installed Wasm: {}\n  - Expected Wasm: {}", wasm_hash, expected_wasm_hash);
       err_msg!("Make sure it has been setup with snapmail-cli");
       std::process::abort();
    }
@@ -75,6 +89,18 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    return conductor;
 }
 
+/// Create a DnaFile from a path to a *.dna bundle
+async fn load_dna_from_path(uid: String, path: &Path) -> holochain_types::dna::error::DnaResult<DnaFile> {
+   let mut dna = DnaBundle::read_from_file(path)
+      .await?
+      .into_dna_file(None, None)
+      .await?
+      .0;
+   dna = dna.with_uid(uid).await?;
+   Ok(dna)
+}
+
+
 ///
 async fn load_dna_from_rs(uid: String) -> DnaFile {
    let compressed = base64::decode_config(crate::wasm::DNA_WASM_B64, base64::URL_SAFE_NO_PAD).unwrap();
@@ -86,8 +112,11 @@ async fn load_dna_from_rs(uid: String) -> DnaFile {
    .into_inner();
    let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash.clone());
    let zome = (ZOME_NAME.into(), zome_def).into();
+   //let name = SNAPMAIL_APP_ID.to_string();
+   let name =format!("{}-{}", SNAPMAIL_APP_ID, uid);
+   println!(" - name: {}", name);
    let dna_file = DnaFile::new(DnaDef {
-   name: SNAPMAIL_APP_ID.to_string(),
+   name,
    uid: uid.to_string(),
    properties: SerializedBytes::try_from(()).unwrap(),
    zomes: vec![zome].into(),
@@ -100,7 +129,7 @@ async fn load_dna_from_rs(uid: String) -> DnaFile {
 /// Install Snapmail DNA from dna file
 /// FIXME: hardcoded DNA file path
 #[allow(deprecated)]
-pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
+pub async fn install_app(sid: String, uid: String, maybe_path: Option<PathBuf>) -> ConductorResult<DnaHash> {
    /// Load conductor from config file
    let config_path = Path::new(&*CONFIG_PATH).join(sid.clone());
    let conductor_path = config_path.join(CONDUCTOR_CONFIG_FILENAME);
@@ -114,15 +143,13 @@ pub async fn install_app(sid: String, uid: String) -> ConductorResult<DnaHash> {
       .await?;
 
    /// Load DnaFile
-   // println!("Loading DNA wasm file: {}", WASM_PATH);
-   // let wasm = &std::fs::read(WASM_PATH)?;
-   // let wasm_str = format!("pub const DNA_WASM: [u8 ; {}] = {:?};\n", wasm.len(), wasm);
-   // std::fs::write("./wasm.rs", wasm_str.as_bytes());
-   // //let wasm2 = &std::fs::read("./dump.rs")?;
-   // let dna_wasm = DnaWasm::from(wasm.to_owned());
-
-   println!("Building DNA from wasm stored in Rust code.");
-   let dna_file = load_dna_from_rs(uid).await;
+   let dna_file = if let Some(path) = maybe_path {
+      println!("Loading DNA from path: {}", path.to_string_lossy());
+      load_dna_from_path(uid, &path).await.unwrap()
+   } else {
+      println!("Building DNA from wasm stored in Rust code.");
+      load_dna_from_rs(uid).await
+   };
 
    /// Register DNA
    conductor.register_dna(dna_file.clone()).await?;

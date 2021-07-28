@@ -101,7 +101,11 @@ impl MailTable {
    pub fn get_mail_text(&self, index: usize, chain: &SnapmailChain) -> String {
       let hh = self.mail_index_map.get(&index).unwrap();
       let item = chain.mail_map.get(hh).unwrap();
-      let author = chain.handle_map.get(&item.author).unwrap();
+      let maybe_author = chain.handle_map.get(&item.author);
+      let author = match maybe_author {
+         Some(a) => a,
+         None => "<unknown>",
+      };
       let date: DateTime<Local> = Local.timestamp(item.mail.date_sent as i64, 0);
       let date_str = format!("{}", date.format("%H:%M %Y-%m-%d"));
       /// TO line

@@ -23,6 +23,9 @@ pub struct SetupCommand {
    /// Network ID that this session will use
    uid: String,
 
+   #[structopt(long, parse(from_os_str))]
+   pub dna_path: Option<PathBuf>,
+
    // Set a root directory for the app's storage data to be placed into.
    // Defaults to the system's temp directory.
    // This directory must already exist.
@@ -43,8 +46,8 @@ impl SetupCommand {
       ).expect("Generate config failed. Maybe Invalid params.");
 
 
-      let _dna_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone()).await?;
-      // msg!("    Using DNA: {}", dna_hash);
+      let dna_hash = install_app(sid.to_string_lossy().to_string(), self.uid.clone(), self.dna_path.clone()).await?;
+       msg!("    Using DNA: {}", dna_hash);
       let conductor = start_conductor(sid_str.clone()).await;
       let hash = snapmail_set_handle(conductor, sid_str.clone())?;
       msg!(" handle set: {} - {:?}", sid_str, hash);

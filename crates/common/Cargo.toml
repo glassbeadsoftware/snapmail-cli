@@ -39,6 +39,6 @@ holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "c5d
 #holochain_types = { path = "../../../holochain-develop/crates/holochain_types" }
 #holochain_p2p = { path = "../../../holochain-develop/crates/holochain_p2p" }
 
-#[target.armv7-unknown-linux-gnueabihf.dependencies]
+[target.armv7-unknown-linux-gnueabihf.dependencies]
 # Added due to dependency problems when cross-compiling for RPi
-#openssl = { version = "0.10.32", features = ["vendored"] }
+openssl = { version = "0.10.32", features = ["vendored"] }

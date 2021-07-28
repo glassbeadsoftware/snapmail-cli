@@ -1,21 +1,20 @@
 [workspace]
-
+resolver="2"
 members = [
     "crates/common",
     "crates/rustify-wasm",
     "crates/snapmail-cli",
     "crates/snapmail-tui",
 ]
-resolver="2"
 
-#[patch.crates-io]
-#rkv = { git = "https://github.com/holochain/rkv.git", branch = "master" }
-#lmdb-rkv = { git = "https://github.com/holochain/lmdb-rs.git" }
+[profile.dev]
+debug = false
 
 [profile.release]
 opt-level = 'z'  # Optimize for size.
 lto = true # link time optimization
 
+# Optimize deps even in Dev
 [profile.dev.package."*"]
 opt-level = 3
 debug = false

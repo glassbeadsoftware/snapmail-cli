@@ -221,7 +221,10 @@ impl App {
    pub fn previous_mail(&mut self, chain: &SnapmailChain) {
       self.mail_table.previous();
       if let Some(index) = self.mail_table.state.selected() {
-         let hh = self.mail_table.mail_index_map.get(&index).unwrap().clone();
+         let hh = match self.mail_table.mail_index_map.get(&index) {
+            Some(h) => h.clone(),
+            None => return,
+         };
          self.command = AppCommand::AcknowledgeMail(hh.clone());
          self.feedback(&format!("Reading mail: {}", hh));
          /// Attachment

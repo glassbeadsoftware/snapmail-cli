@@ -1,4 +1,6 @@
+#![allow(non_upper_case_globals)]
 #![allow(unused_doc_comments)]
+#![allow(unused_attributes)]
 
 use structopt::StructOpt;
 

@@ -26,8 +26,8 @@ impl SnapmailChain {
       let my_handle = snapmail_get_my_handle(conductor.clone(), ()).unwrap();
       /// Query DHT
       let handle_list = snapmail_get_all_handles(conductor.clone(), ()).unwrap_or(Vec::new());
-      let _new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ());
-      let _new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ());
+      let _new_ack_list = snapmail_check_ack_inbox(conductor.clone(), ());
+      let _new_mail_list = snapmail_check_mail_inbox(conductor.clone(), ());
 
       let all_mail_list = snapmail_get_all_mails(conductor.clone(), ()).unwrap_or(Vec::new());
       /// Change list to HashMap

@@ -446,18 +446,23 @@ impl App {
          bcc: bcc_list,
          manifest_address_list,
       };
-      let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
+      //let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
       /// Send
-      let output = snapmail_send_mail(conductor, mail)?;
-      /// Show results
-      let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
-      let message = format!("Mail sent. Pendings:  {} / {} ({})", pending_count, send_count, output.outmail);
-      let fg_color =  if pending_count == 0 {
-         Color::Green
-      } else if pending_count == send_count {
-         Color::LightMagenta
-      }  else {
-         Color::Yellow
+      let sent_hh = snapmail_send_mail(conductor.clone(), mail)?;
+      /// Get State
+      let mail_state = snapmail_get_outmail_state(conductor, sent_hh.clone())?;
+      /// Show result
+      // let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
+      // let message = format!("Mail sent. Pendings:  {} / {} ({})", pending_count, send_count, output.outmail);
+      let message = format!("Mail sent: {:?} ({})", mail_state, sent_hh);
+      let fg_color =  match mail_state {
+         OutMailState::Pending => Color::Yellow,
+         OutMailState::PartiallyArrived_NoAcknowledgement => Color::LightMagenta,
+         OutMailState::PartiallyArrived_PartiallyAcknowledged => Color::LightMagenta,
+         OutMailState::Arrived_NoAcknowledgement => Color::Green,
+         OutMailState::Arrived_PartiallyAcknowledged => Color::Green,
+         OutMailState::FullyAcknowledged => Color::Green,
+         OutMailState::Deleted => Color::Red,
       };
       self.feedback_ext(&message, fg_color, Color::Black);
 

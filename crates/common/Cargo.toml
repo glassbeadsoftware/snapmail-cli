@@ -20,14 +20,14 @@ base64 = "0.13"
 snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 
 # online
-holochain_util = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_util"}
-holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holo_hash" }
-holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_keystore" }
-holochain = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain" }
-holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_zome_types" }
-holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_conductor_api" }
-holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_types" }
-holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "c5dbdf28825927106bc32d186dd54f20d35df468", package = "holochain_p2p" }
+holochain_util = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_util"}
+holo_hash = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holo_hash" }
+holochain_keystore = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_keystore" }
+holochain = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain" }
+holochain_zome_types = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_zome_types" }
+holochain_conductor_api = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_conductor_api" }
+holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_types" }
+holochain_p2p = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_p2p" }
 
 # local
 #holochain_util = { path = "../../../holochain-develop/crates/holochain_util" }

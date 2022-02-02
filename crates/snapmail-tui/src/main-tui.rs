@@ -1,5 +1,6 @@
-#![allow(unused_doc_comments)]
 #![allow(non_upper_case_globals)]
+#![allow(unused_doc_comments)]
+#![allow(unused_attributes)]
 
 #[macro_use]
 extern crate strum_macros;

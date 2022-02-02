@@ -1,6 +1,6 @@
 //! Helpers for creating, reading and writing [`ConductorConfig`]s.
 use std::path::PathBuf;
-use holochain_conductor_api::config::conductor::ConductorConfig;
+use holochain_conductor_api::config::conductor::{ConductorConfig, KeystoreConfig};
 use holochain_conductor_api::config::*;
 use crate::globals::*;
 use holochain_p2p::kitsune_p2p::KitsuneP2pConfig;
@@ -12,7 +12,10 @@ pub fn create_config(environment_path: PathBuf) -> ConductorConfig {
     conductor_config.environment_path = environment_path.clone().into();
     let mut keystore_path = environment_path;
     keystore_path.push("keystore");
-    conductor_config.keystore_path = Some(keystore_path);
+    conductor_config.keystore = KeystoreConfig::LairServerLegacyDeprecated {
+        keystore_path: Some(keystore_path),
+        danger_passphrase_insecure_from_config: "default-insecure-passphrase".into(),
+    };
     conductor_config
 }
 

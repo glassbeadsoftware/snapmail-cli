@@ -174,7 +174,7 @@ fn get_status_string(mail: &MailItem) -> String {
             OutMailState::PartiallyArrived_PartiallyAcknowledged => ":A",
             OutMailState::Arrived_NoAcknowledgement => "vv",
             OutMailState::Arrived_PartiallyAcknowledged => "vA",
-            OutMailState::Received => "OK",
+            OutMailState::FullyAcknowledged => "OK",
             OutMailState::Deleted => "XX",
          }
       }

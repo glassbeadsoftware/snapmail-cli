@@ -9,6 +9,8 @@ members = [
 
 [profile.dev]
 debug = false
+opt-level = 0
+overflow-checks = false
 
 [profile.release]
 opt-level = 'z'  # Optimize for size.

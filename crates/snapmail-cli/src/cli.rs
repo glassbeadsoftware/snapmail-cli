@@ -195,9 +195,9 @@ impl SnapSubcommand {
             msg!("Pull...");
             let conductor = start_conductor(sid_str).await;
             let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
-            let new_ack_list = snapmail_check_incoming_ack(conductor.clone(), ())?;
+            let new_ack_list = snapmail_check_ack_inbox(conductor.clone(), ())?;
             msg!(" -  New Acks: {}", new_ack_list.len());
-            let new_mail_list = snapmail_check_incoming_mail(conductor.clone(), ())?;
+            let new_mail_list = snapmail_check_mail_inbox(conductor.clone(), ())?;
             msg!(" - New Mails: {}", new_mail_list.len());
             for mail_item in new_mail_list.iter() {
                msg!(" - {:?}", mail_item);

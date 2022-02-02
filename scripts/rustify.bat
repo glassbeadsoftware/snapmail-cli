@@ -1,6 +1,4 @@
 REM Build and Rustify Snapmail WASM
-cargo build
+cargo build --release -p rustify_wasm
 
-.\target\debug\rustify-wasm.exe build\snapmail-rsm\target\wasm32-unknown-unknown\release\snapmail.wasm
-
-cargo build
+.\target\release\rustify-wasm.exe build\snapmail-rsm\target\wasm32-unknown-unknown\release\snapmail.wasm

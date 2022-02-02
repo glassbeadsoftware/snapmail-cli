@@ -56,12 +56,6 @@ snapmail-cli billy list
 snapmail-cli billy open uhCkk69Fu0YwACllB__HLWwN49vCVf8JIOfKDuBXjMjG5BWcH2Tq4
 `````
 
-## Building
-
-`````
-cargo build --release
-`````
-
 # Snapmail-tui
 
 `````
@@ -117,3 +111,9 @@ Press Esc key to cancel editing.<br/>
 Bootstrap URL and Proxy URL currently not changeable. Redo setup with CLI or manually edit the conductor-config.yaml in your .config folder.
 
 ![screenshot-write](/sshots/snap-edit.png)
+
+# Building
+
+1. `./scripts/setup.bat`
+3. `./scripts/rustify.bat`
+4. `cargo build --release`

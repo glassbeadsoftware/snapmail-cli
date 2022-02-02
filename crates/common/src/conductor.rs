@@ -16,7 +16,7 @@ use holochain::conductor::{
 };
 use std::path::Path;
 use std::path::PathBuf;
-use holochain_keystore::keystore_actor::KeystoreSenderExt;
+//use holochain_keystore::keystore_actor::KeystoreSenderExt;
 use holochain::conductor::config::ConductorConfig;
 
 ///
@@ -40,14 +40,14 @@ pub async fn start_conductor_or_abort(sid: String) -> (ConductorHandle, DnaHash)
    let expected_wasm_hash = holo_hash::WasmHash::with_data(expected_wasm).await;
 
    /// - Get Installed DNAs
-   let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
+   let dnas = conductor.list_dnas();
    /// - Check
    if dnas.len() != 1 {
       err_msg!("No installed DNA found ({})", dnas.len());
       err_msg!("Make sure it has been setup with snapmail-cli");
       std::process::abort();
    }
-   let dna = conductor.get_dna(&dnas[0]).await.unwrap();
+   let dna = conductor.get_dna(&dnas[0]).unwrap();
    let expected_hash = dna.dna_hash().clone();
    let maybe_wasm = dna.get_wasm_for_zome(&ZomeName::from("snapmail"));
    if maybe_wasm.is_err() {
@@ -77,14 +77,14 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
    let conductor = conductor_handle_from_config_path(Some(config_path)).await;
    /// Check state
    //let _ = conductor.print_setup();
-   //let dnas = conductor.list_dnas().await.unwrap();
-   //msg!("Installed DNAs: {:?}", dnas);
-   //let apps = conductor.list_active_apps().await.unwrap();
+   let dnas = conductor.list_dnas();
+   msg!("Installed DNAs: {:?}", dnas);
+   //let apps = conductor.list_active_apps();
    //msg!("Activate Apps: {:?}", apps);
    //let _interfaces = conductor.list_app_interfaces().await.unwrap();
    //msg!("App Interfaces: {:?}", interfaces);
-   //let cell_ids = conductor.list_cell_ids().await.unwrap();
-   //println!("Cell IDs: {:?}", cell_ids);
+   let cell_ids = conductor.list_cell_ids(None);
+   println!("Cell IDs: {:?}", cell_ids);
    /// Done
    return conductor;
 }
@@ -139,7 +139,7 @@ pub async fn install_app(sid: String, uid: String, maybe_path: Option<PathBuf>) 
    /// Generate keys
    let agent_key = conductor
       .keystore()
-      .generate_sign_keypair_from_pure_entropy()
+      .new_sign_keypair_random()
       .await?;
 
    /// Load DnaFile
@@ -164,10 +164,10 @@ pub async fn install_app(sid: String, uid: String, maybe_path: Option<PathBuf>) 
    /// Activate app
    conductor
       .clone()
-      .enable_app(&SNAPMAIL_APP_ID.to_string())
+      .enable_app(SNAPMAIL_APP_ID.into())
       .await?;
    /// Done
-   let dnas = conductor.list_dnas().await.expect("Conductor should not fail");
+   let dnas = conductor.list_dnas();
    msg!("Installed DNAs: {:?}", dnas);
    Ok(dna_file.dna_hash().clone())
 }
@@ -178,9 +178,7 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       //let p2p = conductor.holochain_p2p();
       //let broadcaster = conductor.signal_broadcaster();
 
-      let cell_id = &conductor.list_cell_ids(None).await
-         .expect("Conductor should not fail")
-         [0];
+      let cell_id = &conductor.list_cell_ids(None)[0];
 
       // let cell = conductor.cell_by_id(cell_id).unwrap();
       // let arc = cell.env();
@@ -189,12 +187,12 @@ pub fn dump_state(conductor: ConductorHandle) -> usize {
       //let integration_dump = integrate_dht_ops_workflow::dump_state(arc.clone().into())?;
 
       let space = cell_id.dna_hash().to_kitsune();
-      let p2p_env = conductor.get_p2p_env(space).await;
+      let p2p_env = conductor.get_p2p_env(space);
 
       let peer_dump = p2p_agent_store::dump_state(
          p2p_env.into(),
          Some(cell_id.clone()),
-      ).expect("p2p_store should not fail");
+      ).await.expect("p2p_agent_store::dump_state() should not fail");
 
       //let state = conductor.dump_cell_state(&cell_ids[0]).await.unwrap();
       //msg!(" {}", state);

@@ -57,13 +57,15 @@ impl SendCommand {
          bcc: vec![],
          manifest_address_list,
       };
-      let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
+      //let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
       // Send
-      let output = snapmail_send_mail(conductor, mail)?;
+      let sent_hh = snapmail_send_mail(conductor.clone(), mail)?;
+      // Get State
+      let mail_state = snapmail_get_outmail_state(conductor, sent_hh.clone())?;
       // Show results
-      let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
-      msg!("Send done: {:?}", output.outmail);
-      msg!("   - pendings: {} / {}", pending_count, send_count);
+      //let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
+      msg!("Send done: {:?}", sent_hh);
+      msg!("   - mail_state: {:?}", mail_state);
       Ok(())
    }
 }

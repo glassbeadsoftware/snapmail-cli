@@ -284,8 +284,7 @@ impl App {
          AppCommand::AcknowledgeMail(hh) => {
             if let Some(mail_item) = chain.mail_map.get(hh) {
                match mail_item.state {
-                  MailState::In(InMailState::Incoming) |
-                  MailState::In(InMailState::Arrived) => {
+                  MailState::In(InMailState::Unacknowledged) => {
                      let res = snapmail_acknowledge_mail(conductor, hh.clone());
                      if let Ok(_entry_hash) = res {
                         let msg = format!("Mail acknowledged: {}", hh);
@@ -456,12 +455,10 @@ impl App {
       // let message = format!("Mail sent. Pendings:  {} / {} ({})", pending_count, send_count, output.outmail);
       let message = format!("Mail sent: {:?} ({})", mail_state, sent_hh);
       let fg_color =  match mail_state {
-         OutMailState::Pending => Color::Yellow,
-         OutMailState::PartiallyArrived_NoAcknowledgement => Color::LightMagenta,
-         OutMailState::PartiallyArrived_PartiallyAcknowledged => Color::LightMagenta,
-         OutMailState::Arrived_NoAcknowledgement => Color::Green,
-         OutMailState::Arrived_PartiallyAcknowledged => Color::Green,
-         OutMailState::FullyAcknowledged => Color::Green,
+         OutMailState::Unsent => Color::Yellow,
+         OutMailState::AllSent => Color::Magenta,
+         OutMailState::AllReceived => Color::LightMagenta,
+         OutMailState::AllAcknowledged => Color::Green,
          OutMailState::Deleted => Color::Red,
       };
       self.feedback_ext(&message, fg_color, Color::Black);

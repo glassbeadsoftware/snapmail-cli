@@ -10,6 +10,7 @@ use snapmail::{
 };
 use std::path::PathBuf;
 use holochain_types::dna::*;
+use tokio::time::{sleep, Duration};
 
 #[derive(Debug, StructOpt, Clone)]
 pub struct SendCommand {
@@ -32,7 +33,7 @@ pub struct SendCommand {
 
 impl SendCommand {
    ///
-   pub fn run(self, conductor: ConductorHandle) -> anyhow::Result<()> {
+   pub async fn run(self, conductor: ConductorHandle) -> anyhow::Result<()> {
       // Form "to" list
       let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
       let mut to_list: Vec<AgentPubKey> = Vec::new();
@@ -60,12 +61,19 @@ impl SendCommand {
       //let send_count = mail.to.len() + mail.cc.len() + mail.bcc.len();
       // Send
       let sent_hh = snapmail_send_mail(conductor.clone(), mail)?;
+
+      sleep(Duration::from_millis(10 * 1000)).await; // conductor.shutdown() is broken
+
       // Get State
-      let mail_state = snapmail_get_outmail_state(conductor, sent_hh.clone())?;
+      let mail_state = snapmail_get_outmail_state(conductor.clone(), sent_hh.clone())?;
       // Show results
       //let pending_count = output.to_pendings.len() + output.cc_pendings.len() + output.bcc_pendings.len();
       msg!("Send done: {:?}", sent_hh);
       msg!("   - mail_state: {:?}", mail_state);
+
+      // Wait for post-commit to finish
+      sleep(Duration::from_millis(20 * 1000)).await; // conductor.shutdown() is broken
+      conductor.shutdown();
       Ok(())
    }
 }

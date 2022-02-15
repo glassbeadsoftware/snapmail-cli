@@ -24,6 +24,7 @@ ARGS:
 SUBCOMMANDS:
     change            Modify the setup
     clear             Erase a session from disk
+    chain             Print source-chain in terminal
     directory         Display all users part of the current network
     get-attachment    Extract an attachment from a mail
     get-handle        Get agent's current handle
@@ -35,9 +36,11 @@ SUBCOMMANDS:
     open              Read mail from mailbox (Will send an acknowledgement to mail author)
     ping              Check if a user is currently online
     pull              Query the DHT for all relevant data (handles, mailbox, ackbox)
-    send              Send a mail to another agent
+    send              Send a mail to another agent    
     set-handle        Change agent's handle
     setup             Create agent and config
+    status            Show a mail's state (Unsent, acknowledged...)
+    resend            Check outbox and resend mails who do not have acknowledge status
 `````
 
 ## Examples

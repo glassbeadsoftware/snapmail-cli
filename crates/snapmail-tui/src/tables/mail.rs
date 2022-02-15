@@ -160,21 +160,19 @@ fn get_status_string(mail: &MailItem) -> String {
    match &mail.state {
       MailState::In(in_state) => {
          match in_state {
-            InMailState::Incoming => ">>",
-            InMailState::Arrived => "vv",
-            InMailState::Acknowledged => "A-",
-            InMailState::AckReceived => "A+",
+            InMailState::Unacknowledged => "··",
+            InMailState::AckUnsent => "AU",
+            InMailState::AckPending => "AP",
+            InMailState::AckDelivered => "OK",
             InMailState::Deleted => "XX",
          }
       },
       MailState::Out(out_state) => {
          match &out_state {
-            OutMailState::Pending => "--",
-            OutMailState::PartiallyArrived_NoAcknowledgement => "::",
-            OutMailState::PartiallyArrived_PartiallyAcknowledged => ":A",
-            OutMailState::Arrived_NoAcknowledgement => "vv",
-            OutMailState::Arrived_PartiallyAcknowledged => "vA",
-            OutMailState::FullyAcknowledged => "OK",
+            OutMailState::Unsent => ">>",
+            OutMailState::AllSent => "::",
+            OutMailState::AllReceived => "vv",
+            OutMailState::AllAcknowledged => "OK",
             OutMailState::Deleted => "XX",
          }
       }

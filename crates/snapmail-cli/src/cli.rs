@@ -18,6 +18,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 use snapmail::mail::*;
 use holochain_types::dna::*;
+use snapmail::pub_enc_key::snapmail_get_enc_key;
 
 #[derive(StructOpt, Debug)]
 pub enum SnapSubcommand {
@@ -47,8 +48,17 @@ pub enum SnapSubcommand {
    },
    /// Query the DHT for all relevant data (handles, mailbox, ackbox)
    Pull,
+   /// Display the source chain in terminal
+   Chain,
+   /// Check outmails and resend non acknowledged ones
+   Resend,
    /// Display all users part of the current network
    Directory,
+   /// Get a users public encryption key
+   Key {
+      /// handle of agent to get the key of
+      handle: String,
+   },
    /// Send a mail to another agent
    Send(SendCommand),
    /// List all mails received by this agent
@@ -58,6 +68,10 @@ pub enum SnapSubcommand {
    /// Read mail from mailbox (Will send an acknowledgement to mail author)
    Open {
       /// Hash of the mail to open
+      hash: String,
+   },
+   Status {
+      /// Hash of the mail to get state
       hash: String,
    },
    /// Extract an attachment from a mail
@@ -120,7 +134,7 @@ impl SnapSubcommand {
          Self::Send(cmd) => {
             msg!("Send!");
             let conductor = start_conductor(sid_str).await;
-            cmd.run(conductor)?;
+            cmd.run(conductor).await?;
          },
          Self::SetHandle {handle } => {
             msg!("** Set handle: {}", handle);
@@ -162,6 +176,11 @@ impl SnapSubcommand {
             let hh: HeaderHash = stoh(hash);
             open(sid_str, hh).await?;
          },
+         Self::Status { hash } => {
+            msg!("Getting Mail Status...");
+            let hh: HeaderHash = stoh(hash);
+            get_status(sid_str, hh).await?;
+         },
          Self::GetAttachment { hash } => {
             msg!("GetAttachment...");
             let eh: EntryHash = stoh(hash);
@@ -178,6 +197,19 @@ impl SnapSubcommand {
                msg!(" - {} - {}", handle_item.name, handle_item.agentId);
             }
          },
+         Self::Key {handle} => {
+            msg!("** Getting key of: {}", handle);
+            let conductor = start_conductor(sid_str).await;
+            let agent_list = snapmail_find_agent(conductor.clone(), handle)?;
+            if agent_list.len() == 0 {
+               msg!("No agent found for that handle");
+               return Ok(());
+            }
+            for agent_id in agent_list.iter() {
+               let enc_key = snapmail_get_enc_key(conductor.clone(), agent_id.clone())?;
+               msg!(" - {} : {:?}", agent_id, enc_key);
+            }
+         }
          Self::List => {
             msg!("List inbox...");
             let conductor = start_conductor(sid_str).await;
@@ -206,6 +238,16 @@ impl SnapSubcommand {
             let all_mail_list = snapmail_get_all_mails(conductor.clone(), ())?;
             msg!(" - All Mails: {}", all_mail_list.len());
          },
+         Self::Chain => {
+            let conductor = start_conductor(sid_str).await;
+            print_chain(conductor).await;
+         },
+         Self::Resend => {
+            let conductor = start_conductor(sid_str).await;
+            let _ = snapmail_resend_outmails(conductor.clone(), ())?;
+            let _ = snapmail_resend_outacks(conductor.clone(), ())?;
+            let _ = snapmail_request_acks(conductor.clone(), ())?;
+         }
       }
       Ok(())
    }

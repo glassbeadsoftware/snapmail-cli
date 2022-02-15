@@ -26,6 +26,11 @@ pub async fn listen(conductor: ConductorHandle, loop_interval_sec: u64) -> anyho
 
    let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
 
+   let eh_list = snapmail_check_ack_inbox(conductor.clone(), ())?;
+   let hh_list = snapmail_check_mail_inbox(conductor.clone(), ())?;
+
+   msg!("Inbox checked:\n -  acks received: {}\n - mails received: {}", eh_list.len(), hh_list.len());
+
    let signal_stream = conductor.signal_broadcaster().await.subscribe_merged();
    pin_mut!(signal_stream);
 

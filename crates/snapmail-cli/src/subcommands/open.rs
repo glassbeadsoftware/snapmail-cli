@@ -41,9 +41,9 @@ fn print_mail(handle_list: &Vec<HandleItem>, mail: Mail, from: String, bcc: Vec<
 }
 
 ///
-pub async fn open(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
+pub async fn open(uid: String, ah: ActionHash) -> anyhow::Result<()> {
    let conductor = start_conductor(uid).await;
-   let maybe_mail = snapmail_get_mail(conductor.clone(), hh.clone())?;
+   let maybe_mail = snapmail_get_mail(conductor.clone(), ah.clone())?;
    if let Some(mail) = maybe_mail.0 {
       let handle_list = snapmail_get_all_handles(conductor.clone(), ())?;
       msg!(" - mail: {:?}", mail);
@@ -53,7 +53,7 @@ pub async fn open(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
                .ok_or(anyhow::Error::msg("Handle not found"))?;
             print_mail(&handle_list, inmail.mail, from, vec![]);
             msg!("Acknowledging...");
-            let maybe_hash = snapmail_acknowledge_mail(conductor.clone(), hh);
+            let maybe_hash = snapmail_acknowledge_mail(conductor.clone(), ah);
             match maybe_hash {
                Ok(hash) => msg!("Acknowledged: {}", hash),
                Err(e) => msg!("Done - {:?}", e),
@@ -72,11 +72,11 @@ pub async fn open(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
 }
 
 ///
-pub async fn get_status(uid: String, hh: HeaderHash) -> anyhow::Result<()> {
+pub async fn get_status(uid: String, ah: ActionHash) -> anyhow::Result<()> {
    let conductor = start_conductor(uid).await;
-   let state = snapmail_get_outmail_state(conductor.clone(), hh.clone())?;
+   let state = snapmail_get_outmail_state(conductor.clone(), ah.clone())?;
    msg!(" Outmail state: {:?}", state);
-   let map = snapmail_get_outmail_delivery_state(conductor.clone(), hh.clone())?;
+   let map = snapmail_get_outmail_delivery_state(conductor.clone(), ah.clone())?;
    for pair in map.iter() {
       msg!(" - {:?}", pair);
    }

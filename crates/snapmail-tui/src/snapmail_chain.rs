@@ -11,7 +11,7 @@ use snapmail::handle::*;
 pub struct SnapmailChain {
    pub my_handle: String,
    pub handle_map: HashMap<AgentPubKey, String>,
-   pub mail_map: HashMap<HeaderHash, MailItem>,
+   pub mail_map: HashMap<ActionHash, MailItem>,
 }
 
 impl SnapmailChain {

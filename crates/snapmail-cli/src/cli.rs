@@ -173,13 +173,13 @@ impl SnapSubcommand {
          },
          Self::Open { hash } => {
             msg!("Open...");
-            let hh: HeaderHash = stoh(hash);
-            open(sid_str, hh).await?;
+            let ah: ActionHash = stoh(hash);
+            open(sid_str, ah).await?;
          },
          Self::Status { hash } => {
             msg!("Getting Mail Status...");
-            let hh: HeaderHash = stoh(hash);
-            get_status(sid_str, hh).await?;
+            let ah: ActionHash = stoh(hash);
+            get_status(sid_str, ah).await?;
          },
          Self::GetAttachment { hash } => {
             msg!("GetAttachment...");

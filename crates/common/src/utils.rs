@@ -45,8 +45,8 @@ pub fn stoh<T: holochain_types::dna::PrimitiveHashType>(input: String) -> HoloHa
 /// Get username from AgentPubKey
 pub fn get_name(handle_list: &Vec<HandleItem>, candidate: &AgentPubKey) -> Option<String> {
    for handle_item in handle_list.iter() {
-      if &handle_item.agentId == candidate {
-         return Some(handle_item.name.clone());
+      if &handle_item.agent_pub_key == candidate {
+         return Some(handle_item.username.clone());
       }
    }
    None
@@ -55,8 +55,8 @@ pub fn get_name(handle_list: &Vec<HandleItem>, candidate: &AgentPubKey) -> Optio
 /// Get username from AgentPubKey
 pub fn get_agent_id(handle_list: &Vec<HandleItem>, candidate: &str) -> Option<AgentPubKey> {
    for handle_item in handle_list.iter() {
-      if &handle_item.name == candidate {
-         return Some(handle_item.agentId.clone());
+      if &handle_item.username == candidate {
+         return Some(handle_item.agent_pub_key.clone());
       }
    }
    None

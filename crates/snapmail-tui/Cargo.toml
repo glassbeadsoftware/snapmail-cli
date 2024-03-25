@@ -1,32 +1,32 @@
 [package]
 name = "snapmail_tui"
-version = "0.0.4"
-keywords = [ "holochain" ]
-categories = [ "command-line-utilities"]
-edition = "2018"
+keywords.workspace = true
+categories.workspace = true
+version.workspace = true
+edition.workspace = true
 
 [[bin]]
 name = "snapmail-tui"
 path = "src/main-tui.rs"
 
 [dependencies]
-snapmail_common = { path = "../common" }
-strum = "0.19"
-strum_macros = "0.19"
+anyhow.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+#chrono = { version = "0.4", features = ["serde"] }
+chrono.workspace = true
+
 crossterm = { version = "0.19", features = [ "serde" ] }
-chrono = { version = "0.4", features = ["serde"] }
+
+
 tui = { version = "0.15", default-features = false, features = ['crossterm', 'serde'] }
-anyhow = "1.0"
-tokio = { version = "1.5", features = [ "full" ] }
-tokio-stream = { version = "0.1.5" }
+
+tokio.workspace = true
+tokio-stream = { version = "0.1" }
 futures-util = "0.3.1"
 
+snapmail_common = { path = "../common" }
 snapmail = { path = "../../../snapmail-rsm/zomes/snapmail" }
 
-# online
-holochain = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain" }
-holochain_types = { git = "https://github.com/holochain/holochain.git", rev = "1767dfc2d73ed107ac20dddc3fa56e46856c45cd", package = "holochain_types" }
-
-# local
-#holochain = { path = "../../../holochain-develop/crates/holochain" }
-#holochain_types = { path = "../../../holochain-develop/crates/holochain_types" }
+holochain.workspace = true
+holochain_types.workspace = true

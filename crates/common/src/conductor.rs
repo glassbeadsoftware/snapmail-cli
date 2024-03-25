@@ -90,51 +90,56 @@ pub async fn start_conductor(sid: String) -> ConductorHandle {
 }
 
 /// Create a DnaFile from a path to a *.dna bundle
-async fn load_dna_from_path(uid: String, path: &Path) -> holochain_types::dna::error::DnaResult<DnaFile> {
+async fn load_dna_from_path(ns: NetworkSeed, path: &Path) -> holochain_types::dna::error::DnaResult<DnaFile> {
    let mut dna = DnaBundle::read_from_file(path)
       .await?
       .into_dna_file(None, None)
       .await?
       .0;
-   dna = dna.with_uid(uid).await?;
+   dna = dna.with_network_seed(ns).await?;
    Ok(dna)
 }
 
 
-///
-async fn load_dna_from_rs(uid: String) -> DnaFile {
-   let compressed = base64::decode_config(crate::wasm::DNA_WASM_B64, base64::URL_SAFE_NO_PAD).unwrap();
-   let (decompressed, _checksum) = yazi::decompress(&compressed, yazi::Format::Zlib).unwrap();
-
-   let dna_wasm = DnaWasm::from(decompressed);
-   let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
-   .await
-   .into_inner();
-   let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash.clone());
-   let zome = (ZOME_NAME.into(), zome_def).into();
-   //let name = SNAPMAIL_APP_ID.to_string();
-   let name =format!("{}-{}", SNAPMAIL_APP_ID, uid);
-   println!(" - name: {}", name);
-   let dna_file = DnaFile::new(DnaDef {
-   name,
-   uid: uid.to_string(),
-   properties: SerializedBytes::try_from(()).unwrap(),
-   zomes: vec![zome].into(),
-   },
-   vec![dna_wasm].into_iter(),
-   ).await.expect("Dna file load failed");
-   dna_file
-}
+// ///
+// async fn load_dna_from_rs(ns: NetworkSeed) -> DnaFile {
+//    let compressed = base64::decode_config(crate::wasm::DNA_WASM_B64, base64::URL_SAFE_NO_PAD).unwrap();
+//    let (decompressed, _checksum) = yazi::decompress(&compressed, yazi::Format::Zlib).unwrap();
+//
+//    let dna_wasm = DnaWasm::from(decompressed);
+//    let (_, wasm_hash) = holochain_types::dna::wasm::DnaWasmHashed::from_content(dna_wasm.clone())
+//    .await
+//    .into_inner();
+//    let zome_def: ZomeDef = ZomeDef::from_hash(wasm_hash.clone());
+//    let zome = (ZOME_NAME.into(), zome_def).into();
+//    //let name = SNAPMAIL_APP_ID.to_string();
+//    let name =format!("{}-{}", SNAPMAIL_APP_ID, ns);
+//    println!(" - name: {}", name);
+//    let dna_file = DnaFile::new(DnaDef {
+//    name,
+//    modifiers: {
+//       network_seed: ns,
+//       properties: SerializedBytes::try_from(()).unwrap(),
+//       origin_time: Timestamp::HOLOCHAIN_EPOCH,
+//       quantum_time: Duration::from_secs(5 * 60),
+//    }
+//    integrity_zomes: vec![zome].into(),
+//    coordinator_zomes: vec![zome].into(),
+//    },
+//    vec![dna_wasm].into_iter(),
+//    ).await.expect("Dna file load failed");
+//    dna_file
+// }
 
 /// Install Snapmail DNA from dna file
 /// FIXME: hardcoded DNA file path
 #[allow(deprecated)]
-pub async fn install_app(sid: String, uid: String, maybe_path: Option<PathBuf>) -> ConductorResult<DnaHash> {
+pub async fn install_app(sid: String, ns: NetworkSeed, maybe_path: Option<PathBuf>) -> ConductorResult<DnaHash> {
    /// Load conductor from config file
    let config_path = Path::new(&*CONFIG_PATH).join(sid.clone());
    let conductor_path = config_path.join(CONDUCTOR_CONFIG_FILENAME);
    let app_filepath = config_path.join(APP_CONFIG_FILENAME);
-   std::fs::write(app_filepath, uid.as_bytes())?;
+   std::fs::write(app_filepath, ns.as_bytes())?;
    let conductor = conductor_handle_from_config_path(Some(conductor_path)).await;
    /// Generate keys
    let agent_key = conductor
@@ -145,10 +150,10 @@ pub async fn install_app(sid: String, uid: String, maybe_path: Option<PathBuf>) 
    /// Load DnaFile
    let dna_file = if let Some(path) = maybe_path {
       println!("Loading DNA from path: {}", path.to_string_lossy());
-      load_dna_from_path(uid, &path).await.unwrap()
+      load_dna_from_path(ns, &path).await.unwrap()
    } else {
       println!("Building DNA from wasm stored in Rust code.");
-      load_dna_from_rs(uid).await
+      load_dna_from_rs(ns).await
    };
 
    /// Register DNA

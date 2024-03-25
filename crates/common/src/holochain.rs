@@ -8,31 +8,89 @@ use holochain_conductor_api::conductor::ConductorConfigError;
 
 const ERROR_CODE: i32 = 44;
 
-pub async fn conductor_handle_from_config_path(config_path: Option<PathBuf>) -> ConductorHandle {
+pub
+async fn conductor_handle_from_config_path(opt: &Opt) -> ConductorHandle {
+   let config_path = opt.config_path.clone();
    let config_path_default = config_path.is_none();
    let config_path: ConfigFilePath = config_path.map(Into::into).unwrap_or_default();
-   //msg!("config_path: {:?}", config_path);
-   let config: ConductorConfig = load_config(&config_path, config_path_default);
-   /// Check if LMDB env dir is present
-   /// In interactive mode give the user a chance to create it, otherwise create it automatically
+   debug!("config_path: {}", config_path);
+
+   let config: ConductorConfig = if opt.interactive {
+      // Load config, offer to create default config if missing
+      interactive::load_config_or_prompt_for_default(config_path)
+         .expect("Could not load conductor config")
+         .unwrap_or_else(|| {
+            println!("Cannot continue without configuration");
+            std::process::exit(ERROR_CODE);
+         })
+   } else {
+      load_config(&config_path, config_path_default)
+   };
+
+   // read the passphrase to prepare for usage
+   let passphrase = match &config.keystore {
+      KeystoreConfig::DangerTestKeystore => None,
+      KeystoreConfig::LairServer { .. } | KeystoreConfig::LairServerInProc { .. } => {
+         if opt.piped {
+            holochain_util::pw::pw_set_piped(true);
+         }
+
+         Some(holochain_util::pw::pw_get().unwrap())
+      }
+   };
+
+   // Check if database is present
+   // In interactive mode give the user a chance to create it, otherwise create it automatically
    let env_path = PathBuf::from(config.environment_path.clone());
    if !env_path.is_dir() {
-      let result = std::fs::create_dir_all(&env_path);
+      let result = if opt.interactive {
+         interactive::prompt_for_database_dir(&env_path)
+      } else {
+         std::fs::create_dir_all(&env_path)
+      };
       match result {
-         Ok(()) => msg!("Created LMDB environment at {}.", env_path.display()),
+         Ok(()) => println!("Created database at {}.", env_path.display()),
          Err(e) => {
-            msg!("Couldn't create LMDB environment: {}", e);
+            println!("Couldn't create database: {}", e);
             std::process::exit(ERROR_CODE);
          }
       }
    }
-   /// Initialize the Conductor
+
+   // Initialize the Conductor
    Conductor::builder()
       .config(config)
+      .passphrase(passphrase)
       .build()
       .await
       .expect("Could not initialize Conductor from configuration")
 }
+
+// pub async fn conductor_handle_from_config_path(config_path: Option<PathBuf>) -> ConductorHandle {
+//    let config_path_default = config_path.is_none();
+//    let config_path: ConfigFilePath = config_path.map(Into::into).unwrap_or_default();
+//    //msg!("config_path: {:?}", config_path);
+//    let config: ConductorConfig = load_config(&config_path, config_path_default);
+//    /// Check if LMDB env dir is present
+//    /// In interactive mode give the user a chance to create it, otherwise create it automatically
+//    let env_path = PathBuf::from(config.environment_path.clone());
+//    if !env_path.is_dir() {
+//       let result = std::fs::create_dir_all(&env_path);
+//       match result {
+//          Ok(()) => msg!("Created LMDB environment at {}.", env_path.display()),
+//          Err(e) => {
+//             msg!("Couldn't create LMDB environment: {}", e);
+//             std::process::exit(ERROR_CODE);
+//          }
+//       }
+//    }
+//    /// Initialize the Conductor
+//    Conductor::builder()
+//       .config(config)
+//       .build()
+//       .await
+//       .expect("Could not initialize Conductor from configuration")
+// }
 
 /// Load config, throw friendly error on failure
 fn load_config(config_path: &ConfigFilePath, config_path_default: bool) -> ConductorConfig {

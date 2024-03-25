@@ -3,13 +3,14 @@ use snapmail::{
    CHUNK_MAX_SIZE, FILE_MAX_SIZE,
    file::*,
 };
+// use snapmail_model::FileChunk
 use std::path::PathBuf;
 use holochain_types::dna::*;
 use std::io::prelude::*;
 use std::io::Result;
 
 ///
-pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result<HeaderHash> {
+pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result<ActionHash> {
    /// Load file
    let maybe_filename = filepath.file_name();
    let filename = if let Some(filename) = maybe_filename {

@@ -10,7 +10,7 @@ use crate::snapmail_chain::*;
 pub struct MailTable {
    pub state: TableState,
    pub items: Vec<Vec<String>>,
-   pub mail_index_map: HashMap<usize, HeaderHash>,
+   pub mail_index_map: HashMap<usize, ActionHash>,
 }
 
 impl MailTable {

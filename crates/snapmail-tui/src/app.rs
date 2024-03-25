@@ -43,7 +43,7 @@ pub enum InputVariable {
 pub enum AppCommand {
    None,
    SendMail,
-   AcknowledgeMail(HeaderHash),
+   AcknowledgeMail(ActionHash),
    DeleteMail,
    UpdateHandle,
 }
@@ -416,7 +416,7 @@ impl App {
 
       /// Form attachment list
       /// TODO multi attachments support
-      let mut manifest_address_list: Vec<HeaderHash> = Vec::new();
+      let mut manifest_address_list: Vec<ActionHash> = Vec::new();
       // for attachment in &self.write_attachments {
       //    let maybe_hh = write_attachment(conductor.clone(), attachment.clone());
       //    if let Ok(hh) = maybe_hh {

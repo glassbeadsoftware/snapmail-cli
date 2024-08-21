@@ -3,8 +3,8 @@ resolver="2"
 members = [
     "crates/common",
     "crates/rustify-wasm",
-    "crates/snapmail-cli",
-    "crates/snapmail-tui",
+    #"crates/snapmail-cli",
+    #"crates/snapmail-tui",
 ]
 
 [workspace.package]
@@ -16,7 +16,7 @@ categories = [ "command-line-utilities"]
 
 [workspace.dependencies]
 serde = { version = "=1.0.197", default-features = false }
-#chrono = { version = "0.4.22", default-features = false, features = ["clock", "std", "oldtime", "serde"] }
+chrono = { version = "0.4.22", default-features = false, features = ["clock", "std", "oldtime", "serde"] }
 anyhow = "1.0"
 strum = "0.19"
 strum_macros = "0.19"
@@ -32,6 +32,7 @@ holochain_conductor_api = { version = "=0.3.1" }
 holochain_types = { version = "=0.3.1" }
 holochain_p2p = { version = "=0.3.1" }
 holochain_state = { version = "=0.3.1" }
+kitsune_p2p_types = { version = "=0.3.1" }
 
 [profile.dev]
 debug = false

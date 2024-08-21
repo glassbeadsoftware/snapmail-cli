@@ -1,13 +1,15 @@
 use holochain::conductor::ConductorHandle;
-use snapmail::{
-   CHUNK_MAX_SIZE, FILE_MAX_SIZE,
-   file::*,
-};
+use snapmail::file::*;
 // use snapmail_model::FileChunk
 use std::path::PathBuf;
 use holochain_types::dna::*;
+use holochain_zome_types::*;
 use std::io::prelude::*;
 use std::io::Result;
+
+// FIXME
+pub const FILE_MAX_SIZE: usize = 1000000;
+pub const CHUNK_MAX_SIZE: usize = 16000;
 
 ///
 pub fn write_attachment(conductor: ConductorHandle, filepath: PathBuf) -> Result<ActionHash> {

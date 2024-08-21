@@ -3,7 +3,7 @@ use crate::{
    //config::*,
 };
 use crate::holochain::*;
-use snapmail::ZOME_NAME;
+use snapmail::SNAPMAIL_DEFAULT_COORDINATOR_ZOME_NAME;
 use holochain::conductor::ConductorHandle;
 use holochain_types::dna::*;
 use holochain_types::dna::wasm::DnaWasm;

@@ -1,9 +1,11 @@
 //! Helpers for creating, reading and writing [`ConductorConfig`]s.
+
 use std::path::PathBuf;
 use holochain_conductor_api::config::conductor::{ConductorConfig, KeystoreConfig};
 use holochain_conductor_api::config::*;
 use crate::globals::*;
-use holochain_p2p::kitsune_p2p::KitsuneP2pConfig;
+use kitsune_p2p_types::config::KitsuneP2pConfig;
+
 
 /// Create a new default [`ConductorConfig`] with environment path
 /// and keystore all in the same directory.
@@ -19,6 +21,7 @@ pub fn create_config(environment_path: PathBuf) -> ConductorConfig {
     conductor_config
 }
 
+
 /// Write [`ConductorConfig`] to [`CONDUCTOR_CONFIG`]
 pub fn write_config(mut path: PathBuf, config: &ConductorConfig) -> PathBuf {
     path.push(CONDUCTOR_CONFIG_FILENAME);
@@ -26,6 +29,7 @@ pub fn write_config(mut path: PathBuf, config: &ConductorConfig) -> PathBuf {
        .expect("CONDUCTOR_CONFIG_FILENAME should be writable");
     path
 }
+
 
 /// Read the [`ConductorConfig`] from the file [`CONDUCTOR_CONFIG`] in the provided path.
 pub fn read_config(mut path: PathBuf) -> anyhow::Result<Option<ConductorConfig>> {
@@ -36,6 +40,7 @@ pub fn read_config(mut path: PathBuf) -> anyhow::Result<Option<ConductorConfig>>
         Err(_) => Ok(None),
     }
 }
+
 
 /// Generate a new setup for the holochain conductor.
 /// This creates a directory and a [`ConductorConfig`]
@@ -71,6 +76,7 @@ pub fn generate(
     Ok(dir)
 }
 
+
 /// Generate a new sandbox from a full config.
 pub fn generate_with_config(
     maybe_config: Option<ConductorConfig>,
@@ -82,6 +88,7 @@ pub fn generate_with_config(
     write_config(dir.clone(), &config);
     Ok(dir)
 }
+
 
 /// Generate a new directory structure for a holochain conductor.
 pub fn generate_directory(

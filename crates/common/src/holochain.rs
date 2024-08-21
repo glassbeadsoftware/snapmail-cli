@@ -13,7 +13,7 @@ async fn conductor_handle_from_config_path(opt: &Opt) -> ConductorHandle {
    let config_path = opt.config_path.clone();
    let config_path_default = config_path.is_none();
    let config_path: ConfigFilePath = config_path.map(Into::into).unwrap_or_default();
-   debug!("config_path: {}", config_path);
+   //debug!("config_path: {}", config_path);
 
    let config: ConductorConfig = if opt.interactive {
       // Load config, offer to create default config if missing
